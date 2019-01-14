@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-import helpers
-from ANTARES_object.LAobject import LAobject
+from astrorapid import helpers
+from astrorapid.ANTARES_object.LAobject import LAobject
 
 
 class InputLightCurve(object):
