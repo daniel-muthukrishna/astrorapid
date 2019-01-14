@@ -2,6 +2,11 @@
 Real-time Automated Photometric IDentification (RAPID) of astronomical transients using deep learning
 
 
+# Installation
+```bash
+    pip install astrorapid
+```
+
 # Example Usage
 ```python
 
