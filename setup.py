@@ -9,10 +9,10 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='astrorapid',
-    version='0.0.4',
+    version='0.0.5',
     description='Real-time Automated Photometric IDentification of astronomical transients',
     long_description=long_description,
-    url='https://github.com/daniel-muthukrishna/DASH',
+    url='https://github.com/daniel-muthukrishna/astrorapid',
     author='Daniel Muthukrishna',
     author_email='daniel.muthukrishna@gmail.com',
     license='MIT',
