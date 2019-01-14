@@ -40,12 +40,12 @@ class InputLightCurve(object):
             Optional parameter. Milky Way E(B-V) extinction.
         """
 
-        self.mjd = mjd
-        self.flux = flux
-        self.fluxerr = fluxerr
-        self.passband = passband
-        self.zeropoint = zeropoint
-        self.photflag = photflag
+        self.mjd = np.array(mjd)
+        self.flux = np.array(flux)
+        self.fluxerr = np.array(fluxerr)
+        self.passband = np.array(passband)
+        self.zeropoint = np.array(zeropoint)
+        self.photflag = np.array(photflag)
         self.ra = ra
         self.dec = dec
         self.objid = objid
@@ -63,7 +63,7 @@ class InputLightCurve(object):
         return b
 
     def get_trigger_time(self):
-        trigger_mjd = float(self.mjd[self.photflag == 1][0])
+        trigger_mjd = float(self.mjd[self.photflag == 6144][0])
         t = self.mjd - trigger_mjd
 
         return trigger_mjd, t
@@ -74,7 +74,7 @@ class InputLightCurve(object):
         return t
 
     def correct_for_distance(self, flux, fluxerr):
-        dlmu = cosmo.distmod(self.redshift)
+        dlmu = cosmo.distmod(self.redshift).value
         flux, fluxerr = helpers.calc_luminosity(flux, fluxerr, dlmu)
 
         return flux, fluxerr
@@ -95,7 +95,7 @@ class InputLightCurve(object):
 
         outlc = laobject.get_lc(recompute=True)
 
-        otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd]
+        otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd, self.objid]
 
         savepd = {
         pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename({0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T
@@ -125,7 +125,7 @@ def read_multiple_light_curves(light_curve_list):
     return processed_light_curves
 
 
-def prepare_input_arrays(lightcurves, passbands=('r', 'g'), contextual_info):
+def prepare_input_arrays(lightcurves, passbands=('g', 'r'), contextual_info=(0,)):
 
     nobjects = len(lightcurves)
     nobs = 50
@@ -142,7 +142,7 @@ def prepare_input_arrays(lightcurves, passbands=('r', 'g'), contextual_info):
         print("Preparing light curve {} of {}".format(i, nobjects))
 
         otherinfo = data['otherinfo'].values.flatten()
-        redshift, b, mwebv, trigger_mjd = otherinfo
+        redshift, b, mwebv, trigger_mjd, objid = otherinfo[0:5]
 
         # Make cuts
         if abs(b) < 15:
@@ -225,4 +225,4 @@ def prepare_input_arrays(lightcurves, passbands=('r', 'g'), contextual_info):
         # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
         X = X.swapaxes(2, 1)
 
-        return X
+        return X, orig_lc, timesX, objids_list

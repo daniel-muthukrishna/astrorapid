@@ -1,0 +1,9 @@
+# Include the licence file
+include LICENCE
+
+# Include the data files
+# include *.hdf5
+
+# Include Python files
+include *.py
+include README.md

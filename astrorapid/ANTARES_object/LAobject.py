@@ -8,18 +8,14 @@ from __future__ import unicode_literals
 import warnings
 import numpy as np
 from . import constants
-from .features.periodic import PeriodicMixin
-from .features.parametric import ParametricMixin
 from .features.base import BaseMixin
-from .features.early import EarlyMixin
-from .features.plasticc import PlasticcMixin
 from astropy.stats import sigma_clip
 import extinction
 
 __all__ = ['LAobject']
 
 
-class LAobject(PlasticcMixin, PeriodicMixin, ParametricMixin, BaseMixin, EarlyMixin):
+class LAobject(BaseMixin):
     """
     ANTARES object - locus aggregated alert lightcurve and feature encapsulator
 
