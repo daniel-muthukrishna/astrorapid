@@ -1,34 +1,13 @@
 import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from collections import OrderedDict
-import pandas as pd
-from scipy.interpolate import interp1d
-from scipy import interp
-from sklearn.model_selection import train_test_split
-from keras.models import Sequential
 from keras.models import load_model
-from keras.layers import Dense, Input
-from keras.layers import LSTM, GRU
-from keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed
-from keras.layers.convolutional import Conv1D, Conv2D
-from keras.layers.convolutional import MaxPooling1D, MaxPooling2D
-from keras.layers.core import Flatten
-from keras.layers.embeddings import Embedding
-from keras.preprocessing import sequence
-from keras.utils import to_categorical
-from sklearn.metrics import confusion_matrix
-import imageio
-import operator
-from phased_lstm_keras.PhasedLSTM import PhasedLSTM
-# from bin.ordered_truthtables_and_info import make_tables
 import matplotlib
-import matplotlib.patheffects as path_effects
 import matplotlib.animation as animation
 
-from process_light_curves import read_multiple_light_curves, prepare_input_arrays
+from astrorapid.process_light_curves import read_multiple_light_curves, prepare_input_arrays
 
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
