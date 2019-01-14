@@ -20,10 +20,11 @@ CLASS_COLOR = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:
 PB_COLOR = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
 PB_MARKER = {'g': 'o', 'r': 's'}
 PB_ALPHA = {'g': 0.3, 'r': 1.}
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Classify(object):
-    def __init__(self, light_curves, model_filepath='keras_model.hdf5', passbands=('g', 'r')):
+    def __init__(self, light_curves, model_filepath='', passbands=('g', 'r')):
         """
         Takes a list of photometric information and classifies light curves as a function of time
 
@@ -43,7 +44,13 @@ class Classify(object):
         self.light_curves = light_curves
         self.model_filepath = model_filepath
         self.passbands = passbands
-        self.model = load_model(self.model_filepath)
+        try:
+            self.model = load_model(self.model_filepath)
+        except Exception as e:
+            if model_filepath != '':
+                print("Invalid keras model. Using default model...")
+            self.model_filepath = os.path.join(SCRIPT_DIR + 'keras_model.hdf5')
+            self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):
         processed_lightcurves = read_multiple_light_curves(self.light_curves)
