@@ -49,7 +49,7 @@ class Classify(object):
         except Exception as e:
             if model_filepath != '':
                 print("Invalid keras model. Using default model...")
-            self.model_filepath = os.path.join(SCRIPT_DIR + 'keras_model.hdf5')
+            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model.hdf5')
             self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):
