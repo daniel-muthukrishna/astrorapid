@@ -1,30 +1,9 @@
-import os
-from collections import OrderedDict
-import numpy as np
-import h5py
-import multiprocessing as mp
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.cosmology import WMAP9 as cosmo
-import pandas as pd
-import json
-import argparse
-import os
-import sys
 import numpy as np
 import pandas as pd
-import h5py
-from sklearn.model_selection import train_test_split
-from keras.utils import to_categorical
-from earlyclass import helpers
-from imblearn import over_sampling
-from sklearn import preprocessing
-from scipy.signal import medfilt
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
-import sklearn
-import pickle
-import multiprocessing as mp
 
 import helpers
 from ANTARES_object.LAobject import LAobject
@@ -247,10 +226,3 @@ def prepare_input_arrays(lightcurves, passbands=('r', 'g'), contextual_info):
         X = X.swapaxes(2, 1)
 
         return X
-
-
-if __name__ == '__main__':
-    passbands1 = ('r', 'g')
-    light_curve_list1 = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
-    lightcurves1 = read_multiple_light_curves(light_curve_list1)
-    prepare_input_arrays(lightcurves1, passbands1)
