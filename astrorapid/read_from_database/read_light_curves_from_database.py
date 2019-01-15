@@ -1,3 +1,8 @@
+"""
+Example usage:
+python read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --multiprocessing False
+"""
+
 import os
 import numpy as np
 import h5py
@@ -85,6 +90,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
+    parser.add_argument('-m', "--multiprocessing", type=bool)
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -94,6 +100,10 @@ def main():
         offset_next = args.offsetnext
     else:
         offset_next = 2200
+    if args.multiprocessing is not None:
+        multiprocessing = multiprocessing
+    else:
+        multiprocessing = True
     print(offset, offset_next)
 
     training_set_dir = 'training_set_files'
