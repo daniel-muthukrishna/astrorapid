@@ -138,11 +138,11 @@ class PrepareInputArrays(PrepareArrays):
         orig_lc = []
         deleterows = []
 
-        for i, data in enumerate(lightcurves):
+        for i, (objid, data) in enumerate(lightcurves.items()):
             print("Preparing light curve {} of {}".format(i, nobjects))
 
             otherinfo = data['otherinfo'].values.flatten()
-            redshift, b, mwebv, trigger_mjd, objid = otherinfo[0:5]
+            redshift, b, mwebv, trigger_mjd = otherinfo[0:4]
 
             # Make cuts
             deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=None, bcut=self.bcut,
@@ -377,7 +377,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
                 continue
 
             otherinfo = data['otherinfo'].values.flatten()
-            redshift, b, mwebv, trigger_mjd, objid, t0, peakmjd = otherinfo[0:7]
+            redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
 
             # Make cuts
             deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=model, bcut=self.bcut,

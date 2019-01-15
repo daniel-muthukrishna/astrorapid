@@ -128,7 +128,7 @@ class InputLightCurve(object):
 
         outlc = laobject.get_lc(recompute=True)
 
-        otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd, self.objid]
+        otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd]
 
         if self.training_set_parameters is not None:
             t0 = self.compute_t0(outlc)
@@ -151,10 +151,11 @@ def read_multiple_light_curves(light_curve_list, known_redshift=True, training_s
     Returns the processed light curves
     """
 
-    processed_light_curves = []
+    processed_light_curves = {}
     for light_curve in light_curve_list:
+        mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv = light_curve
         inputlightcurve = InputLightCurve(*light_curve, known_redshift, training_set_parameters)
-        processed_light_curves.append(inputlightcurve.preprocess_light_curve())
+        processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
     return processed_light_curves
 
