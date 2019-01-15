@@ -6,6 +6,7 @@ from collections import OrderedDict
 from keras.models import load_model
 import matplotlib
 import matplotlib.animation as animation
+from pkg_resources import resource_filename
 
 from astrorapid.process_light_curves import read_multiple_light_curves
 from astrorapid.prepare_arrays import PrepareInputArrays
@@ -48,16 +49,21 @@ class Classify(object):
         self.passbands = passbands
 
         if self.known_redshift:
-            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model_with_redshift.hdf5')
             self.contextual_info = (0,)
+            filename = 'keras_model_with_redshift.hdf5'
         else:
-            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model_no_redshift.hdf5')
             self.contextual_info = ()
+            filename = 'keras_model_no_redshift.hdf5'
 
         if model_filepath != '' and os.path.exists(model_filepath):
             self.model_filepath = model_filepath
             print("Invalid keras model. Using default model...")
+        else:
+            self.model_filepath = os.path.join(SCRIPT_DIR, filename)
+            if not os.path.exists(self.model_filepath):
+                self.model_filepath = resource_filename(__name__, 'keras_model_with_redshift.hdf5')
 
+        print(self.model_filepath)
         self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):

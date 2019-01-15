@@ -10,11 +10,15 @@ def rapid_stage(locus_data):
     redshift = 0.
     mwebv = 0.2
 
-    id, mjd, flux, fluxerr, passband, mag = locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf')
+    alert_id, mjd, ras, decs, passband, mag, magerr, zeropoint, = locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf', 'ztf_sigmapsf', 'ztf_magzpsci')
+
+    flux = 10. ** (-0.4 * (mag - zeropoint))
+    fluxerr = np.abs(flux * magerr * (np.log(10.) / 2.5))
     passband = np.where(passband == 1, 'g', passband)
     passband = np.where(passband == 2, 'r', passband)
-    zeropoint = [27.5] * len(mjd)
-    photflag = [6144] + [4096] * (len(mjd) - 1)
+    photflag = [0] * int(len(mjd) / 2 - 3) + [6144] + [4096] * int(len(mjd) / 2 + 2)
+
+    print(locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf', 'ztf_sigmapsf', 'ztf_magzpsci', 'ztf_diffmaglim'))
 
     light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 

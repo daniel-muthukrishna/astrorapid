@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='astrorapid',
-    version='0.1.0',
+    version='0.1.6',
     description='Real-time Automated Photometric IDentification of astronomical transients',
     long_description=long_description,
     url='https://github.com/daniel-muthukrishna/astrorapid',
@@ -64,7 +64,11 @@ setup(name='astrorapid',
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-
+    package_data={
+        # If any package contains *.txt or *.rst files, include them:
+        '': ['*.hdf5', '*.rst', '*.md'],
+    },
+    include_package_data=True,
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
