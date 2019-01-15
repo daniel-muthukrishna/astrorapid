@@ -1,6 +1,6 @@
 """
 Example usage:
-nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nproccesses 8
+nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nprocesses 8
 """
 
 import os
@@ -89,7 +89,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
-    parser.add_argument('-m', "--nproccesses", type=int)
+    parser.add_argument('-m', "--nprocesses", type=int)
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -120,14 +120,14 @@ def main():
             print(os.path.join(save_dir, 'earlylc_{}.hdf5'.format(i)))
             args_list.append((data_release, i, save_dir, field, model, batch_size, sort, redo, passbands))
 
-    if nprocesses != 1:
+    if nprocesses == 1:
+        for args in args_list:
+            create_all_hdf_files(args)
+    else:
         pool = mp.Pool(nprocesses)
         results = pool.map_async(create_all_hdf_files, args_list)
         pool.close()
         pool.join()
-    else:
-        for args in args_list:
-            create_all_hdf_files(args)
 
     combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release), training_set_dir)
 
