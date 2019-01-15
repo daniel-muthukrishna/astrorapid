@@ -3,14 +3,15 @@ from astropy.coordinates import SkyCoord
 from astropy.cosmology import WMAP9 as cosmo
 import numpy as np
 import pandas as pd
-from scipy.interpolate import interp1d
 
 from astrorapid import helpers
 from astrorapid.ANTARES_object.LAobject import LAobject
+from astrorapid.ANTARES_object.features import model_early_lightcurve
 
 
 class InputLightCurve(object):
-    def __init__(self, mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift=None, mwebv=None):
+    def __init__(self, mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift=None, mwebv=None,
+                 known_redshift=True, training_set_parameters=None):
         """
 
         Parameters
@@ -38,6 +39,11 @@ class InputLightCurve(object):
             Optional parameter. Cosmological redshift.
         mwebv : float
             Optional parameter. Milky Way E(B-V) extinction.
+        known_redshift : bool
+            Whether to use redshift in processing the light curves and making the arrays.
+        training_set_parameters : dict
+            Optional parameter. If this is not None, then determine the explosion time, t0, for full the training set.
+            The dictionary must have the following keys: {class_number, peakmjd}
         """
 
         self.mjd = np.array(mjd)
@@ -51,10 +57,14 @@ class InputLightCurve(object):
         self.objid = objid
         self.redshift = redshift
         self.mwebv = mwebv
+        self.known_redshift =known_redshift
+        self.training_set_parameters = training_set_parameters
+        if training_set_parameters is not None:
+            self.class_number = training_set_parameters['class_number']
+            self.peakmjd = training_set_parameters['peakmjd']
 
         self.b = self.get_galactic_latitude()
         self.trigger_mjd, self.t = self.get_trigger_time()
-
 
     def get_galactic_latitude(self):
         c_icrs = SkyCoord(ra=self.ra * u.degree, dec=self.dec * u.degree, frame='icrs')
@@ -79,11 +89,34 @@ class InputLightCurve(object):
 
         return flux, fluxerr
 
+    def compute_t0(self, outlc):
+        """ Calculate the explosion time for the trianing set if certain conditions are met. """
+        calc_params = True
+        inrange_mask = self.t < self.peakmjd
+        if int(self.class_number) in [70, 80, 82, 83]:  # No t0 if model types (AGN, RRlyrae, Eclipsing Binaries)
+            calc_params = False
+        elif self.peakmjd - self.trigger_mjd < 0:  # No t0 if trigger to peak time is small
+            calc_params = False
+        elif len(self.t[inrange_mask]) < 3:  # No t0 if not At least 3 points before peak
+            calc_params = False
+        elif len(self.t[self.t < 0]) < 3:  # No t0 if there are less than three points before trigger. This suggests that it triggered on one of the first point of a passband
+            calc_params = False
+
+        if calc_params:
+            earlytime = self.peakmjd - self.trigger_mjd
+            fit_func, parameters = model_early_lightcurve.fit_early_lightcurve(outlc, earlytime)
+        else:
+            parameters = {pb: [-99, -99, -99] for pb in self.passband}
+
+        t0 = parameters[next(iter(parameters))][2]  # Get t0 from any of the passbands
+
+        return t0
+
     def preprocess_light_curve(self):
         """ Preprocess light curve. """
 
         # Account for distance and time dilation if redshift is known
-        if self.redshift is not None:
+        if self.known_redshift and self.redshift is not None:
             self.t = self.correct_time_dilation(self.t)
             self.flux, self.fluxerr = self.correct_for_distance(self.flux, self.fluxerr)
 
@@ -97,10 +130,11 @@ class InputLightCurve(object):
 
         otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd, self.objid]
 
-        savepd = {
-        pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename({0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T
-        for pb, lcinfo in
-        outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
+        if self.training_set_parameters is not None:
+            t0 = self.compute_t0(outlc)
+            otherinfo += [t0, self.peakmjd]
+
+        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename({0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T for pb, lcinfo in outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
         savepd['otherinfo'] = pd.DataFrame(otherinfo)
         savepd = pd.DataFrame(
             {(outerKey, innerKey): values for outerKey, innerDict in savepd.items() for innerKey, values in
@@ -109,7 +143,7 @@ class InputLightCurve(object):
         return savepd
 
 
-def read_multiple_light_curves(light_curve_list):
+def read_multiple_light_curves(light_curve_list, known_redshift=True, training_set_parameters=None):
     """
     light_curve_list is a list of tuples with each tuple having entries:
     mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv
@@ -119,110 +153,13 @@ def read_multiple_light_curves(light_curve_list):
 
     processed_light_curves = []
     for light_curve in light_curve_list:
-        inputlightcurve = InputLightCurve(*light_curve)
+        inputlightcurve = InputLightCurve(*light_curve, known_redshift, training_set_parameters)
         processed_light_curves.append(inputlightcurve.preprocess_light_curve())
 
     return processed_light_curves
 
 
-def prepare_input_arrays(lightcurves, passbands=('g', 'r'), contextual_info=(0,)):
 
-    nobjects = len(lightcurves)
-    nobs = 50
-    npassbands = 2
-    nfeatures = npassbands + 1
 
-    X = np.zeros(shape=(nobjects, nfeatures, nobs))
-    timesX = np.zeros(shape=(nobjects, nobs))
-    objids_list = []
-    orig_lc = []
 
-    for i, data in enumerate(lightcurves):
-        objid = i
-        print("Preparing light curve {} of {}".format(i, nobjects))
 
-        otherinfo = data['otherinfo'].values.flatten()
-        redshift, b, mwebv, trigger_mjd, objid = otherinfo[0:5]
-
-        # Make cuts
-        if abs(b) < 15:
-            print("In galactic plane. b = {}".format(b))
-        if data.shape[0] < 4:
-            print("Less than 4 epochs. nobs = {}".format(data.shape))
-        time = data['r']['time'][0:nobs].dropna()
-        if len(time[time < 0]) < 3:
-            print("Less than 3 points in the r band pre trigger", len(time[time < 0]))
-
-        # Get min and max times for tinterp
-        timestep = 3.0
-        mintimes = []
-        maxtimes = []
-        for j, pb in enumerate(passbands):
-            if pb not in data:
-                continue
-            time = data[pb]['time'][0:nobs].dropna()
-            mintimes.append(time.min())
-            maxtimes.append(time.max())
-        if mintimes == []:
-            print("No data for objid:", i)
-            continue
-        mintime = min(mintimes)
-        maxtime = max(maxtimes) + timestep
-        tinterp = np.arange(mintime, maxtime, step=timestep)
-        len_t = len(tinterp)
-        if len_t >= nobs:
-            tinterp = tinterp[(tinterp >= -70) & (tinterp <= 80)]
-            len_t = len(tinterp)
-            if len_t >= nobs:
-                tinterp = tinterp[tinterp <= 80]
-                len_t = len(tinterp)
-                if len_t >= nobs:
-                    tinterp = tinterp[len_t - nobs:]
-                    len_t = len(tinterp)
-
-        timesX[i][0:len_t] = tinterp
-
-        endtime = 1000
-        j = 0
-
-        orig_lc.append(data)
-        objids_list.append(objid)
-
-        for j, pb in enumerate(passbands):
-            if pb not in data:
-                print("No", pb, "in objid:", objid)
-                continue
-            time = data[pb]['time'][0:nobs].dropna()
-            try:
-                flux = data[pb]['fluxRenorm'][0:nobs].dropna()
-                fluxerr = data[pb]['fluxErrRenorm'][0:nobs].dropna()
-            except KeyError:
-                flux = data[pb][5][0:nobs].dropna()
-                fluxerr = data[pb][6][0:nobs].dropna()
-            photflag = data[pb]['photflag'][0:nobs].dropna()
-
-            n = len(flux)  # Get vector length (could be less than nobs)
-
-            if n > 1:
-                if flux.values[-1] > flux.values[-2]:  # If last values are increasing, then set fill_values to zero
-                    f = interp1d(time, flux, kind='linear', bounds_error=False, fill_value=0.)
-                else:
-                    f = interp1d(time, flux, kind='linear', bounds_error=False,
-                                 fill_value='extrapolate')  # extrapolate until all passbands finished.
-
-                fluxinterp = f(tinterp)
-                fluxinterp = np.nan_to_num(fluxinterp)
-                fluxinterp = fluxinterp.clip(min=0)
-                X[i][j][0:len_t] = fluxinterp
-
-        # Add contextual information
-        for jj, c_idx in enumerate(contextual_info, 1):
-            try:
-                X[i][j + jj][0:len_t] = otherinfo[c_idx] * np.ones(len_t)
-            except Exception as e:
-                X[i][j + jj][0:len_t] = otherinfo[c_idx].values[0] * np.ones(len_t)
-
-        # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
-        X = X.swapaxes(2, 1)
-
-        return X, orig_lc, timesX, objids_list

@@ -7,7 +7,8 @@ from keras.models import load_model
 import matplotlib
 import matplotlib.animation as animation
 
-from astrorapid.process_light_curves import read_multiple_light_curves, prepare_input_arrays
+from astrorapid.process_light_curves import read_multiple_light_curves
+from astrorapid.prepare_arrays import PrepareInputArrays
 
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
@@ -24,9 +25,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Classify(object):
-    def __init__(self, light_curves, model_filepath='', passbands=('g', 'r')):
-        """
-        Takes a list of photometric information and classifies light curves as a function of time
+    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r')):
+        """ Takes a list of photometric information and classifies light curves as a function of time
 
         Parameters
         ----------
@@ -35,6 +35,8 @@ class Classify(object):
             (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
             Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
+        known_redshift : bool
+            Different model to be used if redshift is not known.
         model_filepath : str
             Optional argument. The model is taken from the pre-trained model ZTF model if not specified.
         passbands : tuple
@@ -42,19 +44,27 @@ class Classify(object):
 
         """
         self.light_curves = light_curves
-        self.model_filepath = model_filepath
+        self.known_redshift = known_redshift
         self.passbands = passbands
-        try:
-            self.model = load_model(self.model_filepath)
-        except Exception as e:
-            if model_filepath != '':
-                print("Invalid keras model. Using default model...")
-            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model.hdf5')
-            self.model = load_model(self.model_filepath)
+
+        if self.known_redshift:
+            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model_with_redshift.hdf5')
+            self.contextual_info = (0,)
+        else:
+            self.model_filepath = os.path.join(SCRIPT_DIR, 'keras_model_no_redshift.hdf5')
+            self.contextual_info = ()
+
+        if model_filepath != '' and os.path.exists(self.model_filepath):
+            self.model_filepath = model_filepath
+        else:
+            print("Invalid keras model. Using default model...")
+
+        self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):
-        processed_lightcurves = read_multiple_light_curves(self.light_curves)
-        X = prepare_input_arrays(processed_lightcurves, self.passbands, contextual_info=(0,))
+        processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift, training_set_parameters=None)
+        prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info)
+        X = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
 
         return X
 
@@ -120,8 +130,7 @@ class Classify(object):
             plt.close()
 
     def plot_classification_animation(self, indexes_to_plot=None):
-        """
-        Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation.
+        """ Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation.
 
         Parameters
         ----------
