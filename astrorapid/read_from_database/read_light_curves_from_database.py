@@ -111,7 +111,7 @@ def main():
     print(offset, offset_next)
 
     training_set_dir = 'training_set_files'
-    save_dir = os.path.join(training_set_dir, 'saved_lc_{}_{}'.format(field, data_release))
+    save_dir = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}'.format(field, data_release, savename))
     if not os.path.exists(save_dir) and offset == 0:
         os.makedirs(save_dir)
 
