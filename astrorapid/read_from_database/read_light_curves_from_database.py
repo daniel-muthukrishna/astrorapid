@@ -89,8 +89,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
-    parser.add_argument('-m', "--nprocesses", type=int)
-    parser.add_argument('-n', "--savename", type=str)
+    parser.add_argument('-m', "--nprocesses", type=int, help='Number of multiprocessing processes. Default is 1.')
+    parser.add_argument("--savename", type=str)
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -134,7 +134,7 @@ def main():
         pool.close()
         pool.join()
 
-    combine_hdf_files(save_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release), training_set_dir, savename)
+    combine_hdf_files(save_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename), training_set_dir)
 
 
 if __name__ == '__main__':
