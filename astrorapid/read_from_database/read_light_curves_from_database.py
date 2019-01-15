@@ -1,6 +1,6 @@
 """
 Example usage:
-nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nprocesses 8
+nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nprocesses 8 --savename 'testing'
 """
 
 import os
@@ -90,6 +90,7 @@ def main():
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
     parser.add_argument('-m', "--nprocesses", type=int)
+    parser.add_argument('-n', "--savename", type=str)
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -103,6 +104,10 @@ def main():
         nprocesses = args.nprocesses
     else:
         nprocesses = 1
+    if args.savename is not None:
+        savename = args.savename
+    else:
+        savename = ""
     print(offset, offset_next)
 
     training_set_dir = 'training_set_files'
@@ -129,7 +134,7 @@ def main():
         pool.close()
         pool.join()
 
-    combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release), training_set_dir)
+    combine_hdf_files(save_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release), training_set_dir, savename)
 
 
 if __name__ == '__main__':
