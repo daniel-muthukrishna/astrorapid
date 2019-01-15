@@ -1,6 +1,6 @@
 """
 Example usage:
-python read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --multiprocessing False
+nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nproccesses 8
 """
 
 import os
@@ -31,7 +31,7 @@ def read_light_curves_from_sql_database(data_release, fname, field_in='%', model
 
         lc = getter.convert_pandas_lc_to_recarray_lc(phot, passbands=passbands)
 
-        inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['fluxerr'], lc['pb'], lc['zpt'], lc['photflag'], ra,
+        inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['zpt'], lc['photflag'], ra,
                                           dec, objid, redshift, mwebv, known_redshift=known_redshift,
                                           training_set_parameters={'class_number': int(model), 'peakmjd': peakmjd})
 
@@ -71,7 +71,6 @@ def create_all_hdf_files(args):
 
 
 def main():
-    multiprocessing = False
     passbands = ('g', 'r')
     data_release = 'ZTF_20180716'
     field = 'MSIP'
@@ -90,7 +89,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
-    parser.add_argument('-m', "--multiprocessing", type=bool)
+    parser.add_argument('-m', "--nproccesses", type=int)
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -100,10 +99,10 @@ def main():
         offset_next = args.offsetnext
     else:
         offset_next = 2200
-    if args.multiprocessing is not None:
-        multiprocessing = multiprocessing
+    if args.nprocesses is not None:
+        nprocesses = args.nprocesses
     else:
-        multiprocessing = True
+        nprocesses = 1
     print(offset, offset_next)
 
     training_set_dir = 'training_set_files'
@@ -121,8 +120,8 @@ def main():
             print(os.path.join(save_dir, 'earlylc_{}.hdf5'.format(i)))
             args_list.append((data_release, i, save_dir, field, model, batch_size, sort, redo, passbands))
 
-    if multiprocessing:
-        pool = mp.Pool(processes=1)
+    if nprocesses != 1:
+        pool = mp.Pool(nprocesses)
         results = pool.map_async(create_all_hdf_files, args_list)
         pool.close()
         pool.join()
@@ -130,7 +129,7 @@ def main():
         for args in args_list:
             create_all_hdf_files(args)
 
-    combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release, training_set_dir))
+    combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release), training_set_dir)
 
 
 if __name__ == '__main__':
