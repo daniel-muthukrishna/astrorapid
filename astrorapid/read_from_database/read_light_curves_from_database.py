@@ -37,9 +37,9 @@ def read_light_curves_from_sql_database(data_release, fname, field_in='%', model
     print("saved %s" % fname)
 
 
-def combine_hdf_files(save_dir, combined_savename):
+def combine_hdf_files(save_dir, combined_savename, training_set_dir):
     fnames = os.listdir(save_dir)
-    fname_out = os.path.join(ROOT_DIR, 'earlyclass', combined_savename)
+    fname_out = os.path.join(training_set_dir, 'earlyclass', combined_savename)
     output_file = h5py.File(fname_out, 'w')
 
 
@@ -120,7 +120,7 @@ def main():
         for args in args_list:
             create_all_hdf_files(args)
 
-    combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release))
+    combine_hdf_files(save_dir, 'saved_lc_{}_{}.hdf5'.format(field, data_release, training_set_dir))
 
 
 if __name__ == '__main__':
