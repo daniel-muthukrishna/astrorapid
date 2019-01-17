@@ -1,6 +1,6 @@
 """
 Example usage:
-nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 1000 --nprocesses 8 --savename 'testing'
+nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_database --offset 0 --offsetnext 70 --nprocesses 8 --savename 'testing' --combinefiles
 """
 
 import os
@@ -44,7 +44,7 @@ def read_light_curves_from_sql_database(data_release, fname, field_in='%', model
 
 def combine_hdf_files(save_dir, combined_savename, training_set_dir):
     fnames = os.listdir(save_dir)
-    fname_out = os.path.join(training_set_dir, 'earlyclass', combined_savename)
+    fname_out = os.path.join(training_set_dir, combined_savename)
     output_file = h5py.File(fname_out, 'w')
 
 
@@ -65,7 +65,7 @@ def combine_hdf_files(save_dir, combined_savename, training_set_dir):
 def create_all_hdf_files(args):
     data_release, i, save_dir, field_in, model_in, batch_size, sort, redo, passbands = args
     offset = batch_size * i
-    fname = os.path.join(save_dir, 'earlylc_{}.hdf5'.format(i))
+    fname = os.path.join(save_dir, 'lc_{}.hdf5'.format(i))
     read_light_curves_from_sql_database(data_release=data_release, fname=fname, field_in=field_in, model_in=model_in,
                            batch_size=batch_size, offset=offset, sort=sort, redo=redo, passbands=passbands)
 
@@ -91,6 +91,7 @@ def main():
     parser.add_argument('-n', "--offsetnext", type=int)
     parser.add_argument('-m', "--nprocesses", type=int, help='Number of multiprocessing processes. Default is 1.')
     parser.add_argument("--savename", type=str)
+    parser.add_argument("--combinefiles", help="Only set this if after this action, all files will have been created.", action='store_true')
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -121,8 +122,8 @@ def main():
     args_list = []
     file_list = os.listdir(save_dir)
     for i in i_list:
-        if 'earlylc_{}.hdf5'.format(i) not in file_list:
-            print(os.path.join(save_dir, 'earlylc_{}.hdf5'.format(i)))
+        if 'lc_{}.hdf5'.format(i) not in file_list:
+            print(os.path.join(save_dir, 'lc_{}.hdf5'.format(i)))
             args_list.append((data_release, i, save_dir, field, model, batch_size, sort, redo, passbands))
 
     if nprocesses == 1:
@@ -134,7 +135,8 @@ def main():
         pool.close()
         pool.join()
 
-    combine_hdf_files(save_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename), training_set_dir)
+    if args.combinefiles:
+        combine_hdf_files(save_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename), training_set_dir)
 
 
 if __name__ == '__main__':
