@@ -1,18 +1,22 @@
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from collections import OrderedDict
 from keras.models import load_model
-import matplotlib
-import matplotlib.animation as animation
 from pkg_resources import resource_filename
 
 from astrorapid.process_light_curves import read_multiple_light_curves
 from astrorapid.prepare_arrays import PrepareInputArrays
 
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    import matplotlib
+    import matplotlib.animation as animation
+
+    plt.rcParams['text.usetex'] = True
+    plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
+except ImportError:
+    print("Warning: You will need to install 'matplotlib' if you wish to plot the classifications.")
 
 CLASS_NAMES = ['Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Class A', 'Kilonova', 'SLSN-I',
                'Class B', 'Class C', 'Class D', 'TDE']

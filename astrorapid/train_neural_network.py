@@ -8,6 +8,7 @@ from keras.layers.convolutional import Conv1D, Conv2D
 from keras.layers.convolutional import MaxPooling1D, MaxPooling2D
 
 from astrorapid.prepare_arrays import PrepareTrainingSetArrays
+from astrorapid.plot_metrics import plot_metrics
 
 
 def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True):

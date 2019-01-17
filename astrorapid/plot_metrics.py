@@ -1,14 +1,19 @@
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.interpolate import interp1d
 from keras.utils import to_categorical
 from sklearn.metrics import confusion_matrix
-import imageio
-import matplotlib
 
 from astrorapid.classifier_metrics import plot_confusion_matrix, compute_multiclass_roc_auc, compute_precision_recall, plasticc_log_loss
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib
+    import imageio
+except ImportError:
+    print("Warning: You will need to install 'matplotlib' and 'imageio' if you want to plot the "
+          "classification performance metrics.")
 
 
 def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None, passbands=('g', 'r')):

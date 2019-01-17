@@ -4,7 +4,6 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 import pickle
 import multiprocessing as mp
-
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d

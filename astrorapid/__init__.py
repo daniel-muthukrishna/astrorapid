@@ -21,8 +21,8 @@ def main():
     predictions = classification.get_predictions()
     print(predictions)
 
-    classification.plot_light_curves_and_classifications()
-    classification.plot_classification_animation()
+    # classification.plot_light_curves_and_classifications()
+    # classification.plot_classification_animation()
 
 
 if __name__ == '__main__':

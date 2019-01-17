@@ -1,21 +1,25 @@
 import os
 import sys
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import itertools
-from chainconsumer import ChainConsumer
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
 from scipy import interp
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 
-font = {'family': 'normal',
-        'size': 34}
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
 
-matplotlib.rc('font', **font)
+    plt.rcParams['text.usetex'] = True
+    plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
+
+    font = {'family': 'normal',
+            'size': 34}
+
+    matplotlib.rc('font', **font)
+except ImportError:
+    print("Warning: You will need to install matplotlib if you want to plot any metric")
 
 COLORS = ['tab:green', 'tab:orange', 'tab:blue', 'tab:red', 'tab:purple', 'tab:brown', '#aaffc3', 'tab:olive',
           'tab:cyan', '#FF1493', 'navy', 'tab:pink', 'lightcoral', '#228B22', '#aa6e28', '#FFA07A']
@@ -265,97 +269,3 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
             plt.savefig(figname_png, bbox_inches="tight")
 
     return figname_png
-
-
-def plot_feature_importance(classifier, feature_names, num_features, fig_dir, num_features_plot=50, name=''):
-    importances = classifier.feature_importances_
-    std = np.std([tree.feature_importances_ for tree in classifier.estimators_], axis=0)
-    indices = np.argsort(importances)[::-1]
-
-    num_features = min(num_features, len(indices))
-    # Print the feature ranking
-    print("Feature ranking:")
-    for f in range(num_features):
-        print("%d. %s (%f)" % (f + 1, feature_names[indices[f]], importances[indices[f]]))
-    n = num_features_plot
-    if n > num_features:
-        n = num_features
-    # Plot the feature importances of the forest
-    fig = plt.figure(figsize=(20, 10))
-    plt.bar(range(n), importances[indices][:n], color='tab:blue', yerr=std[indices][:n], align="center")
-    plt.xticks(range(n), feature_names[indices][:n], rotation=90)
-    plt.tick_params(axis='both', labelsize=24)
-    plt.xlim([-1, n])
-    plt.ylabel("Importance")
-    plt.tight_layout()
-    plt.savefig(os.path.join(fig_dir, 'feature_importance{}.pdf'.format(name)))
-
-
-def scatter(x, colors, feature_names, models, sntypes_map):
-    import matplotlib.pyplot as plt
-    import matplotlib.patheffects as PathEffects
-    import seaborn as sns
-    sns.set_style('darkgrid')
-    sns.set_palette('muted')
-    sns.set_context("notebook", font_scale=1.5,
-                    rc={"lines.linewidth": 2.5})
-
-    xaxisclass = 0
-    yaxisclass = 2
-
-    # We choose a color palette with seaborn.
-    palette = np.array(sns.color_palette("hls", 10))
-
-    # We create a scatter plot.
-    f = plt.figure(figsize=(8, 8))
-    ax = plt.subplot(aspect='equal')
-    sc = ax.scatter(x[:,xaxisclass], x[:,yaxisclass], lw=0, s=10,
-                    c=palette[colors.astype(np.int)], alpha=0.4)
-    plt.xlim(min(x[:,xaxisclass]), max(x[:,yaxisclass]))
-    plt.ylim(min(x[:,xaxisclass]), max(x[:,yaxisclass]))
-    # ax.axis('off')
-    ax.axis('tight')
-    plt.xlabel(feature_names[xaxisclass])
-    plt.ylabel(feature_names[yaxisclass])
-
-    # We add the labels for each digit.
-    txts = []
-    for i, model in enumerate(models):
-        model_name = sntypes_map[model]
-        # Position of each label.
-        xtext, ytext = np.median(x[colors == i, :][:,[xaxisclass,yaxisclass]], axis=0)
-        txt = ax.text(xtext, ytext, model_name, fontsize=24)
-        txt.set_path_effects([
-            PathEffects.Stroke(linewidth=5, foreground="w"),
-            PathEffects.Normal()])
-        txts.append(txt)
-
-    return f, ax, sc, txts
-
-
-def plot_features_space(models, sntypes_map, X, y, feature_names, fig_dir, add_save_name=''):
-    colors = np.copy(y)
-    for i, m in enumerate(models):
-        colors[y == m] = i
-
-    scatter(X, colors, feature_names, models, sntypes_map)
-    plt.savefig(fname=os.path.join(fig_dir, 'feature_space_sns_%s' % add_save_name), dpi=120)
-    plt.show()
-
-    print(X.shape, y.shape)
-    for i in range(len(X[0])):
-        mask = np.where(X[:,i] != 0)[0]
-        X = X[mask]
-        y = y[mask]
-    print(X.shape, y.shape)
-
-    for i, f in enumerate(feature_names):
-        feature_names[i] = "$" + f + "$"
-
-    c = ChainConsumer()
-    for model in models[::-1]:
-        model_name = sntypes_map[model]
-        c.add_chain(X[y == model], parameters=list(feature_names), name=model_name)
-    c.configure(colors=["#B32222", "#D1D10D", "#455A64", "#1f77b4", "#2ca02c"], shade=True, shade_alpha=0.2, bar_shade=True)
-    fig = c.plotter.plot()
-    fig.savefig(fname=os.path.join(fig_dir, 'feature_space_contours_%s.pdf' % add_save_name), transparent=False)
