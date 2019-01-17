@@ -1,6 +1,4 @@
 import numpy as np
-from scipy.optimize import curve_fit, minimize
-import matplotlib.pyplot as plt
 import emcee
 from collections import OrderedDict
 import copy

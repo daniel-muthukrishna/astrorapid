@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='astrorapid',
-    version='0.1.8',
+    version='0.1.9',
     description='Real-time Automated Photometric IDentification of astronomical transients',
     long_description=long_description,
     url='https://github.com/daniel-muthukrishna/astrorapid',
@@ -50,7 +50,7 @@ setup(name='astrorapid',
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy', 'scipy', 'tensorflow', 'keras', 'astropy', 'pandas', 'extinction', 'scikit-learn'],
+    install_requires=['numpy', 'tensorflow', 'keras', 'astropy', 'pandas', 'extinction', 'scikit-learn'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

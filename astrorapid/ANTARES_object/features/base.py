@@ -9,12 +9,16 @@ import numpy as np
 import pandas as pd
 import math
 from six.moves import zip
-import scipy.stats
-import scipy.interpolate as scinterp
 from astropy.stats import median_absolute_deviation
 # from cesium import featurize
 from .. import constants
-from . import stats_computation
+
+try:
+    import scipy.stats
+    from . import stats_computation
+except ImportError:
+    print("Warning: scipy is not installed. This may cause some issues.")
+
 
 
 class BaseMixin(object):
