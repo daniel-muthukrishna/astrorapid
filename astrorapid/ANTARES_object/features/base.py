@@ -12,7 +12,7 @@ from six.moves import zip
 import scipy.stats
 import scipy.interpolate as scinterp
 from astropy.stats import median_absolute_deviation
-from cesium import featurize
+# from cesium import featurize
 from .. import constants
 from . import stats_computation
 
