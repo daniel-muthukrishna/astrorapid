@@ -190,16 +190,13 @@ class PrepareTrainingSetArrays(PrepareArrays):
         -------
         objids : list
             list of object IDs as strings.
-        fpath_saved_lc : str
-            Same as input argument
-
         """
 
         with h5py.File(fpath_saved_lc, 'r') as hdffile:
             objids = np.array(list(hdffile.keys()))
         np.random.shuffle(objids)
 
-        return objids, fpath_saved_lc
+        return objids
 
     def prepare_training_set_arrays(self, fpath_saved_lc, otherchange=''):
         savepath = "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
