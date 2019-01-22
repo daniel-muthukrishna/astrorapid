@@ -359,7 +359,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         deleterows = []
 
         for i, objid in enumerate(objids):
-            print("Preparing {} light curve {} of {}".format(objid, i, self.nobjects))
+            print("Preparing {} light curve {} of {}".format(objid, i, nobjects))
 
             # Get aggregate model
             field, model, base, snid = objid.astype(str).split('_')
