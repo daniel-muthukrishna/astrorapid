@@ -69,7 +69,7 @@ def main():
     data_release = 'ZTF_20180716'
     field = 'MSIP'
     savename = 'astrorapid'
-    fpath = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}'.format(field, data_release, savename))
+    fpath = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename))
 
     fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
     for dirname in [fig_dir, fig_dir+'/cf_since_trigger', fig_dir+'/cf_since_t0', fig_dir+'/roc_since_trigger', fig_dir+'/lc_pred', fig_dir+'/pr_since_trigger', fig_dir+'/truth_table_since_trigger']:
