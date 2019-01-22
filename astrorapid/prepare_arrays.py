@@ -27,7 +27,14 @@ class PrepareArrays(object):
 
     def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, variables_cut=True):
         deleted = False
-        time = data['r']['time'][0:self.nobs].dropna()
+        try:
+            time = data['r']['time'][0:self.nobs].dropna()
+        except KeyError:
+            print("No r band data. passbands")
+            deleterows.append(i)
+            deleted = True
+            return deleterows, deleted
+
         if data.shape[0] < 4:
             print("Less than 4 epochs. nobs = {}".format(data.shape))
             deleterows.append(i)
