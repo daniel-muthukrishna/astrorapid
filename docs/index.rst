@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to astrorapid's documentation!
-======================================
+RAPID
+=====
 RAPID (Real-time Automated Photometric IDentification) can classify multiband photometric light curves into
 several different transient classes. It uses a deep recurrent neural network to produce time-varying classifications.
 
@@ -13,6 +13,10 @@ several different transient classes. It uses a deep recurrent neural network to 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   installation
+   usage
+   example
 
 
 Contribute
