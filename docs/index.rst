@@ -39,12 +39,3 @@ Author
 ------
 Daniel Muthukrishna
 http://www.danielmuthukrishna.com
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
