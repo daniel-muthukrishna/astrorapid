@@ -11,7 +11,7 @@ from astrorapid.prepare_arrays import PrepareTrainingSetArrays
 from astrorapid.plot_metrics import plot_metrics
 
 
-def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True):
+def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25):
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
 
     if not retrain and os.path.isfile(model_filename):
@@ -37,7 +37,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
         model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=25, batch_size=64, verbose=2, sample_weight=sample_weights)
+        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=64, verbose=2, sample_weight=sample_weights)
 
         print(model.summary())
         model.save(model_filename)
@@ -52,6 +52,7 @@ def main():
     aggregate_classes = True
     reread_hdf5_data = False
     retrain_rnn = False
+    train_epochs = 25
 
     otherchange = ''
     nchunks = 1000
@@ -65,17 +66,19 @@ def main():
     if not os.path.exists(training_set_dir):
         os.makedirs(training_set_dir)
 
+    data_release = 'ZTF_20180716'
+    field = 'MSIP'
+    savename = 'astrorapid'
+    fpath = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}'.format(field, data_release, savename))
 
-    fpath = '/Users/danmuth/PycharmProjects/earlyclass/lc_data_MSIP_ZTF_20180716_full_lc_z0.5_mr23_ebv02_widercuts5.hdf5'
-
-    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_25epochs{}ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
+    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
     for dirname in [fig_dir, fig_dir+'/cf_since_trigger', fig_dir+'/cf_since_t0', fig_dir+'/roc_since_trigger', fig_dir+'/lc_pred', fig_dir+'/pr_since_trigger', fig_dir+'/truth_table_since_trigger']:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_hdf5_data, aggregate_classes, bcut, zcut, variablescut, nchunks=10000)
+    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_hdf5_data, aggregate_classes, bcut, zcut, variablescut, nchunks=nchunks)
     X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = preparearrays.prepare_training_set_arrays(fpath, otherchange)
-    model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir, retrain=retrain_rnn)
+    model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir, retrain=retrain_rnn, epochs=train_epochs)
     plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=timesX_test, orig_lc_test=orig_lc_test, objids_test=objids_test, passbands=passbands)
 
 
