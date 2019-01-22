@@ -20,7 +20,7 @@ Alternatively, the source code can be downloaded from GitHub by running the foll
 
 Dependencies
 ------------
-Using pip to install astrorapid will automatically install the mandatory dependencies: `numpy`, `tensorflow`, `keras`, `astropy`, `pandas`, `extinction`, `scikit-learn`.
+Using pip to install astrorapid will automatically install the mandatory dependencies: :code:`numpy`, :code:`tensorflow`, :code:`keras`, :code:`astropy`, :code:`pandas`, :code:`extinction`, :code:`scikit-learn`.
 
 If you wish to plot your classifications or train your own classifier with your data you will need matplotlib and scipy as well. These can be installed with
 
