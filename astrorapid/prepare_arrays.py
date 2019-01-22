@@ -190,20 +190,23 @@ class PrepareTrainingSetArrays(PrepareArrays):
         -------
         objids : list
             list of object IDs as strings.
+        fpath_saved_lc : str
+            Same as input argument
+
         """
 
         with h5py.File(fpath_saved_lc, 'r') as hdffile:
             objids = np.array(list(hdffile.keys()))
         np.random.shuffle(objids)
 
-        return objids
+        return objids, fpath_saved_lc
 
     def prepare_training_set_arrays(self, fpath_saved_lc, otherchange=''):
         savepath = "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                  self.contextual_info, os.path.basename(fpath_saved_lc),
                                                                  self.zcut, self.bcut, self.variablescut)
         if self.reread is True or not os.path.isfile(os.path.join(self.training_set_dir, savepath)):
-            objids = self.get_saved_light_curves_from_database(fpath_saved_lc)
+            objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
             nobjects = len(objids)
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
