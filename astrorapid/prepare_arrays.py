@@ -47,7 +47,7 @@ class PrepareArrays(object):
             print("In galactic plane. b = {}".format(b))
             deleterows.append(i)
             deleted = True
-        elif zcut is not None and redshift is not None and redshift > self.zcut and redshift == 0:
+        elif zcut is not None and redshift is not None and (redshift > self.zcut or redshift == 0):
             print("Redshift cut. z = {}".format(redshift))
             deleterows.append(i)
             deleted = True
