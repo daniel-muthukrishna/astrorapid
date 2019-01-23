@@ -258,60 +258,99 @@ class PrepareTrainingSetArrays(PrepareArrays):
             labels = np.delete(labels, deleterows, axis=0)
             timesX = np.delete(timesX, deleterows, axis=0)
 
-            np.save(
-                "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
-                                                              os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
-                                                              self.variablescut), X)
-            np.save(
-                "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
-                                                              os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
-                                                              self.variablescut), y)
-            np.save("labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                       self.contextual_info,
-                                                                       os.path.basename(fpath_saved_lc), self.zcut,
-                                                                       self.bcut, self.variablescut), labels)
-            np.save("tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                        self.contextual_info,
-                                                                        os.path.basename(fpath_saved_lc), self.zcut,
-                                                                        self.bcut, self.variablescut), timesX)
-            np.save("objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                       self.contextual_info,
-                                                                       os.path.basename(fpath_saved_lc), self.zcut,
-                                                                       self.bcut, self.variablescut), objids_list)
-            with open("origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                         self.contextual_info,
-                                                                         os.path.basename(fpath_saved_lc), self.zcut,
-                                                                         self.bcut, self.variablescut), 'wb') as f:
+            np.save(os.path.join(self.training_set_dir,
+                                 "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                               self.contextual_info,
+                                                                               os.path.basename(fpath_saved_lc),
+                                                                               self.zcut, self.bcut,
+                                                                               self.variablescut)), X)
+            np.save(os.path.join(self.training_set_dir,
+                                 "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                               self.contextual_info,
+                                                                               os.path.basename(fpath_saved_lc),
+                                                                               self.zcut, self.bcut,
+                                                                               self.variablescut)), y)
+            np.save(os.path.join(self.training_set_dir,
+                                 "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                                    self.contextual_info,
+                                                                                    os.path.basename(fpath_saved_lc),
+                                                                                    self.zcut,
+                                                                                    self.bcut, self.variablescut)),
+                    labels)
+            np.save(os.path.join(self.training_set_dir, "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                                            self.aggregate_classes,
+                                                                                                            self.contextual_info,
+                                                                                                            os.path.basename(
+                                                                                                                fpath_saved_lc),
+                                                                                                            self.zcut,
+                                                                                                            self.bcut,
+                                                                                                            self.variablescut)),
+                    timesX)
+            np.save(os.path.join(self.training_set_dir,
+                                 "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                                    self.contextual_info,
+                                                                                    os.path.basename(fpath_saved_lc),
+                                                                                    self.zcut,
+                                                                                    self.bcut, self.variablescut)),
+                    objids_list)
+            with open(os.path.join(self.training_set_dir,
+                                   "origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                      self.aggregate_classes,
+                                                                                      self.contextual_info,
+                                                                                      os.path.basename(fpath_saved_lc),
+                                                                                      self.zcut,
+                                                                                      self.bcut, self.variablescut)),
+                      'wb') as f:
                 pickle.dump(orig_lc, f)
 
         else:
-            X = np.load(
-                "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
-                                                              os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
-                                                              self.variablescut), mmap_mode='r')
-            y = np.load(
-                "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
-                                                              os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
-                                                              self.variablescut))
-            labels = np.load(
-                "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                   self.contextual_info,
-                                                                   os.path.basename(fpath_saved_lc), self.zcut,
-                                                                   self.bcut, self.variablescut))
-            timesX = np.load(
-                "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                    self.contextual_info,
-                                                                    os.path.basename(fpath_saved_lc), self.zcut,
-                                                                    self.bcut, self.variablescut))
-            objids_list = np.load(
-                "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                   self.contextual_info,
-                                                                   os.path.basename(fpath_saved_lc), self.zcut,
-                                                                   self.bcut, self.variablescut))
-            with open("origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                         self.contextual_info,
-                                                                         os.path.basename(fpath_saved_lc), self.zcut,
-                                                                         self.bcut, self.variablescut), 'rb') as f:
+            X = np.load(os.path.join(self.training_set_dir,
+                                     "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                                   self.contextual_info,
+                                                                                   os.path.basename(fpath_saved_lc),
+                                                                                   self.zcut, self.bcut,
+                                                                                   self.variablescut)), mmap_mode='r')
+            y = np.load(os.path.join(self.training_set_dir,
+                                     "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                                   self.contextual_info,
+                                                                                   os.path.basename(fpath_saved_lc),
+                                                                                   self.zcut, self.bcut,
+                                                                                   self.variablescut)))
+            labels = np.load(os.path.join(self.training_set_dir,
+                                          "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                             self.aggregate_classes,
+                                                                                             self.contextual_info,
+                                                                                             os.path.basename(
+                                                                                                 fpath_saved_lc),
+                                                                                             self.zcut,
+                                                                                             self.bcut,
+                                                                                             self.variablescut)))
+            timesX = np.load(os.path.join(self.training_set_dir,
+                                          "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                              self.aggregate_classes,
+                                                                                              self.contextual_info,
+                                                                                              os.path.basename(
+                                                                                                  fpath_saved_lc),
+                                                                                              self.zcut,
+                                                                                              self.bcut,
+                                                                                              self.variablescut)))
+            objids_list = np.load(os.path.join(self.training_set_dir,
+                                               "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                                  self.aggregate_classes,
+                                                                                                  self.contextual_info,
+                                                                                                  os.path.basename(
+                                                                                                      fpath_saved_lc),
+                                                                                                  self.zcut,
+                                                                                                  self.bcut,
+                                                                                                  self.variablescut)))
+            with open(os.path.join(self.training_set_dir,
+                                   "origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                                                                      self.aggregate_classes,
+                                                                                      self.contextual_info,
+                                                                                      os.path.basename(fpath_saved_lc),
+                                                                                      self.zcut,
+                                                                                      self.bcut, self.variablescut)),
+                      'rb') as f:
                 orig_lc = pickle.load(f)
 
         classes = sorted(list(set(labels)))
