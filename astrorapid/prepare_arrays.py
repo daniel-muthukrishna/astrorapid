@@ -285,25 +285,25 @@ class PrepareTrainingSetArrays(PrepareArrays):
                 pickle.dump(orig_lc, f)
 
         else:
-            self.X = np.load(
+            X = np.load(
                 "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
                                                               os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
                                                               self.variablescut), mmap_mode='r')
-            self.y = np.load(
+            y = np.load(
                 "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes, self.contextual_info,
                                                               os.path.basename(fpath_saved_lc), self.zcut, self.bcut,
                                                               self.variablescut))
-            self.labels = np.load(
+            labels = np.load(
                 "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                    self.contextual_info,
                                                                    os.path.basename(fpath_saved_lc), self.zcut,
                                                                    self.bcut, self.variablescut))
-            self.timesX = np.load(
+            timesX = np.load(
                 "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                     self.contextual_info,
                                                                     os.path.basename(fpath_saved_lc), self.zcut,
                                                                     self.bcut, self.variablescut))
-            self.objids_list = np.load(
+            objids_list = np.load(
                 "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                    self.contextual_info,
                                                                    os.path.basename(fpath_saved_lc), self.zcut,
@@ -314,28 +314,28 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                          self.bcut, self.variablescut), 'rb') as f:
                 orig_lc = pickle.load(f)
 
-        classes = sorted(list(set(self.labels)))
+        classes = sorted(list(set(labels)))
         sntypes_map = helpers.get_sntypes()
         class_names = [sntypes_map[class_num] for class_num in classes]
 
         # Count nobjects per class
         for c in classes:
-            nobs = len(self.X[self.labels == c])
+            nobs = len(X[labels == c])
             print(c, nobs)
 
         # Use class numbers 1,2,3... instead of 1, 3, 13 etc.
-        y_indexes = np.copy(self.y)
+        y_indexes = np.copy(y)
         for i, c in enumerate(classes):
-            y_indexes[self.y == c] = i + 1
-        self.y = y_indexes
+            y_indexes[y == c] = i + 1
+        y = y_indexes
 
-        self.y = to_categorical(self.y)
+        y = to_categorical(y)
 
         # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
-        self.X = self.X.swapaxes(2, 1)
+        X = X.swapaxes(2, 1)
 
         X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = train_test_split(
-            self.X, self.y, self.labels, self.timesX, self.orig_lc, self.objids_list, train_size=0.60,
+            X, y, labels, timesX, orig_lc, objids_list, train_size=0.60,
             shuffle=False, random_state=42)
 
         counts = np.unique(labels_train, return_counts=True)[-1]
