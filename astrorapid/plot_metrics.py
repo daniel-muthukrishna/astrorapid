@@ -5,7 +5,8 @@ from scipy.interpolate import interp1d
 from keras.utils import to_categorical
 from sklearn.metrics import confusion_matrix
 
-from astrorapid.classifier_metrics import plot_confusion_matrix, compute_multiclass_roc_auc, compute_precision_recall, plasticc_log_loss
+from astrorapid.classifier_metrics import plot_confusion_matrix, compute_multiclass_roc_auc, compute_precision_recall, \
+    plasticc_log_loss
 
 try:
     import matplotlib.pyplot as plt
@@ -15,8 +16,20 @@ except ImportError:
     print("Warning: You will need to install 'matplotlib' and 'imageio' if you want to plot the "
           "classification performance metrics.")
 
+COLORS = ['grey', 'tab:green', 'tab:orange', 'tab:blue', 'tab:red', 'tab:purple', 'tab:brown', '#aaffc3', 'tab:olive',
+          'tab:cyan', '#FF1493', 'navy', 'tab:pink', 'lightcoral', '#228B22', '#aa6e28', '#FFA07A']
+COLCLASS = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:orange', 'SNII': 'tab:blue',
+            'SNIa-91bg': 'tab:red', 'SNIa-x': 'tab:purple', 'point-Ia': 'tab:brown', 'Kilonova': '#aaffc3',
+            'SLSN-I': 'tab:olive',
+            'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink'}
+COLPB = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
+MARKPB = {'g': 'o', 'r': 's'}
+ALPHAPB = {'g': 0.3, 'r': 1.}
+WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 
-def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None, passbands=('g', 'r')):
+
+def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None,
+                 passbands=('g', 'r')):
     scores = model.evaluate(X_test, y_test, verbose=0)
     print("Accuracy: %.2f%%" % (scores[1] * 100))
 
@@ -25,7 +38,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     y_pred_indexes = np.argmax(y_pred, axis=-1)
 
     accuracy = len(np.where(y_pred_indexes == y_test_indexes)[0])
-    print("Accuracy is: {}/{} = {}".format(accuracy, len(y_test_indexes.flatten()), accuracy / len(y_test_indexes.flatten())))
+    print("Accuracy is: {}/{} = {}".format(accuracy, len(y_test_indexes.flatten()),
+                                           accuracy / len(y_test_indexes.flatten())))
 
     class_names = ["Pre-explosion"] + class_names
 
@@ -225,4 +239,3 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     plt.savefig(os.path.join(fig_dir, "wlogloss_vs_time.pdf"))
     plt.close()
     print(wlogloss)
-

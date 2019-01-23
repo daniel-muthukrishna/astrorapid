@@ -55,7 +55,7 @@ def main():
     train_epochs = 25
 
     otherchange = ''
-    nchunks = 1000
+    nchunks = 10000
 
     # Train + Test cuts
     zcut = 0.5

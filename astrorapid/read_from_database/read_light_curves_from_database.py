@@ -14,13 +14,17 @@ from astrorapid.read_from_database.get_data import GetData
 from astrorapid.process_light_curves import InputLightCurve
 
 
-def read_light_curves_from_sql_database(data_release, fname, field_in='%', model_in='%', batch_size=100, offset=0, sort=True, redo=False, passbands=('g', 'r'), known_redshift=True):
+def read_light_curves_from_sql_database(data_release, fname, field_in='%', model_in='%', batch_size=100, offset=0,
+                                        sort=True, passbands=('g', 'r'), known_redshift=True):
     print(fname)
 
     extrasql = ''  # "AND (objid LIKE '%00' OR objid LIKE '%50' OR sim_type_index IN (51,61,62,63,64,84,90,91,93))"  # ''#AND sim_redshift_host < 0.5 AND sim_peakmag_r < 23'
     getter = GetData(data_release)
-    result = getter.get_lcs_data(columns=['objid', 'ptrobs_min', 'ptrobs_max', 'sim_peakmag_r', 'sim_redshift_host', 'mwebv', 'sim_dlmu', 'peakmjd', 'mwebv', 'ra', 'decl', 'hostgal_photoz', 'hostgal_photoz_err'],
-                                 field=field_in, model=model_in, snid='%', limit=batch_size, offset=offset, shuffle=False, sort=sort, extrasql=extrasql)
+    result = getter.get_lcs_data(
+        columns=['objid', 'ptrobs_min', 'ptrobs_max', 'sim_peakmag_r', 'sim_redshift_host', 'mwebv', 'sim_dlmu',
+                 'peakmjd', 'mwebv', 'ra', 'decl', 'hostgal_photoz', 'hostgal_photoz_err'],
+        field=field_in, model=model_in, snid='%', limit=batch_size, offset=offset, shuffle=False, sort=sort,
+        extrasql=extrasql)
 
     store = pd.HDFStore(fname)
 
@@ -47,7 +51,6 @@ def combine_hdf_files(save_dir, combined_savename, training_set_dir):
     fname_out = os.path.join(training_set_dir, combined_savename)
     output_file = h5py.File(fname_out, 'w')
 
-
     for n, f in enumerate(fnames):
         print(n, f)
         try:
@@ -63,11 +66,11 @@ def combine_hdf_files(save_dir, combined_savename, training_set_dir):
 
 
 def create_all_hdf_files(args):
-    data_release, i, save_dir, field_in, model_in, batch_size, sort, redo, passbands = args
+    data_release, i, save_dir, field_in, model_in, batch_size, sort, passbands = args
     offset = batch_size * i
     fname = os.path.join(save_dir, 'lc_{}.hdf5'.format(i))
     read_light_curves_from_sql_database(data_release=data_release, fname=fname, field_in=field_in, model_in=model_in,
-                           batch_size=batch_size, offset=offset, sort=sort, redo=redo, passbands=passbands)
+                                        batch_size=batch_size, offset=offset, sort=sort, passbands=passbands)
 
 
 def main():
@@ -84,14 +87,14 @@ def main():
 
     batch_size = 1000
     sort = True
-    redo = True
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', "--offset", type=int)
     parser.add_argument('-n', "--offsetnext", type=int)
     parser.add_argument('-m', "--nprocesses", type=int, help='Number of multiprocessing processes. Default is 1.')
     parser.add_argument("--savename", type=str)
-    parser.add_argument("--combinefiles", help="Only set this if after this action, all files will have been created.", action='store_true')
+    parser.add_argument("--combinefiles", help="Only set this if after this action, all files will have been created.",
+                        action='store_true')
     args = parser.parse_args()
     if args.offset is not None:
         offset = args.offset
@@ -124,7 +127,7 @@ def main():
     for i in i_list:
         if 'lc_{}.hdf5'.format(i) not in file_list:
             print(os.path.join(save_dir, 'lc_{}.hdf5'.format(i)))
-            args_list.append((data_release, i, save_dir, field, model, batch_size, sort, redo, passbands))
+            args_list.append((data_release, i, save_dir, field, model, batch_size, sort, passbands))
 
     if nprocesses == 1:
         for args in args_list:
@@ -141,4 +144,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

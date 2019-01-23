@@ -184,7 +184,7 @@ def compute_multiclass_roc_auc(classes, y_test, y_pred_prob, name='', fig_dir='.
     if logyscale:
         plt.yscale("log")
     else:
-        pass # plt.ylim([0.0, 1.05])
+        pass  # plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     if title is not None:
@@ -199,7 +199,8 @@ def compute_multiclass_roc_auc(classes, y_test, y_pred_prob, name='', fig_dir='.
     return figname, save_auc
 
 
-def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.RdBu, fig_dir='.', name='', combine_kfolds=False, show_uncertainties=False):
+def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.RdBu, fig_dir='.', name='',
+                          combine_kfolds=False, show_uncertainties=False):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -215,7 +216,6 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
         print("Normalized confusion matrix")
     else:
         print('Confusion matrix, without normalization')
-
 
     print(cm)
     # Multiply off diagonal by -1

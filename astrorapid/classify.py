@@ -71,7 +71,8 @@ class Classify(object):
         self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):
-        processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift, training_set_parameters=None)
+        processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift,
+                                                           training_set_parameters=None)
         prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info)
         X = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
 
@@ -189,7 +190,8 @@ class Classify(object):
                              label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
 
                 for classnum, classname in enumerate(CLASS_NAMES):
-                    ax2.plot(self.timesX[idx][:argmax][:int(i + 1)], self.y_predict[idx][:, classnum][:argmax][:int(i + 1)],
+                    ax2.plot(self.timesX[idx][:argmax][:int(i + 1)],
+                             self.y_predict[idx][:, classnum][:argmax][:int(i + 1)],
                              '-', label=classname, color=CLASS_COLOR[classname], linewidth=3)
 
                 # Don't repeat legend items

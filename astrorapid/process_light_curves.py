@@ -13,7 +13,6 @@ except ImportError:
     print("You will need to install 'emcee' if you wish to train your own classifier on new data.")
 
 
-
 class InputLightCurve(object):
     def __init__(self, mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift=None, mwebv=None,
                  known_redshift=True, training_set_parameters=None):
@@ -62,7 +61,7 @@ class InputLightCurve(object):
         self.objid = objid
         self.redshift = redshift
         self.mwebv = mwebv
-        self.known_redshift =known_redshift
+        self.known_redshift = known_redshift
         self.training_set_parameters = training_set_parameters
         if training_set_parameters is not None:
             self.class_number = training_set_parameters['class_number']
@@ -104,7 +103,8 @@ class InputLightCurve(object):
             calc_params = False
         elif len(self.t[inrange_mask]) < 3:  # No t0 if not At least 3 points before peak
             calc_params = False
-        elif len(self.t[self.t < 0]) < 3:  # No t0 if there are less than three points before trigger. This suggests that it triggered on one of the first point of a passband
+        elif len(self.t[
+                     self.t < 0]) < 3:  # No t0 if there are less than three points before trigger. This suggests that it triggered on one of the first point of a passband
             calc_params = False
 
         if calc_params:
@@ -139,7 +139,9 @@ class InputLightCurve(object):
             t0 = self.compute_t0(outlc)
             otherinfo += [t0, self.peakmjd]
 
-        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename({0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T for pb, lcinfo in outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
+        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename(
+            {0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T for pb, lcinfo in
+                  outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
         savepd['otherinfo'] = pd.DataFrame(otherinfo)
         savepd = pd.DataFrame(
             {(outerKey, innerKey): values for outerKey, innerDict in savepd.items() for innerKey, values in
@@ -163,9 +165,3 @@ def read_multiple_light_curves(light_curve_list, known_redshift=True, training_s
         processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
     return processed_light_curves
-
-
-
-
-
-

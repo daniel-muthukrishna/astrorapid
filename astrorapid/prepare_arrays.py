@@ -210,9 +210,11 @@ class PrepareTrainingSetArrays(PrepareArrays):
         return objids, fpath_saved_lc
 
     def prepare_training_set_arrays(self, fpath_saved_lc, otherchange=''):
-        savepath = os.path.join(self.training_set_dir, "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                 self.contextual_info, os.path.basename(fpath_saved_lc),
-                                                                 self.zcut, self.bcut, self.variablescut))
+        savepath = os.path.join(self.training_set_dir,
+                                "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                              self.contextual_info,
+                                                                              os.path.basename(fpath_saved_lc),
+                                                                              self.zcut, self.bcut, self.variablescut))
 
         if self.reread is True or not os.path.isfile(os.path.join(self.training_set_dir, savepath)):
             objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
