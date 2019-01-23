@@ -216,7 +216,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                               os.path.basename(fpath_saved_lc),
                                                                               self.zcut, self.bcut, self.variablescut))
 
-        if self.reread is True or not os.path.isfile(os.path.join(self.training_set_dir, savepath)):
+        if self.reread is True or not os.path.isfile(savepath):
             objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
             nobjects = len(objids)
 
