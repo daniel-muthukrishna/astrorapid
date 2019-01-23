@@ -32,6 +32,6 @@ If you wish to plot your classifications or train your own classifier with your 
 
 Platforms
 ---------
-RAPID has only been tested on Python 3 distributions, but is expected to work with Python 2 as well.
-It should be cross-platform workin on Mac, Windows, and Linux distributions. However, this remains to be tested.
+RAPID can be run on both Python 2 and Python 3 distributions.
+It is also cross-platform, working on Mac, Windows, and Linux distributions.
 If you have any issues, please submit an issue at https://github.com/daniel-muthukrishna/astrorapid/issues.
