@@ -1,3 +1,3 @@
 from astrorapid.classify import Classify
 
-name = "astrorapid_pkg"
+name = "astrorapid"
