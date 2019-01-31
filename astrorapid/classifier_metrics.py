@@ -11,7 +11,7 @@ try:
     import matplotlib
     import matplotlib.pyplot as plt
 
-    plt.rcParams['text.usetex'] = True
+    # plt.rcParams['text.usetex'] = True
     plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 
     font = {'family': 'normal',

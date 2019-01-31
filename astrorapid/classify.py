@@ -13,7 +13,7 @@ try:
     import matplotlib
     import matplotlib.animation as animation
 
-    plt.rcParams['text.usetex'] = True
+    # plt.rcParams['text.usetex'] = True
     plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 except ImportError:
     print("Warning: You will need to install 'matplotlib' if you wish to plot the classifications.")
