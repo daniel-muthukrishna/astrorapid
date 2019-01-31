@@ -11,6 +11,7 @@ from astrorapid.classifier_metrics import plot_confusion_matrix, compute_multicl
 try:
     import matplotlib.pyplot as plt
     import matplotlib
+    from matplotlib.ticker import MaxNLocator
     import imageio
 except ImportError:
     print("Warning: You will need to install 'matplotlib' and 'imageio' if you want to plot the "
@@ -50,13 +51,71 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-    plt.rcParams['text.usetex'] = True
+    # plt.rcParams['text.usetex'] = True
     plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 
     # Plot accuracy vs time per class
     font = {'family': 'normal',
             'size': 36}
     matplotlib.rc('font', **font)
+
+    # Plot classification example vs time
+    for idx in np.arange(0, 100):
+        print("Plotting example vs time", idx)
+        argmax = timesX_test[idx].argmax() + 1
+        fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15), num="classification_vs_time_{}".format(idx),
+                                       sharex=True)
+
+        for pb in passbands:
+            if pb in orig_lc_test[idx].keys():
+                try:
+                    ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb]['fluxRenorm'],
+                                 yerr=orig_lc_test[idx][pb]['fluxErrRenorm'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
+                                 lw=3, markersize=10)
+                except KeyError:
+                    ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb][5], yerr=orig_lc_test[idx][pb][6],
+                                 fmt=MARKPB[pb], label=pb, c=COLPB[pb], lw=3, markersize=10)
+        true_class = int(max(y_test_indexes[idx]))
+        t0 = orig_lc_test[idx]['otherinfo'].values.flatten()[0]
+        ax1.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
+        ax2.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
+        ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
+        ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
+        try:
+            otherinfo = orig_lc_test[idx]['otherinfo'].values.flatten()
+            t0, redshift, mwebv, b, peakmag, ra, decl, trigger_mjd, peakmjd = otherinfo[0:9]
+            print(otherinfo[0:9])
+            ax1.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
+            ax2.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
+        except Exception as e:
+            print(e)
+
+        ax1.annotate('$t_0 = {}$'.format(round(t0, 1)), xy=(t0, 1), xytext=(t0 - 33, 0.9), color='grey')
+        class_accuracies = [timesX_test[idx][:argmax]]
+
+        for classnum, classname in enumerate(class_names):
+            ax2.plot(timesX_test[idx][:argmax], y_pred[idx][:, classnum][:argmax], '-', label=classname,
+                     color=COLORS[classnum], linewidth=3)
+            class_accuracies.append(y_pred[idx][:, classnum][:argmax])
+        ax1.legend(frameon=False, fontsize=33)
+        ax2.legend(frameon=False, fontsize=23.5)  # , ncol=2)
+        ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
+        ax1.set_ylabel("Relative Flux")  # , fontsize=15)
+        ax2.set_ylabel("Class Probability")  # , fontsize=18)
+        ax1.set_ylim(-0.1, 1.1)
+        ax2.set_ylim(0, 1)
+        ax1.set_xlim(-70, 80)
+        plt.setp(ax1.get_xticklabels(), visible=False)
+        ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
+        plt.tight_layout()
+        fig.subplots_adjust(hspace=0)
+        plt.savefig(os.path.join(fig_dir + '/lc_pred',
+                                 "classification_vs_time_{}_{}_{}_{}.pdf".format(idx, class_names[true_class], redshift,
+                                                                                 peakmjd - trigger_mjd)))
+        plt.savefig(os.path.join(fig_dir + '/lc_pred', class_names[true_class],
+                                 "classification_vs_time_{}_{}_{}_{}.pdf".format(idx, class_names[true_class], redshift,
+                                                                                 peakmjd - trigger_mjd)))
+
     print("Plotting Accuracy vs time per class...")
     fig = plt.figure("accuracy_vs_time_perclass", figsize=(13, 12))
     # fig = plt.figure(figsize=(13, 12))
@@ -84,7 +143,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
 
         try:
             assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index])
-        except:
+        except Exception as e:
+            print(e)
             pass
 
         plt.plot(time_bins[time_list_indexes_inclass[1:]], accuracy_vs_time_inclass, '-', label=classname, color=COLORS[classnum], lw=3)
@@ -111,7 +171,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     y_pred_indexes_days_past_trigger = np.zeros((nobjects, ntimesteps))
     y_pred_days_past_trigger = np.zeros((nobjects, ntimesteps, nclasses))
     for objidx in range(nobjects):
-        print(objidx, nobjects, 'For conf matrix')
+        print(objidx, nobjects, 'For conf matrix') if objidx % 1000 == 0 else 0
         f = interp1d(timesX_test[objidx], y_test_indexes[objidx], kind='nearest', bounds_error=False,
                      fill_value='extrapolate')
         y_test_indexes_days_past_trigger[objidx][:] = f(time_bins)
