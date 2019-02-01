@@ -3,6 +3,7 @@ import numpy as np
 from collections import OrderedDict
 from keras.models import load_model
 from pkg_resources import resource_filename
+from distutils.spawn import find_executable
 
 from astrorapid.process_light_curves import read_multiple_light_curves
 from astrorapid.prepare_arrays import PrepareInputArrays
@@ -13,10 +14,14 @@ try:
     import matplotlib
     import matplotlib.animation as animation
 
-    # plt.rcParams['text.usetex'] = True
+    # Check if latex is installed
+    if find_executable('latex'):
+        plt.rcParams['text.usetex'] = True
     plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
+
 except ImportError:
     print("Warning: You will need to install 'matplotlib' if you wish to plot the classifications.")
+
 
 CLASS_NAMES = ['Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Class A', 'Kilonova', 'SLSN-I',
                'Class B', 'Class C', 'Class D', 'TDE']

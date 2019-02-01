@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from distutils.spawn import find_executable
 from scipy.interpolate import interp1d
 from keras.utils import to_categorical
 from sklearn.metrics import confusion_matrix
@@ -13,6 +14,10 @@ try:
     import matplotlib
     from matplotlib.ticker import MaxNLocator
     import imageio
+    if find_executable('latex'):
+        plt.rcParams['text.usetex'] = True
+    plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
+
 except ImportError:
     print("Warning: You will need to install 'matplotlib' and 'imageio' if you want to plot the "
           "classification performance metrics.")
@@ -50,9 +55,6 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         dirname = os.path.join(fig_dir + '/lc_pred', cname)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-
-    # plt.rcParams['text.usetex'] = True
-    plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 
     # Plot accuracy vs time per class
     font = {'family': 'normal',

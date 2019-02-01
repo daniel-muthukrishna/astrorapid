@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import itertools
+from distutils.spawn import find_executable
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
@@ -11,7 +12,9 @@ try:
     import matplotlib
     import matplotlib.pyplot as plt
 
-    # plt.rcParams['text.usetex'] = True
+    # Check if latex is installed
+    if find_executable('latex'):
+        plt.rcParams['text.usetex'] = True
     plt.rcParams['font.serif'] = ['Computer Modern Roman'] + plt.rcParams['font.serif']
 
     font = {'family': 'normal',
