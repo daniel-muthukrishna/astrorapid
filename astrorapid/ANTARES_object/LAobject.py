@@ -100,7 +100,7 @@ class LAobject(BaseMixin):
         zeropoint = np.atleast_1d(zeropoint)
         # if there's a single number for zeropoint, make sure that it is an array
         if len(zeropoint) == 1:
-            zeropoint = np.repeat(zeropoint, _tshape[0])
+            zeropoint = np.repeat(zeropoint, self.time.shape)
         self.zeropoint = zeropoint
 
         # convert input magnitudes to fluxes
