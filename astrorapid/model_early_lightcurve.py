@@ -1,7 +1,11 @@
 import numpy as np
-import emcee
 from collections import OrderedDict
 import copy
+
+try:
+    import emcee
+except ImportError:
+    print("You will need to install 'emcee' if you wish to train your own classifier on new data.")
 
 
 def fit_early_lightcurve(outlc, earlytime=10):

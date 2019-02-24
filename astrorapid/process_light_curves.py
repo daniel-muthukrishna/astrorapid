@@ -4,13 +4,8 @@ from astropy.cosmology import WMAP9 as cosmo
 import numpy as np
 import pandas as pd
 
-from astrorapid import helpers
+from astrorapid import helpers, model_early_lightcurve
 from astrorapid.ANTARES_object.LAobject import LAobject
-
-try:
-    from astrorapid.ANTARES_object.features import model_early_lightcurve
-except ImportError:
-    print("You will need to install 'emcee' if you wish to train your own classifier on new data.")
 
 
 class InputLightCurve(object):
