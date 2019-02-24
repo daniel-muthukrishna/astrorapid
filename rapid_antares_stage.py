@@ -2,38 +2,6 @@ import numpy as np
 from astrorapid.classify import Classify
 
 
-def rapid_stage(locus_data):
-    locus_properties = str(locus_data.get_properties())
-    objid = locus_properties['alert_id']
-    ra = locus_properties['ra']
-    dec = locus_properties['dec']
-    redshift = 0.
-    mwebv = 0.2
-
-    alert_id, mjd, ras, decs, passband, mag, magerr, zeropoint, = locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf', 'ztf_sigmapsf', 'ztf_magzpsci')
-
-    flux = 10. ** (-0.4 * (mag - zeropoint))
-    fluxerr = np.abs(flux * magerr * (np.log(10.) / 2.5))
-    photflag = [0] * int(len(mjd) / 2 - 3) + [6144] + [4096] * int(len(mjd) / 2 + 2)
-    passband = np.where((passband == 1) | (passband == '1.0'), 'g', passband)
-    passband = np.where((passband == 2) | (passband == '2.0'), 'r', passband)
-
-    deleteindexes = np.where((passband == 3) | (passband == '3.0'))
-    mjd, passband, flux, fluxerr, zeropoint, photflag = delete_indexes(deleteindexes, mjd, passband, flux, fluxerr, zeropoint, photflag)
-
-    light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
-
-    classification = Classify(light_curve_list)
-    predictions = classification.get_predictions()
-    print(predictions)
-
-    print(locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf', 'ztf_sigmapsf', 'ztf_magzpsci',
-                                     'ztf_diffmaglim'))
-
-    # classification.plot_light_curves_and_classifications()
-    # classification.plot_classification_animation()
-
-
 def delete_indexes(deleteindexes, *args):
     newarrs = []
     for arr in args:
@@ -41,6 +9,52 @@ def delete_indexes(deleteindexes, *args):
         newarrs.append(newarr)
 
     return newarrs
+
+
+def rapid_stage(locus_data):
+    locus_properties = locus_data.get_properties()
+    objid = locus_properties['alert_id']
+    ra = locus_properties['ra']
+    dec = locus_properties['dec']
+    redshift = 0.  # TODO: Get correct redshift
+    mwebv = 0.2  # TODO: Get correct extinction
+
+    alert_id, mjd, ras, decs, passband, mag, magerr, zeropoint, = locus_data.get_time_series('ra', 'dec', 'ztf_fid',
+                                                                                             'ztf_magpsf',
+                                                                                             'ztf_sigmapsf',
+                                                                                             'ztf_magzpsci')
+    if len(mjd) < 3:
+        print("less than 3 points")
+        return
+    zpt_median = np.median(zeropoint[zeropoint != None])
+    zeropoint[zeropoint == None] = zpt_median
+    zeropoint = np.asarray(zeropoint, dtype=np.float64)
+    mag = np.asarray(mag, dtype=np.float64)
+
+    flux = 10. ** (-0.4 * (mag - zeropoint))
+    fluxerr = np.abs(flux * magerr * (np.log(10.) / 2.5))
+
+    passband = np.where((passband == 1) | (passband == '1.0'), 'g', passband)
+    passband = np.where((passband == 2) | (passband == '2.0'), 'r', passband)
+
+    # Set photflag detections when S/N > 5
+    photflag = np.zeros(len(flux))
+    photflag[flux / fluxerr > 5] = 4096
+    photflag[np.where(mjd == min(mjd[photflag == 4096]))] = 6144
+
+    deleteindexes = np.where((passband == 3) | (passband == '3.0') | (np.isnan(mag)))
+    mjd, passband, flux, fluxerr, zeropoint, photflag = delete_indexes(deleteindexes, mjd, passband, flux, fluxerr,
+                                                                       zeropoint, photflag)
+
+    light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
+
+    classification = Classify(light_curve_list, known_redshift=True)
+    predictions = classification.get_predictions()
+    print(predictions)
+
+#     classification.plot_light_curves_and_classifications()
+#     classification.plot_classification_animation()
+
 
 
 # alert_id, mjd, ras, decs, passband, mag = np.array([[50628, 76964, 83220, 101280, 131368, 210180, 343972, 409192, 640237, 755152,
