@@ -1,6 +1,18 @@
 import numpy as np
 
 
+def find_nearest(array, value):
+    """
+    Find the index nearest to a given value.
+    Adapted from: https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+    """
+
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+
+    return idx
+
+
 def calc_luminosity(flux, fluxerr, mu):
     """ Normalise flux light curves with distance modulus.
 

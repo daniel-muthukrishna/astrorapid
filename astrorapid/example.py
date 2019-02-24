@@ -37,12 +37,13 @@ def main():
 
     light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 
-    classification = Classify(light_curve_list)
+    classification = Classify(light_curve_list, known_redshift=True)
     predictions = classification.get_predictions()
     print(predictions)
 
-    classification.plot_light_curves_and_classifications()
+    classification.plot_light_curves_and_classifications(step=False)
     classification.plot_classification_animation()
+    classification.plot_classification_animation_step()
 
 
 if __name__ == '__main__':
