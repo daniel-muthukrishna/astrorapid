@@ -47,7 +47,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
 def main():
     passbands = ('g', 'r')
-    contextual_info = ()
+    contextual_info = (0,)
 
     aggregate_classes = True
     reread_hdf5_data = False
@@ -71,7 +71,7 @@ def main():
     savename = 'astrorapid'
     fpath = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename))
 
-    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
+    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}_epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
     for dirname in [fig_dir, fig_dir+'/cf_since_trigger', fig_dir+'/cf_since_t0', fig_dir+'/roc_since_trigger', fig_dir+'/lc_pred', fig_dir+'/pr_since_trigger', fig_dir+'/truth_table_since_trigger']:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
