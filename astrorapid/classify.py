@@ -128,8 +128,8 @@ class Classify(object):
 
             for pb in self.passbands:
                 if pb in  self.orig_lc[idx].keys():
-                    ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['fluxRenorm'],
-                                 yerr=self.orig_lc[idx][pb]['fluxErrRenorm'], fmt=PB_MARKER[pb], label=pb,
+                    ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['flux'],
+                                 yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
                                  c=PB_COLOR[pb], lw=3, markersize=10)
 
             new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
@@ -308,8 +308,8 @@ class Classify(object):
 
                     dea = [self.orig_lc[idx][pb]['time'] < new_t[int(i+1)]]
 
-                    ax1.errorbar(np.array(self.orig_lc[idx][pb]['time'])[dea], np.array(self.orig_lc[idx][pb]['fluxRenorm'])[dea],
-                                 yerr=np.array(self.orig_lc[idx][pb]['fluxErrRenorm'])[dea], fmt=PB_MARKER[pb], label=pb,
+                    ax1.errorbar(np.array(self.orig_lc[idx][pb]['time'])[dea], np.array(self.orig_lc[idx][pb]['flux'])[dea],
+                                 yerr=np.array(self.orig_lc[idx][pb]['fluxErr'])[dea], fmt=PB_MARKER[pb], label=pb,
                                  c=PB_COLOR[pb], lw=3, markersize=10)
 
                 for classnum, classname in enumerate(CLASS_NAMES):

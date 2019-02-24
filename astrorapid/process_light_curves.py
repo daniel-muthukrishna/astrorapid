@@ -135,7 +135,7 @@ class InputLightCurve(object):
             otherinfo += [t0, self.peakmjd]
 
         savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename(
-            {0: 'time', 5: 'fluxRenorm', 6: 'fluxErrRenorm', 7: 'photflag'}).T for pb, lcinfo in
+            {0: 'time', 3: 'flux', 4: 'fluxErr', 7: 'photflag', 8: 'zeropoint'}).T for pb, lcinfo in
                   outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
         savepd['otherinfo'] = pd.DataFrame(otherinfo)
         savepd = pd.DataFrame(

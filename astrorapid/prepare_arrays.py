@@ -97,8 +97,8 @@ class PrepareArrays(object):
                 continue
             time = data[pb]['time'][0:self.nobs].dropna()
             try:
-                flux = data[pb]['fluxRenorm'][0:self.nobs].dropna()
-                fluxerr = data[pb]['fluxErrRenorm'][0:self.nobs].dropna()
+                flux = data[pb]['flux'][0:self.nobs].dropna()
+                fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna()
             except KeyError:
                 flux = data[pb][5][0:self.nobs].dropna()
                 fluxerr = data[pb][6][0:self.nobs].dropna()

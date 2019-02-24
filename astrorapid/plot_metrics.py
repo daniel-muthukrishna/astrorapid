@@ -70,8 +70,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         for pb in passbands:
             if pb in orig_lc_test[idx].keys():
                 try:
-                    ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb]['fluxRenorm'],
-                                 yerr=orig_lc_test[idx][pb]['fluxErrRenorm'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
+                    ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb]['flux'],
+                                 yerr=orig_lc_test[idx][pb]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
                                  lw=3, markersize=10)
                 except KeyError:
                     ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb][5], yerr=orig_lc_test[idx][pb][6],
