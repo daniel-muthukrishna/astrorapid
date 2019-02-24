@@ -153,7 +153,7 @@ class Classify(object):
             ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
             ax1.set_ylabel("Relative Flux")  # , fontsize=15)
             ax2.set_ylabel("Class Probability")  # , fontsize=18)
-            ax1.set_ylim(-0.1, 1.1)
+            # ax1.set_ylim(-0.1, 1.1)
             ax2.set_ylim(0, 1)
             ax1.set_xlim(left=min(new_t))  # ax1.set_xlim(-70, 80)
             # ax1.grid(True)
@@ -194,6 +194,8 @@ class Classify(object):
 
         for idx in indexes_to_plot:
             new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
+            all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
+
             argmax = self.timesX[idx].argmax() + 1
             fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
                                            num="animation_classification_vs_time_{}".format(idx), sharex=True)
@@ -203,7 +205,7 @@ class Classify(object):
             ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
             ax1.set_ylabel("Relative Flux")  # , fontsize=15)
             ax2.set_ylabel("Class Probability")  # , fontsize=18)
-            ax1.set_ylim(-0.1, 1.1)
+            ax1.set_ylim(min(all_flux), max(all_flux))
             ax2.set_ylim(0, 1)
             ax1.set_xlim(min(new_t), max(new_t))  # ax1.set_xlim(-70, 80)
             plt.setp(ax1.get_xticklabels(), visible=False)
@@ -268,6 +270,10 @@ class Classify(object):
 
         for idx in indexes_to_plot:
             new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
+            new_t = np.sort(new_t[~np.isnan(new_t)])
+            new_y_predict = []
+            all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
+
             argmax = self.timesX[idx].argmax() + 1
             fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
                                            num="animation_classification_vs_time_{}".format(idx), sharex=True)
@@ -277,7 +283,7 @@ class Classify(object):
             ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
             ax1.set_ylabel("Relative Flux")  # , fontsize=15)
             ax2.set_ylabel("Class Probability")  # , fontsize=18)
-            ax1.set_ylim(-0.1, 1.1)
+            ax1.set_ylim(min(all_flux), max(all_flux))
             ax2.set_ylim(0, 1)
             ax1.set_xlim(min(new_t), max(new_t))
             plt.setp(ax1.get_xticklabels(), visible=False)
@@ -289,10 +295,6 @@ class Classify(object):
 
             Writer = animation.writers['ffmpeg']
             writer = Writer(fps=2, bitrate=1800)
-
-            new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
-            new_t = np.sort(new_t[~np.isnan(new_t)])
-            new_y_predict = []
 
             for classnum, classname in enumerate(CLASS_NAMES):
                 new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))

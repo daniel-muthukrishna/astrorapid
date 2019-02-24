@@ -103,8 +103,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
         ax1.set_ylabel("Relative Flux")  # , fontsize=15)
         ax2.set_ylabel("Class Probability")  # , fontsize=18)
-        ax1.set_ylim(-0.1, 1.1)
-        ax2.set_ylim(0, 1)
+        # ax1.set_ylim(-0.1, 1.1)
+        # ax2.set_ylim(0, 1)
         ax1.set_xlim(-70, 80)
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
