@@ -27,4 +27,5 @@ Use the following example code:
 
 Train your own classifier with your own data
 ++++++++++++++++++++++++++++++++++++++++++++
-This can be achieve by running :code:`train_neural_network.py`. More information on this will be added soon...
+This can be achieve by running :code:`train_neural_network.py`.
+More information on this will be added soon... Contact the author for support.
