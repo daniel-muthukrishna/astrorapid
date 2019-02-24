@@ -25,7 +25,8 @@ class PrepareArrays(object):
         self.mintime = -70
         self.maxtime = 80
 
-    def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, variables_cut=True):
+    def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, variables_cut=True,
+                  pre_trigger=True):
         deleted = False
         try:
             time = data['r']['time'][0:self.nobs].dropna()
@@ -39,7 +40,7 @@ class PrepareArrays(object):
             print("Less than 4 epochs. nobs = {}".format(data.shape))
             deleterows.append(i)
             deleted = True
-        elif len(time[time < 0]) < 3:
+        elif pre_trigger and len(time[time < 0]) < 3:
             print("Less than 3 points in the r band pre trigger", len(time[time < 0]))
             deleterows.append(i)
             deleted = True
@@ -115,7 +116,17 @@ class PrepareArrays(object):
                 fluxinterp = f(tinterp)
                 fluxinterp = np.nan_to_num(fluxinterp)
                 fluxinterp = fluxinterp.clip(min=0)
+                fluxerrinterp = np.zeros(len_t)
+
+                for interp_idx, fluxinterp_val in enumerate(fluxinterp):
+                    if fluxinterp_val == 0.:
+                        fluxerrinterp[interp_idx] = 0
+                    else:
+                        nearest_idx = helpers.find_nearest(time, tinterp[interp_idx])
+                        fluxerrinterp[interp_idx] = fluxerr[nearest_idx]
+
                 X[i][j][0:len_t] = fluxinterp
+                # X[i][j * 2 + 1][0:len_t] = fluxerrinterp
 
         # Add contextual information
         for jj, c_idx in enumerate(contextual_info, 1):
@@ -152,7 +163,7 @@ class PrepareInputArrays(PrepareArrays):
 
             # Make cuts
             deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=None, bcut=self.bcut,
-                                                 zcut=self.zcut)
+                                                 zcut=self.zcut, pre_trigger=False)
             if deleted:
                 continue
 
@@ -430,7 +441,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Make cuts
             deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=model, bcut=self.bcut,
-                                                 zcut=self.zcut, variables_cut=self.variablescut)
+                                                 zcut=self.zcut, variables_cut=self.variablescut, pre_trigger=True)
             if deleted:
                 continue
 
