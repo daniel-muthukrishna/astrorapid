@@ -66,11 +66,12 @@ def combine_hdf_files(save_dir, combined_savename, training_set_dir):
 
 
 def create_all_hdf_files(args):
-    data_release, i, save_dir, field_in, model_in, batch_size, sort, passbands = args
+    data_release, i, save_dir, field_in, model_in, batch_size, sort, passbands, known_redshift = args
     offset = batch_size * i
     fname = os.path.join(save_dir, 'lc_{}.hdf5'.format(i))
     read_light_curves_from_sql_database(data_release=data_release, fname=fname, field_in=field_in, model_in=model_in,
-                                        batch_size=batch_size, offset=offset, sort=sort, passbands=passbands)
+                                        batch_size=batch_size, offset=offset, sort=sort, passbands=passbands,
+                                        known_redshift=known_redshift)
 
 
 def main():
@@ -78,6 +79,7 @@ def main():
     data_release = 'ZTF_20180716'
     field = 'MSIP'
     model = '%'
+    known_redshift = True
 
     # Get number of objects
     # extrasql = ''
@@ -127,7 +129,7 @@ def main():
     for i in i_list:
         if 'lc_{}.hdf5'.format(i) not in file_list:
             print(os.path.join(save_dir, 'lc_{}.hdf5'.format(i)))
-            args_list.append((data_release, i, save_dir, field, model, batch_size, sort, passbands))
+            args_list.append((data_release, i, save_dir, field, model, batch_size, sort, passbands, known_redshift))
 
     if nprocesses == 1:
         for args in args_list:
