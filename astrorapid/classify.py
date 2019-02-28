@@ -35,7 +35,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Classify(object):
-    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r'), bcut=True, zcut=None):
+    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r'), bcut=True, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 
         Parameters
@@ -51,6 +51,20 @@ class Classify(object):
             Optional argument. The model is taken from the pre-trained model ZTF model if not specified.
         passbands : tuple
             Optional argument. A tuple listing each passband. E.g. ('g', 'r').
+        bcut : bool
+            Cut on galactic latitude.
+            Do not set unless you know what you are doing.
+        zcut : float or None
+            Remove resdhifts above this value.
+            Do not set unless you know what you are doing.
+        graph : tensorflow graph
+            Do not set unless you know what you are doing.
+            If you are running astrorapid in multiple threads you may need to predefine this
+            This would have been created with Tensorflow i.e. graph = tf.get_default_graph()
+        model : tensorflow model
+            Do not set unless you know what you are doing.
+            If you are running astrorapid in multiple threads you may need to predefine this
+            This would have been created with keras' load_model function e.g. model = load_model('keras_model.hdf5')
 
         """
         self.light_curves = light_curves
@@ -75,7 +89,11 @@ class Classify(object):
                 self.model_filepath = resource_filename(__name__, 'keras_model_with_redshift.hdf5')
 
         print(self.model_filepath)
-        self.model = load_model(self.model_filepath)
+        if self.graph is not None and self.model is not None:
+            self.model = model
+            self.graph = graph
+        else:
+            self.model = load_model(self.model_filepath)
 
     def process_light_curves(self):
         processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift,
@@ -88,7 +106,11 @@ class Classify(object):
     def get_predictions(self):
         self.X, self.orig_lc, self.timesX, self.objids = self.process_light_curves()
 
-        self.y_predict = self.model.predict(self.X)
+        if self.graph is not None and self.model is not None:
+            with self.graph.as_default():
+                self.y_predict = self.model.predict(self.X)
+        else:
+            self.y_predict = self.model.predict(self.X)
 
         return self.y_predict
 
