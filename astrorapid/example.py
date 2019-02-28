@@ -64,15 +64,6 @@ def example_try_multi_threading():
 
     graph = tf.get_default_graph()
 
-    import tensorflow as tf
-    from keras.models import load_model
-
-    global graph, model
-
-    model = load_model('/Users/danmuth/PycharmProjects/astrorapid/astrorapid/keras_model_with_redshift.hdf5')
-
-    graph = tf.get_default_graph()
-
     # Example running threads
     t1 = threading.Thread(target=main, args=(graph, model))
     t2 = threading.Thread(target=main, args=(graph, model))
