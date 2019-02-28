@@ -95,13 +95,14 @@ class PrepareArrays(object):
             if pb not in data:
                 print("No", pb, "in objid:", objid)
                 continue
+
+            # Drop infinite values
+            data.replace([np.inf, -np.inf], np.nan)
+
+            # Get data
             time = data[pb]['time'][0:self.nobs].dropna()
-            try:
-                flux = data[pb]['flux'][0:self.nobs].dropna()
-                fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna()
-            except KeyError:
-                flux = data[pb][5][0:self.nobs].dropna()
-                fluxerr = data[pb][6][0:self.nobs].dropna()
+            flux = data[pb]['flux'][0:self.nobs].dropna()
+            fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna()
             photflag = data[pb]['photflag'][0:self.nobs].dropna()
 
             n = len(flux)  # Get vector length (could be less than nobs)
