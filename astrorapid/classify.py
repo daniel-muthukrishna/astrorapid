@@ -89,9 +89,9 @@ class Classify(object):
                 self.model_filepath = resource_filename(__name__, 'keras_model_with_redshift.hdf5')
 
         print(self.model_filepath)
+        self.graph = graph
         if graph is not None and model is not None:
             self.model = model
-            self.graph = graph
         else:
             self.model = load_model(self.model_filepath)
 
