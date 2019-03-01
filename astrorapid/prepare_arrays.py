@@ -79,15 +79,11 @@ class PrepareArrays(object):
 
         tinterp = np.arange(mintime, maxtime, step=self.timestep)
         len_t = len(tinterp)
-        if len_t >= self.nobs:
-            tinterp = tinterp[(tinterp >= self.mintime) & (tinterp <= self.maxtime)]
+        if len_t > self.nobs:
+            tinterp = tinterp[(tinterp >= self.mintime)]
             len_t = len(tinterp)
-            if len_t >= self.nobs:
-                tinterp = tinterp[tinterp <= self.maxtime]
-                len_t = len(tinterp)
-                if len_t >= self.nobs:
-                    tinterp = tinterp[len_t - self.nobs:]
-                    len_t = len(tinterp)
+            if len_t > self.nobs:
+                tinterp = tinterp[:-(len_t - self.nobs)]
         return tinterp, len_t
 
     def update_X(self, X, i, data, tinterp, len_t, objid, contextual_info, otherinfo):
@@ -155,6 +151,7 @@ class PrepareInputArrays(PrepareArrays):
         objids_list = []
         orig_lc = []
         deleterows = []
+        trigger_mjds = []
 
         for i, (objid, data) in enumerate(lightcurves.items()):
             print("Preparing light curve {} of {}".format(i, nobjects))
@@ -172,12 +169,13 @@ class PrepareInputArrays(PrepareArrays):
             timesX[i][0:len_t] = tinterp
             orig_lc.append(data)
             objids_list.append(objid)
+            trigger_mjds.append(trigger_mjd)
             X = self.update_X(X, i, data, tinterp, len_t, objid, self.contextual_info, otherinfo)
 
         # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
         X = X.swapaxes(2, 1)
 
-        return X, orig_lc, timesX, objids_list
+        return X, orig_lc, timesX, objids_list, trigger_mjds
 
 
 class PrepareTrainingSetArrays(PrepareArrays):
