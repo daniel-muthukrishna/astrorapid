@@ -45,8 +45,9 @@ def main(graph=None, model=None):
     light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 
     classification = Classify(light_curve_list, known_redshift=True, graph=graph, model=model)
-    predictions = classification.get_predictions()
+    predictions, argmax = classification.get_predictions(return_argmax=True)
     print(predictions)
+    print(predictions[0][:argmax[0]])
 
     # classification.plot_light_curves_and_classifications(step=False)
     # classification.plot_classification_animation()
@@ -57,8 +58,6 @@ def example_try_multi_threading():
     import threading
     import tensorflow as tf
     from keras.models import load_model
-
-    global graph, model
 
     model = load_model('/Users/danmuth/PycharmProjects/astrorapid/astrorapid/keras_model_with_redshift.hdf5')
 
@@ -76,3 +75,4 @@ def example_try_multi_threading():
 
 if __name__ == '__main__':
     main()
+    # example_try_multi_threading()

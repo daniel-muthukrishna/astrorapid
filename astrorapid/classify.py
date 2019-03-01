@@ -103,14 +103,39 @@ class Classify(object):
 
         return X, orig_lc, timesX, objids_list
 
-    def get_predictions(self):
+    def get_predictions(self, return_argmax=False):
+        """ Return the classifcation accuracies as a function of time for each class
+
+        Parameters
+        ----------
+        return_argmax: bool
+            return the maximum timestep before the rest of the light curve input image is zeroed out.
+
+        Returns
+        -------
+        self.y_predict: array
+            Classification probability vector at each time step for each object.
+            Array of shape (s, 50, 13) is returned.
+            Where s is the number of obejcts that are classified,
+            50 is the number of times steps, and 13 is the number of classes.
+        argmax: array
+            Array of shape (s x 1) is returned. Where s is the number of obejcts that are classified.
+            Each element indicates the last index of self.y_predict before the rest of the array is zeroed and
+            probabilities are not meaningful.
+
+        """
         self.X, self.orig_lc, self.timesX, self.objids = self.process_light_curves()
 
-        if self.graph is not None and self.model is not None:
+        if self.graph is not None:
+
             with self.graph.as_default():
                 self.y_predict = self.model.predict(self.X)
         else:
             self.y_predict = self.model.predict(self.X)
+
+        if return_argmax:
+            argmax = self.timesX.argmax(axis=1) + 1
+            return self.y_predict, argmax
 
         return self.y_predict
 
@@ -259,7 +284,6 @@ class Classify(object):
                 by_label2 = OrderedDict(zip(labels2, handles2))
                 ax1.legend(by_label1.values(), by_label1.keys(), frameon=False, fontsize=33, loc='lower right')
                 ax2.legend(by_label2.values(), by_label2.keys(), frameon=False, fontsize=21.5, loc='center right')
-
 
             ani = animation.FuncAnimation(fig, animate, frames=50, repeat=True)
             ani.save(os.path.join('classification_vs_time_{}.mp4'.format(self.objids[idx])), writer=writer)
