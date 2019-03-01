@@ -55,12 +55,15 @@ def rapid_stage(locus_data):
 
     light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 
+    from keras import backend as K
+    K.clear_session()
+
     classification = Classify(light_curve_list, known_redshift=True)
     predictions = classification.get_predictions()
     print(predictions)
 
     for i, name in enumerate(classification.class_names):
-        locus_data.set_property('rapid_class_{}_probability'.format(name), predictions[0][-1][i])
+        locus_data.set_property('rapid_class_probability_{}'.format(name), predictions[0][-1][i])
 
 #     classification.plot_light_curves_and_classifications()
 #     classification.plot_classification_animation()
