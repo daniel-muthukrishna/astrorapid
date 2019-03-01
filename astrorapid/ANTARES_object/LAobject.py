@@ -180,7 +180,7 @@ class LAobject(BaseMixin):
 
             # if any of the filtered points are flagged as good detections with
             # PHOTFLAG > 0, save them irrespective
-            saveind = (self.photflag[mask] >= constants.GOOD_PHOTFLAG)
+            saveind = np.where(self.photflag[mask] >= constants.GOOD_PHOTFLAG)
             mask[saveind] = True
 
             # apply the mask

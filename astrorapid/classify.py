@@ -35,7 +35,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Classify(object):
-    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r'), bcut=True, zcut=None, graph=None, model=None):
+    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r'),
+                 bcut=True, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 
         Parameters
@@ -55,7 +56,7 @@ class Classify(object):
             Cut on galactic latitude.
             Do not set unless you know what you are doing.
         zcut : float or None
-            Remove resdhifts above this value.
+            Remove redshifts above this value.
             Do not set unless you know what you are doing.
         graph : tensorflow graph
             Do not set unless you know what you are doing.
@@ -164,7 +165,9 @@ class Classify(object):
             E.g. (0, 1, 3, 5) will plot the zeroth, first, third and fifth light curves and classifications.
             If None or True, then all light curves will be plotted
         step : bool
-            Plot step function along data points instead of interpolating classifications between data
+            Plot step function along data points instead of interpolating classifications between data.
+        use_interp_flux : bool
+            Use all 50 timesteps when plotting classification probabilities rather than just at the timesteps with data.
 
         """
 
