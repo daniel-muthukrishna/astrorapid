@@ -45,13 +45,20 @@ def main(graph=None, model=None):
     light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 
     classification = Classify(light_curve_list, known_redshift=True, graph=graph, model=model)
-    predictions, argmax = classification.get_predictions(return_argmax=True)
+    predictions, time_steps = classification.get_predictions(return_predictions_at_obstime=False)
     print(predictions)
-    print(predictions[0][:argmax[0]])
 
     # classification.plot_light_curves_and_classifications(step=False)
     # classification.plot_classification_animation()
     # classification.plot_classification_animation_step()
+
+    predictions, time_steps = classification.get_predictions(return_predictions_at_obstime=True)
+
+    import matplotlib.pyplot as plt
+    for i, class_name in enumerate(classification.class_names):
+        plt.plot(time_steps[0], predictions[0][:, i], label=class_name)
+    plt.legend()
+    plt.show()
 
 
 def example_try_multi_threading():

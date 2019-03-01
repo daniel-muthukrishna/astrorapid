@@ -72,6 +72,7 @@ class Classify(object):
         self.passbands = passbands
         self.bcut = bcut
         self.zcut = zcut
+        self.class_names = CLASS_NAMES
 
         if self.known_redshift:
             self.contextual_info = (0,)
@@ -99,47 +100,60 @@ class Classify(object):
         processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift,
                                                            training_set_parameters=None)
         prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut)
-        X, orig_lc, timesX, objids_list = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
+        X, orig_lc, timesX, objids_list, trigger_mjds = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
 
-        return X, orig_lc, timesX, objids_list
+        return X, orig_lc, timesX, objids_list, trigger_mjds
 
-    def get_predictions(self, return_argmax=False):
+    def get_predictions(self, return_predictions_at_obstime=False):
         """ Return the classifcation accuracies as a function of time for each class
 
         Parameters
         ----------
-        return_argmax: bool
-            return the maximum timestep before the rest of the light curve input image is zeroed out.
+        return_predictions_at_obstime: bool
+            Return the predictions at the observation times instead of at the 50 interpolated timesteps.
 
         Returns
         -------
-        self.y_predict: array
+        y_predict: array
             Classification probability vector at each time step for each object.
-            Array of shape (s, 50, 13) is returned.
+            Array of shape (s, n, m) is returned.
             Where s is the number of obejcts that are classified,
-            50 is the number of times steps, and 13 is the number of classes.
-        argmax: array
-            Array of shape (s x 1) is returned. Where s is the number of obejcts that are classified.
-            Each element indicates the last index of self.y_predict before the rest of the array is zeroed and
-            probabilities are not meaningful.
+            n is the number of times steps, and m is the number of classes.
+        time_steps: array
+            MJD time steps corresponding to the timesteps of the y_predict array.
 
         """
-        self.X, self.orig_lc, self.timesX, self.objids = self.process_light_curves()
+
+        self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves()
+        nobjects = len(self.objids)
 
         if self.graph is not None:
-
             with self.graph.as_default():
                 self.y_predict = self.model.predict(self.X)
         else:
             self.y_predict = self.model.predict(self.X)
 
-        if return_argmax:
-            argmax = self.timesX.argmax(axis=1) + 1
-            return self.y_predict, argmax
+        argmax = self.timesX.argmax(axis=1) + 1
 
-        return self.y_predict
+        if return_predictions_at_obstime:
+            (s, n, m) = self.y_predict.shape  # (s, n, m) = (num light curves, num timesteps, num classes)
+            y_predict = []
+            time_steps = []
+            for idx in range(s):
+                obs_time = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
+                obs_time = np.sort(obs_time[~np.isnan(obs_time)])
+                y_predict_at_obstime = []
+                for classnum, classname in enumerate(CLASS_NAMES):
+                    y_predict_at_obstime.append(np.interp(obs_time, self.timesX[idx][:argmax[idx]], self.y_predict[idx][:, classnum][:argmax[idx]]))
+                y_predict.append(np.array(y_predict_at_obstime).T)
+                time_steps.append(obs_time + self.trigger_mjds[idx])
+        else:
+            y_predict = [self.y_predict[i][:argmax[i]] for i in range(nobjects)]
+            time_steps = [self.timesX[i][:argmax[i]] + self.trigger_mjds[i] for i in range(nobjects)]
 
-    def plot_light_curves_and_classifications(self, indexes_to_plot=None, savename=None, step=True, use_interp_flux=False):
+        return y_predict, time_steps
+
+    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -149,8 +163,6 @@ class Classify(object):
             The indexes listed in the tuple will be plotted according to the order of the input light curves.
             E.g. (0, 1, 3, 5) will plot the zeroth, first, third and fifth light curves and classifications.
             If None or True, then all light curves will be plotted
-        savename : str
-            Filename to save plot.
         step : bool
             Plot step function along data points instead of interpolating classifications between data
 
@@ -179,7 +191,7 @@ class Classify(object):
                                  yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
                                  c=PB_COLOR[pb], lw=3, markersize=10)
 
-            new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
             new_t = np.sort(new_t[~np.isnan(new_t)])
             if not use_interp_flux:
                 new_y_predict = []
@@ -209,8 +221,7 @@ class Classify(object):
             ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
             plt.tight_layout()
             fig.subplots_adjust(hspace=0)
-            if savename is None:
-                savename = 'classification_vs_time_{}{}{}'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
+            savename = 'classification_vs_time_{}{}{}'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
             plt.savefig("{}.pdf".format(savename))
             # plt.savefig("{}.png".format(savename))
             plt.close()
@@ -240,7 +251,7 @@ class Classify(object):
             self.get_predictions()
 
         for idx in indexes_to_plot:
-            new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
             all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
 
             argmax = self.timesX[idx].argmax() + 1
@@ -288,7 +299,7 @@ class Classify(object):
             ani = animation.FuncAnimation(fig, animate, frames=50, repeat=True)
             ani.save(os.path.join('classification_vs_time_{}.mp4'.format(self.objids[idx])), writer=writer)
 
-    def plot_classification_animation_step(self, indexes_to_plot=None, savename=None):
+    def plot_classification_animation_step(self, indexes_to_plot=None):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation
         as step function.
@@ -299,8 +310,6 @@ class Classify(object):
             The indexes listed in the tuple will be plotted according to the order of the input light curves.
             E.g. (0, 1, 3, 5) will plot the zeroth, first, third and fifth light curves and classifications.
             If None or True, then all light curves will be plotted
-        savename : str
-            Filename to save plot.
 
         """
 
@@ -315,7 +324,7 @@ class Classify(object):
             self.get_predictions()
 
         for idx in indexes_to_plot:
-            new_t = np.array(list(self.orig_lc[idx]['g']['time']) + list(self.orig_lc[idx]['r']['time']))
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
             new_t = np.sort(new_t[~np.isnan(new_t)])
             new_y_predict = []
             all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
@@ -379,7 +388,6 @@ class Classify(object):
                 ax2.legend(by_label2.values(), by_label2.keys(), frameon=False, fontsize=21.5, loc='center right')
 
             ani = animation.FuncAnimation(fig, animate, frames=len(new_t), repeat=True)
-            if savename is None:
-                savename = 'classification_vs_time_{}_step'.format(self.objids[idx])
+            savename = 'classification_vs_time_{}_step'.format(self.objids[idx])
             ani.save("{}.mp4".format(savename), writer=writer)
 

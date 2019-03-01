@@ -28,7 +28,7 @@ mwebv = 0.0228761
 light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
 
 classification = Classify(light_curve_list)
-predictions = classification.get_predictions()
+predictions, time_steps = classification.get_predictions()
 print(predictions)
 
 classification.plot_light_curves_and_classifications()

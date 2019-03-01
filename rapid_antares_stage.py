@@ -23,6 +23,13 @@ def rapid_stage(locus_data):
                                                                                              'ztf_magpsf',
                                                                                              'ztf_sigmapsf',
                                                                                              'ztf_magzpsci')
+
+    # Ignore mag Nonetype values
+    alertid, mjd, ras, decs, passband, mag, magerr, zeropoint = delete_indexes(np.where(mag == None), alert_id, mjd,
+                                                                               ras, decs, passband, mag, magerr,
+                                                                               zeropoint)
+
+    print(locus_data.get_time_series('ra', 'dec', 'ztf_fid', 'ztf_magpsf', 'ztf_sigmapsf', 'ztf_magzpsci'))
     if len(mjd) < 3:
         print("less than 3 points")
         return
@@ -51,6 +58,9 @@ def rapid_stage(locus_data):
     classification = Classify(light_curve_list, known_redshift=True)
     predictions = classification.get_predictions()
     print(predictions)
+
+    for i, name in enumerate(classification.class_names):
+        locus_data.set_property('rapid_class_{}_probability'.format(name), predictions[0][-1][i])
 
 #     classification.plot_light_curves_and_classifications()
 #     classification.plot_classification_animation()
