@@ -84,6 +84,7 @@ class PrepareArrays(object):
             len_t = len(tinterp)
             if len_t > self.nobs:
                 tinterp = tinterp[:-(len_t - self.nobs)]
+                len_t = len(tinterp)
         return tinterp, len_t
 
     def update_X(self, X, i, data, tinterp, len_t, objid, contextual_info, otherinfo):
