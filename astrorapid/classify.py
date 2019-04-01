@@ -162,7 +162,7 @@ class Classify(object):
 
         return y_predict, time_steps
 
-    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False):
+    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False,figdir='.'):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -233,13 +233,13 @@ class Classify(object):
                 plt.tight_layout()
                 fig.subplots_adjust(hspace=0)
                 savename = 'classification_vs_time_{}{}{}'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
-                plt.savefig("{}.pdf".format(savename))
+                plt.savefig(os.path.join(figdir,savename))
                 # plt.savefig("{}.png".format(savename))
                 plt.close()
 
         return self.orig_lc, self.timesX, self.y_predict
 
-    def plot_classification_animation(self, indexes_to_plot=None):
+    def plot_classification_animation(self, indexes_to_plot=None,figdir='.'):
         """ Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation.
 
         Parameters
@@ -308,7 +308,7 @@ class Classify(object):
                 ax2.legend(by_label2.values(), by_label2.keys(), frameon=False, fontsize=21.5, loc='center right')
 
             ani = animation.FuncAnimation(fig, animate, frames=50, repeat=True)
-            ani.save(os.path.join('classification_vs_time_{}.mp4'.format(self.objids[idx])), writer=writer)
+            ani.save(os.path.join(figdir,'classification_vs_time_{}.mp4'.format(self.objids[idx])), writer=writer)
 
     def plot_classification_animation_step(self, indexes_to_plot=None):
         """
