@@ -149,7 +149,6 @@ class Classify(object):
                 for pb in self.passbands:
                     if pb in self.orig_lc[idx]:
                         obs_time.append(self.orig_lc[idx][pb]['time'].values)
-                obs_time = np.array(obs_time)
                 obs_time = np.sort(obs_time[~np.isnan(obs_time)])
                 y_predict_at_obstime = []
                 for classnum, classname in enumerate(CLASS_NAMES):
@@ -162,7 +161,7 @@ class Classify(object):
 
         return y_predict, time_steps
 
-    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False,figdir='.'):
+    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.'):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -176,6 +175,8 @@ class Classify(object):
             Plot step function along data points instead of interpolating classifications between data.
         use_interp_flux : bool
             Use all 50 timesteps when plotting classification probabilities rather than just at the timesteps with data.
+        figdir : str
+            Directory to save figure.
 
         """
 
@@ -233,13 +234,13 @@ class Classify(object):
                 plt.tight_layout()
                 fig.subplots_adjust(hspace=0)
                 savename = 'classification_vs_time_{}{}{}'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
-                plt.savefig(os.path.join(figdir,savename))
+                plt.savefig(os.path.join(figdir, savename))
                 # plt.savefig("{}.png".format(savename))
                 plt.close()
 
         return self.orig_lc, self.timesX, self.y_predict
 
-    def plot_classification_animation(self, indexes_to_plot=None,figdir='.'):
+    def plot_classification_animation(self, indexes_to_plot=None, figdir='.'):
         """ Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation.
 
         Parameters
@@ -248,6 +249,8 @@ class Classify(object):
             The indexes listed in the tuple will be plotted according to the order of the input light curves.
             E.g. (0, 1, 3, 5) will plot the zeroth, first, third and fifth light curves and classifications.
             If None or True, then all light curves will be plotted
+        figdir : str
+            Directory to save figure.
 
         """
 
@@ -308,9 +311,10 @@ class Classify(object):
                 ax2.legend(by_label2.values(), by_label2.keys(), frameon=False, fontsize=21.5, loc='center right')
 
             ani = animation.FuncAnimation(fig, animate, frames=50, repeat=True)
-            ani.save(os.path.join(figdir,'classification_vs_time_{}.mp4'.format(self.objids[idx])), writer=writer)
+            savename = os.path.join(figdir,'classification_vs_time_{}.mp4'.format(self.objids[idx]))
+            ani.save(savename, writer=writer)
 
-    def plot_classification_animation_step(self, indexes_to_plot=None):
+    def plot_classification_animation_step(self, indexes_to_plot=None, figdir='.'):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation
         as step function.
@@ -321,6 +325,8 @@ class Classify(object):
             The indexes listed in the tuple will be plotted according to the order of the input light curves.
             E.g. (0, 1, 3, 5) will plot the zeroth, first, third and fifth light curves and classifications.
             If None or True, then all light curves will be plotted
+        figdir : str
+            Directory to save figure.
 
         """
 
@@ -399,6 +405,6 @@ class Classify(object):
                 ax2.legend(by_label2.values(), by_label2.keys(), frameon=False, fontsize=21.5, loc='center right')
 
             ani = animation.FuncAnimation(fig, animate, frames=len(new_t), repeat=True)
-            savename = 'classification_vs_time_{}_step'.format(self.objids[idx])
-            ani.save("{}.mp4".format(savename), writer=writer)
+            savename = os.path.join(figdir, 'classification_vs_time_{}_step.mp4'.format(self.objids[idx]))
+            ani.save(savename, writer=writer)
 
