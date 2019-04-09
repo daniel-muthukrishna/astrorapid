@@ -54,11 +54,12 @@ def main(graph=None, model=None):
 
     predictions, time_steps = classification.get_predictions(return_predictions_at_obstime=True)
 
-    import matplotlib.pyplot as plt
-    for i, class_name in enumerate(classification.class_names):
-        plt.plot(time_steps[0], predictions[0][:, i], label=class_name)
-    plt.legend()
-    plt.show()
+    if predictions is not None:
+        import matplotlib.pyplot as plt
+        for i, class_name in enumerate(classification.class_names):
+            plt.plot(time_steps[0], predictions[0][:, i], label=class_name)
+        plt.legend()
+        plt.show()
 
 
 def example_try_multi_threading():
