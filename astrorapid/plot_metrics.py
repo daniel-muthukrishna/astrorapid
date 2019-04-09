@@ -77,21 +77,20 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
                     ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb][5], yerr=orig_lc_test[idx][pb][6],
                                  fmt=MARKPB[pb], label=pb, c=COLPB[pb], lw=3, markersize=10)
         true_class = int(max(y_test_indexes[idx]))
-        t0 = orig_lc_test[idx]['otherinfo'].values.flatten()[0]
-        ax1.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
-        ax2.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
         ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
         ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
         try:
             otherinfo = orig_lc_test[idx]['otherinfo'].values.flatten()
-            t0, redshift, mwebv, b, peakmag, ra, decl, trigger_mjd, peakmjd = otherinfo[0:9]
-            print(otherinfo[0:9])
+            redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
+            ax1.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
+            ax2.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
+            ax1.annotate('$t_0 = {}$'.format(round(t0, 1)), xy=(t0, 1), xytext=(t0 - 33, 0.9), color='grey')
+            print(otherinfo[0:6])
             ax1.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
             ax2.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
         except Exception as e:
             print(e)
 
-        ax1.annotate('$t_0 = {}$'.format(round(t0, 1)), xy=(t0, 1), xytext=(t0 - 33, 0.9), color='grey')
         class_accuracies = [timesX_test[idx][:argmax]]
 
         for classnum, classname in enumerate(class_names):
