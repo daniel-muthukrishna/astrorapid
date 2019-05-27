@@ -98,8 +98,7 @@ class InputLightCurve(object):
             calc_params = False
         elif len(self.t[inrange_mask]) < 3:  # No t0 if not At least 3 points before peak
             calc_params = False
-        elif len(self.t[
-                     self.t < 0]) < 3:  # No t0 if there are less than three points before trigger. This suggests that it triggered on one of the first point of a passband
+        elif len(self.t[self.t < 0]) < 3:  # No t0 if there are less than three points before trigger
             calc_params = False
 
         if calc_params:
@@ -134,8 +133,8 @@ class InputLightCurve(object):
             t0 = self.compute_t0(outlc)
             otherinfo += [t0, self.peakmjd]
 
-        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 5, 6, 7]].rename(
-            {0: 'time', 5: 'flux', 6: 'fluxErr', 7: 'photflag', 8: 'zeropoint'}).T for pb, lcinfo in
+        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 3, 4, 7]].rename(
+            {0: 'time', 3: 'flux', 4: 'fluxErr', 7: 'photflag', 8: 'zeropoint'}).T for pb, lcinfo in
                   outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
         savepd['otherinfo'] = pd.DataFrame(otherinfo)
         savepd = pd.DataFrame(
