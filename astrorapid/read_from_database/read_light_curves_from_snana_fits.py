@@ -160,7 +160,12 @@ def read_light_curves_from_snana_fits_files(save_fname, head_files, phot_files, 
                                               dec, objid, redshift, mwebv, known_redshift=known_redshift,
                                               training_set_parameters={'class_number': int(model_num), 'peakmjd': peakmjd})
 
-            savepd = inputlightcurve.preprocess_light_curve()
+            # TODO: work out why some light curves fail mcmc
+            try:
+                savepd = inputlightcurve.preprocess_light_curve()
+            except Exception as e:
+                print("Failed on object", objid, e)
+                continue
             store.append(objid, savepd)
 
     store.close()
