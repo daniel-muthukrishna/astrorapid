@@ -148,7 +148,10 @@ def read_light_curves_from_snana_fits_files(save_fname, head_files, phot_files, 
             mwebv = head['MWEBV']
             mwebv_err = head['MWEBV_ERR']
             ra = head['RA']
-            dec = head['DEC']
+            if 'DEC' in header_data.names:
+                dec = head['DEC']
+            else:
+                dec = head['DECL']
             photoz = head['HOSTGAL_PHOTOZ']
             photozerr = head['HOSTGAL_PHOTOZ_ERR']
             print(i, len(header_data))
@@ -234,7 +237,7 @@ def main():
     if args.offsetnext is not None:
         offset_next = args.offsetnext
     else:
-        offset_next = 1
+        offset_next = 10
     if args.nprocesses is not None:
         nprocesses = args.nprocesses
     else:
