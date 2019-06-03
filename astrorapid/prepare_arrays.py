@@ -102,6 +102,13 @@ class PrepareArrays(object):
             fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna()
             photflag = data[pb]['photflag'][0:self.nobs].dropna()
 
+            # Mask out times outside of mintime and maxtime
+            timemask = (time < self.mintime) & (time > self.maxtime)
+            time = time[timemask]
+            flux = flux[timemask]
+            fluxerr = fluxerr[timemask]
+            photflag = photflag[timemask]
+
             n = len(flux)  # Get vector length (could be less than nobs)
 
             if n > 1:
@@ -173,7 +180,6 @@ class PrepareInputArrays(PrepareArrays):
             trigger_mjds.append(trigger_mjd)
             X = self.update_X(X, i, data, tinterp, len_t, objid, self.contextual_info, otherinfo)
 
-
         deleterows = np.array(deleterows)
         X = np.delete(X, deleterows, axis=0)
         timesX = np.delete(timesX, deleterows, axis=0)
@@ -231,7 +237,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                               self.contextual_info,
                                                                               os.path.basename(fpath_saved_lc),
                                                                               self.zcut, self.bcut, self.variablescut))
-
+        print(savepath)
         if self.reread is True or not os.path.isfile(savepath):
             objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
             nobjects = len(objids)
@@ -239,7 +245,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
             labels = np.zeros(shape=nobjects, dtype=np.uint16)
             y = np.zeros(shape=(nobjects, self.nobs), dtype=np.uint16)
-            X = np.memmap(os.path.join(self.training_set_dir, 'X_lc_data.dat'), dtype=np.float32, mode='w+', shape=(nobjects, self.nfeatures, self.nobs))
+            X = np.memmap(os.path.join(self.training_set_dir, 'X_lc_data.dat'), dtype=np.float32, mode='w+',
+                          shape=(nobjects, self.nfeatures, self.nobs))
             X[:] = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
             timesX = np.zeros(shape=(nobjects, self.nobs))
             objids_list = []
@@ -446,7 +453,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Make cuts
             deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=model, bcut=self.bcut,
-                                                 zcut=self.zcut, variables_cut=self.variablescut, pre_trigger=True)
+                                                 zcut=self.zcut, variables_cut=self.variablescut, pre_trigger=False)
             if deleted:
                 continue
 
@@ -469,3 +476,4 @@ class PrepareTrainingSetArrays(PrepareArrays):
         num_objects = X.shape[0]
 
         return labels, y, X, timesX, objids_list, orig_lc, count_deleterows, num_objects
+
