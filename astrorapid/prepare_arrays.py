@@ -97,10 +97,10 @@ class PrepareArrays(object):
             data.replace([np.inf, -np.inf], np.nan)
 
             # Get data
-            time = data[pb]['time'][0:self.nobs].dropna()
-            flux = data[pb]['flux'][0:self.nobs].dropna()
-            fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna()
-            photflag = data[pb]['photflag'][0:self.nobs].dropna()
+            time = data[pb]['time'][0:self.nobs].dropna().values
+            flux = data[pb]['flux'][0:self.nobs].dropna().values
+            fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna().values
+            photflag = data[pb]['photflag'][0:self.nobs].dropna().values
 
             # Mask out times outside of mintime and maxtime
             timemask = (time > self.mintime) & (time < self.maxtime)
