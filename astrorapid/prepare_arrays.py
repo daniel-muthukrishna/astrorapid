@@ -103,7 +103,7 @@ class PrepareArrays(object):
             photflag = data[pb]['photflag'][0:self.nobs].dropna()
 
             # Mask out times outside of mintime and maxtime
-            timemask = (time < self.mintime) & (time > self.maxtime)
+            timemask = (time > self.mintime) & (time < self.maxtime)
             time = time[timemask]
             flux = flux[timemask]
             fluxerr = fluxerr[timemask]
