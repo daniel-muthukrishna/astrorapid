@@ -32,6 +32,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
         model.add(BatchNormalization())
 
         model.add(GRU(100, return_sequences=True))
+        # model.add(Dropout(0.2, seed=42))
         model.add(BatchNormalization())
         model.add(Dropout(0.2, seed=42))
 
@@ -52,7 +53,7 @@ def main():
     aggregate_classes = True
     reread_hdf5_data = False
     retrain_rnn = False
-    train_epochs = 25
+    train_epochs = 50
 
     otherchange = ''
     nchunks = 10000
@@ -66,9 +67,9 @@ def main():
     if not os.path.exists(training_set_dir):
         os.makedirs(training_set_dir)
 
-    data_release = 'ZTF_20180716'
+    data_release = 'ZTF_20190512'
     field = 'MSIP'
-    savename = 'astrorapid'
+    savename = 'firsttry'
     fpath = os.path.join(training_set_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename))
 
     fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}_epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
