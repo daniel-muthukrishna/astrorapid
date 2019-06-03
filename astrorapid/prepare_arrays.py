@@ -112,7 +112,7 @@ class PrepareArrays(object):
             n = len(flux)  # Get vector length (could be less than nobs)
 
             if n > 1:
-                if flux.values[-1] > flux.values[-2]:  # If last values are increasing, then set fill_values to zero
+                if flux[-1] > flux[-2]:  # If last values are increasing, then set fill_values to zero
                     f = interp1d(time, flux, kind='linear', bounds_error=False, fill_value=0.)
                 else:
                     f = interp1d(time, flux, kind='linear', bounds_error=False,
