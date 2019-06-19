@@ -77,7 +77,7 @@ class Classify(object):
 
         if self.known_redshift:
             self.contextual_info = (0,)
-            filename = 'keras_model_with_redshift.hdf5'
+            filename = 'keras_model.hdf5'  # keras_model_with_redshift.hdf5'
         else:
             self.contextual_info = ()
             filename = 'keras_model_no_redshift.hdf5'
@@ -102,6 +102,11 @@ class Classify(object):
                                                            training_set_parameters=None)
         prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut)
         X, orig_lc, timesX, objids_list, trigger_mjds = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
+
+        # # REMOVE CORRECTION FACTOR IF NOT USED
+        # correction_factor = np.load('astrorapid/correction_factor.npy')
+        # for i, pb in enumerate(self.passbands):
+        #     X[:, :, i] = X[:, :, i] / correction_factor[i]
 
         return X, orig_lc, timesX, objids_list, trigger_mjds
 
@@ -233,7 +238,7 @@ class Classify(object):
                 ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
                 plt.tight_layout()
                 fig.subplots_adjust(hspace=0)
-                savename = 'classification_vs_time_{}{}{}'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
+                savename = 'classification_vs_time_{}{}{}.pdf'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
                 plt.savefig(os.path.join(figdir, savename))
                 # plt.savefig("{}.png".format(savename))
                 plt.close()

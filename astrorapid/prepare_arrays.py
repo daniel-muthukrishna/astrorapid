@@ -52,8 +52,12 @@ class PrepareArrays(object):
             print("Redshift cut. z = {}".format(redshift))
             deleterows.append(i)
             deleted = True
-        elif class_num is not None and variables_cut is True and class_num in [50, 70, 80, 81, 83, 84, 90, 91, 92, 93]:
+        elif class_num is not None and variables_cut is True and class_num in [70, 80, 81, 83, 84, 90, 91, 92, 93]:
             print("Not including variable models", class_num)
+            deleterows.append(i)
+            deleted = True
+        elif class_num in [50]:
+            print("Deleting unused kilonova model")
             deleterows.append(i)
             deleted = True
 
@@ -192,7 +196,7 @@ class PrepareInputArrays(PrepareArrays):
 
 class PrepareTrainingSetArrays(PrepareArrays):
     def __init__(self, passbands=('g', 'r'), contextual_info=(0,), reread=False, aggregate_classes=False, bcut=True,
-                 zcut=None, variablescut=False, nchunks=10000):
+                 zcut=None, variablescut=False, nchunks=10000, training_set_dir='training_set_files'):
         PrepareArrays.__init__(self, passbands, contextual_info)
         self.passbands = passbands
         self.contextual_info = contextual_info
@@ -203,7 +207,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         self.variablescut = variablescut
         self.nchunks = nchunks
         self.agg_map = helpers.aggregate_sntypes()
-        self.training_set_dir = 'training_set_files'
+        self.training_set_dir = training_set_dir
         if not os.path.exists(self.training_set_dir):
             os.makedirs(self.training_set_dir)
 
@@ -266,6 +270,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             sum_deleterows = 0
             startidx = 0
             num_outputs = len(outputs)
+            print('combining results...')
             for i, output in enumerate(outputs):
                 labels_part, y_part, X_part, timesX_part, objids_list_part, orig_lc_part, num_deleterows_part, num_objects_part = output
                 endidx = startidx + num_objects_part
@@ -277,7 +282,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
                 orig_lc.extend(orig_lc_part)
                 startidx += num_objects_part
                 sum_deleterows += num_deleterows_part
-                print('combining results...', i, num_outputs)
 
             deleterows = np.array(np.arange(nobjects - sum_deleterows, nobjects))
             X = np.delete(X, deleterows, axis=0)
