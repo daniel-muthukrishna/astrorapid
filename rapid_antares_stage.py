@@ -58,8 +58,8 @@ def rapid_stage(locus_data):
     from keras import backend as K
     K.clear_session()
 
-    classification = Classify(light_curve_list, known_redshift=True)
-    predictions = classification.get_predictions()
+    classification = Classify(known_redshift=True)
+    predictions = classification.get_predictions(light_curve_list)
     print(predictions)
 
     for i, name in enumerate(classification.class_names):

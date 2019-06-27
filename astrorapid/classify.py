@@ -165,7 +165,8 @@ class Classify(object):
 
         return y_predict, time_steps
 
-    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.'):
+    def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.',
+                                              light_curves=None):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -181,6 +182,12 @@ class Classify(object):
             Use all 50 timesteps when plotting classification probabilities rather than just at the timesteps with data.
         figdir : str
             Directory to save figure.
+        light_curves : list
+            This argument is only required if the get_predictions() method has not been run.
+            Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
+            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            ra, dec, objid, redshift, and mwebv are floats
 
         """
 
@@ -192,7 +199,7 @@ class Classify(object):
             indexes_to_plot = np.arange(len(self.y_predict))
 
         if not hasattr(self, 'y_predict'):
-            self.get_predictions()
+            self.get_predictions(light_curves)
 
         for idx in indexes_to_plot:
                 argmax = self.timesX[idx].argmax() + 1
@@ -244,7 +251,7 @@ class Classify(object):
 
         return self.orig_lc, self.timesX, self.y_predict
 
-    def plot_classification_animation(self, indexes_to_plot=None, figdir='.'):
+    def plot_classification_animation(self, indexes_to_plot=None, figdir='.', light_curves=None):
         """ Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation.
 
         Parameters
@@ -255,6 +262,12 @@ class Classify(object):
             If None or True, then all light curves will be plotted
         figdir : str
             Directory to save figure.
+        light_curves : list
+            This argument is only required if the get_predictions() method has not been run.
+            Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
+            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            ra, dec, objid, redshift, and mwebv are floats
 
         """
 
@@ -266,7 +279,7 @@ class Classify(object):
             indexes_to_plot = np.arange(len(self.y_predict))
 
         if not hasattr(self, 'y_predict'):
-            self.get_predictions()
+            self.get_predictions(light_curves)
 
         for idx in indexes_to_plot:
             new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
@@ -318,7 +331,7 @@ class Classify(object):
             savename = os.path.join(figdir,'classification_vs_time_{}.mp4'.format(self.objids[idx]))
             ani.save(savename, writer=writer)
 
-    def plot_classification_animation_step(self, indexes_to_plot=None, figdir='.'):
+    def plot_classification_animation_step(self, indexes_to_plot=None, figdir='.', light_curves=None):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time as an mp4 animation
         as step function.
@@ -331,6 +344,12 @@ class Classify(object):
             If None or True, then all light curves will be plotted
         figdir : str
             Directory to save figure.
+        light_curves : list
+            This argument is only required if the get_predictions() method has not been run.
+            Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
+            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            ra, dec, objid, redshift, and mwebv are floats
 
         """
 
