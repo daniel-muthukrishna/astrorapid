@@ -16,8 +16,8 @@ Use the following example code:
     light_curve_list = [light_curve_info1,]
 
     # Classify Light curves
-    classification = Classify(light_curve_list, known_redshift=True)
-    predictions = classification.get_predictions()
+    classification = Classify(known_redshift=True)
+    predictions = classification.get_predictions(light_curve_list)
     print(predictions)
 
     # Plot light curve and classification vs time of the light curves at the specified indexes

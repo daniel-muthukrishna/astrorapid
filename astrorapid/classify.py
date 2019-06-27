@@ -35,17 +35,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Classify(object):
-    def __init__(self, light_curves, known_redshift=True, model_filepath='', passbands=('g', 'r'),
+    def __init__(self, known_redshift=True, model_filepath='', passbands=('g', 'r'),
                  bcut=False, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 
         Parameters
         ----------
-        light_curves : list
-            Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
-            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
-            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
-            ra, dec, objid, redshift, and mwebv are floats
         known_redshift : bool
             Different model to be used if redshift is not known.
         model_filepath : str
@@ -68,7 +63,6 @@ class Classify(object):
             This would have been created with keras' load_model function e.g. model = load_model('keras_model.hdf5')
 
         """
-        self.light_curves = light_curves
         self.known_redshift = known_redshift
         self.passbands = passbands
         self.bcut = bcut
@@ -97,8 +91,8 @@ class Classify(object):
         else:
             self.model = load_model(self.model_filepath)
 
-    def process_light_curves(self):
-        processed_lightcurves = read_multiple_light_curves(self.light_curves, known_redshift=self.known_redshift,
+    def process_light_curves(self, light_curves):
+        processed_lightcurves = read_multiple_light_curves(light_curves, known_redshift=self.known_redshift,
                                                            training_set_parameters=None)
         prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut)
         X, orig_lc, timesX, objids_list, trigger_mjds = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
@@ -110,11 +104,16 @@ class Classify(object):
 
         return X, orig_lc, timesX, objids_list, trigger_mjds
 
-    def get_predictions(self, return_predictions_at_obstime=False):
+    def get_predictions(self, light_curves, return_predictions_at_obstime=False):
         """ Return the classifcation accuracies as a function of time for each class
 
         Parameters
         ----------
+        light_curves : list
+            Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
+            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            ra, dec, objid, redshift, and mwebv are floats
         return_predictions_at_obstime: bool
             Return the predictions at the observation times instead of at the 50 interpolated timesteps.
 
@@ -130,7 +129,7 @@ class Classify(object):
 
         """
 
-        self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves()
+        self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves(light_curves)
         nobjects = len(self.objids)
 
         if nobjects == 0:
