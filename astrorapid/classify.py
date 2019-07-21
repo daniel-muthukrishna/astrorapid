@@ -166,7 +166,7 @@ class Classify(object):
         return y_predict, time_steps
 
     def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.',
-                                              light_curves=None):
+                                              light_curves=None, plot_matrix_input=False):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -202,52 +202,55 @@ class Classify(object):
             self.get_predictions(light_curves)
 
         for idx in indexes_to_plot:
-                argmax = self.timesX[idx].argmax() + 1
-                fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
-                                               num="classification_vs_time_{}".format(idx), sharex=True)
-                # ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
-                # ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
+            argmax = self.timesX[idx].argmax() + 1
+            fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
+                                           num="classification_vs_time_{}".format(idx), sharex=True)
+            # ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
+            # ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
 
-                for pb in self.passbands:
-                    if pb in self.orig_lc[idx].keys():
-                        ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['flux'],
-                                     yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
-                                     c=PB_COLOR[pb], lw=3, markersize=10)
+            for pbidx, pb in enumerate(self.passbands):
+                if pb in self.orig_lc[idx].keys():
+                    ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['flux'],
+                                 yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
+                                 c=PB_COLOR[pb], lw=3, markersize=10, alpha=0.2)
+                if plot_matrix_input:
+                    ax1.plot(self.timesX[idx][:argmax], self.X[idx][:, pbidx][:argmax], c=PB_COLOR[pb], lw=3)
 
-                new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
-                new_t = np.sort(new_t[~np.isnan(new_t)])
-                if not use_interp_flux:
-                    new_y_predict = []
-                    for classnum, classname in enumerate(CLASS_NAMES):
-                        new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))
-
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
+            new_t = np.sort(new_t[~np.isnan(new_t)])
+            if not use_interp_flux and not plot_matrix_input:
+                new_y_predict = []
                 for classnum, classname in enumerate(CLASS_NAMES):
-                    if not use_interp_flux:
-                        if step:
-                            ax2.step(new_t, new_y_predict[classnum], '-', label=classname, color=CLASS_COLOR[classname], linewidth=3, where='post')
-                        else:
-                            ax2.plot(new_t, new_y_predict[classnum], '-', label=classname, color=CLASS_COLOR[classname], linewidth=3,)
-                    else:
-                        ax2.plot(self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax], '-', label=classname,
+                    new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))
+
+            for classnum, classname in enumerate(CLASS_NAMES):
+                if use_interp_flux or plot_matrix_input:
+                    ax2.plot(self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax], '-', label=classname,
                              color=CLASS_COLOR[classname], linewidth=3)
-                ax1.legend(frameon=True, fontsize=33)#, loc='lower right')
-                ax2.legend(frameon=True, fontsize=21.5)#, loc='center right')  # , ncol=2)
-                ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
-                ax1.set_ylabel("Relative Flux")  # , fontsize=15)
-                ax2.set_ylabel("Class Probability")  # , fontsize=18)
-                # ax1.set_ylim(-0.1, 1.1)
-                ax2.set_ylim(0, 1)
-                ax1.set_xlim(left=min(new_t))  # ax1.set_xlim(-70, 80)
-                # ax1.grid(True)
-                # ax2.grid(True)
-                plt.setp(ax1.get_xticklabels(), visible=False)
-                ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
-                plt.tight_layout()
-                fig.subplots_adjust(hspace=0)
-                savename = 'classification_vs_time_{}{}{}.pdf'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
-                plt.savefig(os.path.join(figdir, savename))
-                # plt.savefig("{}.png".format(savename))
-                plt.close()
+                else:
+                    if step:
+                        ax2.step(new_t, new_y_predict[classnum], '-', label=classname, color=CLASS_COLOR[classname], linewidth=3, where='post')
+                    else:
+                        ax2.plot(new_t, new_y_predict[classnum], '-', label=classname, color=CLASS_COLOR[classname], linewidth=3,)
+
+            ax1.legend(frameon=True, fontsize=33)#, loc='lower right')
+            ax2.legend(frameon=True, fontsize=21.5)#, loc='center right')  # , ncol=2)
+            ax2.set_xlabel("Days since trigger (rest frame)")  # , fontsize=18)
+            ax1.set_ylabel("Relative Flux")  # , fontsize=15)
+            ax2.set_ylabel("Class Probability")  # , fontsize=18)
+            # ax1.set_ylim(-0.1, 1.1)
+            ax2.set_ylim(0, 1)
+            ax1.set_xlim(left=min(new_t))  # ax1.set_xlim(-70, 80)
+            # ax1.grid(True)
+            # ax2.grid(True)
+            plt.setp(ax1.get_xticklabels(), visible=False)
+            ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
+            plt.tight_layout()
+            fig.subplots_adjust(hspace=0)
+            savename = 'classification_vs_time_{}{}{}.pdf'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
+            plt.savefig(os.path.join(figdir, savename))
+            # plt.savefig("{}.png".format(savename))
+            plt.close()
 
         return self.orig_lc, self.timesX, self.y_predict
 
