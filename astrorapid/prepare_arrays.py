@@ -6,6 +6,7 @@ import pickle
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
+import itertools
 from scipy.interpolate import interp1d
 
 from astrorapid import helpers
@@ -403,6 +404,44 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
         X = X.swapaxes(2, 1)
+
+        # #NORMALISE
+        # X = X.copy()
+        # for i in range(len(X)):
+        #     for pbidx in range(2):
+        #         minX = X[i, :, pbidx].min(axis=0)
+        #         maxX = X[i, :, pbidx].max(axis=0)
+        #         X[i, :, pbidx] = (X[i, :, pbidx] - minX) / (maxX - minX)
+        #         # if (maxX - minX) != 0:
+        #         #     mask.append(i)
+        #         #     break
+        # finitemask = ~np.any(np.any(~np.isfinite(X), axis=1), axis=1)
+        # X = X[finitemask]
+        # y = y[finitemask]
+        # timesX = timesX[finitemask]
+        # objids_list = objids_list[finitemask]
+        # orig_lc = list(itertools.compress(orig_lc, finitemask))
+        # labels = labels[finitemask]
+
+        newX = np.zeros(X.shape)
+        newy = np.zeros(y.shape)
+        lenX = len(X)
+        for i in range(30):#lenX):
+            print(f"new {i} of {lenX}")
+            mask = timesX[i] > 0
+            nmask = sum(mask)
+            newX[i][:nmask] = X[i][mask]
+            newy[i][:nmask] = y[i][mask]
+
+        print("Concatenating")
+        X = np.concatenate((X, newX))
+        y = np.concatenate((y, newy))
+        print("Shuffling")
+        from sklearn.utils import shuffle
+        X, y, labels, timesX, orig_lc, objids_list = shuffle(X, y, labels, timesX, orig_lc, objids_list)
+        print("Done shuffling")
+
+
 
         X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = train_test_split(
             X, y, labels, timesX, orig_lc, objids_list, train_size=0.60,

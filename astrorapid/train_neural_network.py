@@ -55,7 +55,7 @@ def main():
     retrain_rnn = False
     train_epochs = 25
 
-    otherchange = ''
+    otherchange = 'no_dc_and_late_start_lcs'
     nchunks = 10000
 
     # Train + Test cuts
