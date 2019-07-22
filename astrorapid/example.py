@@ -31,9 +31,6 @@ def main(graph=None, model=None):
     passband = ['g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g',
                 'g', 'g', 'g', 'g', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r',
                 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r', 'r']
-    zeropoint = [27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5,
-                 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5,
-                 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5, 27.5]
     photflag = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4096, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4096,
                 6144, 4096, 4096, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     objid = 'MSIP_01_NONIa-0001_10400862'
@@ -42,17 +39,17 @@ def main(graph=None, model=None):
     redshift = 0.233557
     mwebv = 0.0228761
 
-    light_curve_list = [(mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)]
+    light_curve_list = [(mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv)]
 
-    classification = Classify(light_curve_list, known_redshift=True, graph=graph, model=model)
-    predictions, time_steps = classification.get_predictions(return_predictions_at_obstime=False)
+    classification = Classify(known_redshift=True)
+    predictions, time_steps = classification.get_predictions(light_curve_list, return_predictions_at_obstime=False)
     print(predictions)
 
     # classification.plot_light_curves_and_classifications(step=False)
     # classification.plot_classification_animation()
     # classification.plot_classification_animation_step()
 
-    predictions, time_steps = classification.get_predictions(return_predictions_at_obstime=True)
+    predictions, time_steps = classification.get_predictions(light_curve_list, return_predictions_at_obstime=True)
 
     if predictions is not None:
         import matplotlib.pyplot as plt
@@ -62,25 +59,6 @@ def main(graph=None, model=None):
         plt.show()
 
 
-def example_try_multi_threading():
-    import threading
-    import tensorflow as tf
-    from keras.models import load_model
-
-    model = load_model('/Users/danmuth/PycharmProjects/astrorapid/astrorapid/keras_model_with_redshift.hdf5')
-
-    graph = tf.get_default_graph()
-
-    # Example running threads
-    t1 = threading.Thread(target=main, args=(graph, model))
-    t2 = threading.Thread(target=main, args=(graph, model))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    print("Done!")
-
-
 if __name__ == '__main__':
     main()
-    # example_try_multi_threading()
+

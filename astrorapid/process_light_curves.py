@@ -9,7 +9,7 @@ from astrorapid.ANTARES_object.LAobject import LAobject
 
 
 class InputLightCurve(object):
-    def __init__(self, mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift=None, mwebv=None,
+    def __init__(self, mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift=None, mwebv=None,
                  known_redshift=True, training_set_parameters=None):
         """
 
@@ -23,8 +23,6 @@ class InputLightCurve(object):
             List of floating point flux errors times for entire light curve in all passbands.
         passband : array
             List of passbands as strings for each point in the array.
-        zeropoint : array
-            List of floating point zeropoints for entire light curve in all passbands.
         photflag : array
             List of integer flags indicating whether the observation was a detection or non-detection for each
             point in the light curve.
@@ -49,7 +47,6 @@ class InputLightCurve(object):
         self.flux = np.array(flux)
         self.fluxerr = np.array(fluxerr)
         self.passband = np.array(passband)
-        self.zeropoint = np.array(zeropoint)
         self.photflag = np.array(photflag)
         self.ra = ra
         self.dec = dec
@@ -122,7 +119,7 @@ class InputLightCurve(object):
         obsid = np.arange(len(self.t))
 
         laobject = LAobject(locusId=self.objid, objectId=self.objid, time=self.t, flux=self.flux, fluxErr=self.fluxerr,
-                            obsId=obsid, passband=self.passband, zeropoint=self.zeropoint, per=False, mag=False,
+                            obsId=obsid, passband=self.passband, per=False, mag=False,
                             photflag=self.photflag, z=self.redshift)
 
         outlc = laobject.get_lc(recompute=True)
@@ -137,7 +134,7 @@ class InputLightCurve(object):
             otherinfo += [t0, self.peakmjd]
 
         savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 3, 4, 7]].rename(
-            {0: 'time', 3: 'flux', 4: 'fluxErr', 7: 'photflag', 8: 'zeropoint'}).T for pb, lcinfo in
+            {0: 'time', 3: 'flux', 4: 'fluxErr', 7: 'photflag'}).T for pb, lcinfo in
                   outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
         savepd['otherinfo'] = pd.DataFrame(otherinfo)
         savepd = pd.DataFrame(
@@ -150,14 +147,14 @@ class InputLightCurve(object):
 def read_multiple_light_curves(light_curve_list, known_redshift=True, training_set_parameters=None):
     """
     light_curve_list is a list of tuples with each tuple having entries:
-    mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv
+    mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv
 
     Returns the processed light curves
     """
 
     processed_light_curves = {}
     for light_curve in light_curve_list:
-        mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv = light_curve
+        mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
         inputlightcurve = InputLightCurve(*light_curve, known_redshift, training_set_parameters)
         processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 

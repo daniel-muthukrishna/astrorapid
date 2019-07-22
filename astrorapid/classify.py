@@ -24,10 +24,11 @@ except ImportError:
 
 
 CLASS_NAMES = ['Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'point-Ia', 'Kilonova', 'SLSN-I',
-               'PISN', 'ILOT', 'CART', 'TDE']
+               'PISN', 'ILOT', 'CART', 'TDE', 'AGN']
 CLASS_COLOR = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:orange', 'SNII': 'tab:blue',
                'SNIa-91bg': 'tab:red', 'SNIa-x': 'tab:purple', 'point-Ia': 'tab:brown', 'Kilonova': '#aaffc3',
-               'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink'}
+               'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink',
+               'AGN': 'bisque'}
 PB_COLOR = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
 PB_MARKER = {'g': 'o', 'r': 's'}
 PB_ALPHA = {'g': 0.3, 'r': 1.}
@@ -71,7 +72,7 @@ class Classify(object):
 
         if self.known_redshift:
             self.contextual_info = (0,)
-            filename = 'keras_model.hdf5'  # keras_model_with_redshift.hdf5'
+            filename = 'keras_model_with_redshift.hdf5'
         else:
             self.contextual_info = ()
             filename = 'keras_model_no_redshift.hdf5'
@@ -111,8 +112,8 @@ class Classify(object):
         ----------
         light_curves : list
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
-            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
-            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
         return_predictions_at_obstime: bool
             Return the predictions at the observation times instead of at the 50 interpolated timesteps.
@@ -185,8 +186,8 @@ class Classify(object):
         light_curves : list
             This argument is only required if the get_predictions() method has not been run.
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
-            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
-            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
 
         """
@@ -268,8 +269,8 @@ class Classify(object):
         light_curves : list
             This argument is only required if the get_predictions() method has not been run.
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
-            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
-            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
 
         """
@@ -350,8 +351,8 @@ class Classify(object):
         light_curves : list
             This argument is only required if the get_predictions() method has not been run.
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
-            (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv).
-            Here, mjd, flux, fluxerr, passband, zeropoint, and photflag are arrays.
+            (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
+            Here, mjd, flux, fluxerr, passband, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
 
         """

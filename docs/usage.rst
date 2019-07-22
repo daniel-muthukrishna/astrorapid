@@ -12,7 +12,7 @@ Use the following example code:
     from astrorapid.classify import Classify
 
     # Each light curve should be a tuple in this form. Look at the example code for an example of the input format.
-    light_curve_info1 = (mjd, flux, fluxerr, passband, zeropoint, photflag, ra, dec, objid, redshift, mwebv)
+    light_curve_info1 = (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv)
     light_curve_list = [light_curve_info1,]
 
     # Classify Light curves

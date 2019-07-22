@@ -427,7 +427,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         newy = np.zeros(y.shape)
         lenX = len(X)
         for i in range(lenX):
-            if i % 1000:
+            if i % 1000 == 0:
                 print(f"new {i} of {lenX}")
             mask = timesX[i] > 0
             nmask = sum(mask)
