@@ -426,7 +426,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         newX = np.zeros(X.shape)
         newy = np.zeros(y.shape)
         lenX = len(X)
-        for i in range(30):#lenX):
+        for i in range(lenX):
             print(f"new {i} of {lenX}")
             mask = timesX[i] > 0
             nmask = sum(mask)
@@ -436,6 +436,10 @@ class PrepareTrainingSetArrays(PrepareArrays):
         print("Concatenating")
         X = np.concatenate((X, newX))
         y = np.concatenate((y, newy))
+        labels = np.concatenate((labels, labels))
+        timesX = np.concatenate((timesX, timesX))
+        orig_lc = orig_lc * 2
+        objids_list = np.concatenate((objids_list, objids_list))
         print("Shuffling")
         from sklearn.utils import shuffle
         X, y, labels, timesX, orig_lc, objids_list = shuffle(X, y, labels, timesX, orig_lc, objids_list)

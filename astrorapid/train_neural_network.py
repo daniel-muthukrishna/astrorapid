@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import Dense, Input
@@ -13,6 +14,11 @@ from astrorapid.plot_metrics import plot_metrics
 
 def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25):
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
+
+    colour = np.log10(X_train[:,:,0]) - np.log10(X_train[:,:,1])
+    X_train = np.dstack((X_train, colour)).shape
+    colour = np.log10(X_test[:,:,0]) - np.log10(X_test[:,:,1])
+    X_test = np.dstack((X_test, colour)).shape
 
     if not retrain and os.path.isfile(model_filename):
         model = load_model(model_filename)
@@ -53,9 +59,9 @@ def main():
     aggregate_classes = True
     reread_hdf5_data = False
     retrain_rnn = False
-    train_epochs = 25
+    train_epochs = 50
 
-    otherchange = 'no_dc_and_late_start_lcs'
+    otherchange = 'no_dc_and_late_start_lcs_with_colour'
     nchunks = 10000
 
     # Train + Test cuts
