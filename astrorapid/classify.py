@@ -154,6 +154,7 @@ class Classify(object):
                 for pb in self.passbands:
                     if pb in self.orig_lc[idx]:
                         obs_time.append(self.orig_lc[idx][pb]['time'].values)
+                obs_time = np.array(obs_time)
                 obs_time = np.sort(obs_time[~np.isnan(obs_time)])
                 y_predict_at_obstime = []
                 for classnum, classname in enumerate(CLASS_NAMES):

@@ -264,13 +264,13 @@ if __name__ == '__main__':
 
     # classify_lasair_light_curves(object_names=('ZTF18acmxkzj', 'ZTF18adbntwo', 'ZTF18acmzpbf', 'ZTF18acrdmmw', 'ZTF18acsouxk', 'ZTF18aczrafz', 'ZTF18aceynvm', 'ZTF18acdzzyf', 'ZTF18acybdar', 'ZTF18ablhvfr', 'ZTF18acebefc', 'ZTF18acslpba', 'ZTF18aaxcxih', 'ZTF18aaxcntm', 'ZTF18abspqsn', 'ZTF18abvejqt','ZTF18adbntwo', 'ZTF18adasopt', 'ZTF18aajupnt', 'ZTF18aaxkqgy', 'ZTF18abckutn', 'ZTF18abrlljc', 'ZTF18acyybvg', 'ZTF19aadnmgf', 'ZTF18abxftqm',))
 
-    # orig_lc, timesX, y_predict = classify_lasair_light_curves(object_names=[
-    #                                                             'ZTF19aazcxwk', 'ZTF19abauzma',
-    #                                                             'ZTF18abxftqm',  # TDE
-    #                                                             'ZTF19aadnmgf',  # SNIa
-    #                                                             'ZTF18acmzpbf',  # SNIa
-    #                                                             'ZTF19aakzwao',  # SNIa
-    #                                                             ], figdir='astrorapid')
+    orig_lc, timesX, y_predict = classify_lasair_light_curves(object_names=[
+                                                                'ZTF19aazcxwk', 'ZTF19abauzma',
+                                                                'ZTF18abxftqm',  # TDE
+                                                                'ZTF19aadnmgf',  # SNIa
+                                                                'ZTF18acmzpbf',  # SNIa
+                                                                'ZTF19aakzwao',  # SNIa
+                                                                ], figdir='astrorapid')
     # import pickle
     # with open('paper_plot_real_data3.pickle', 'wb') as f:
     #     pickle.dump([orig_lc, timesX, y_predict], f)
