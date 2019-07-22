@@ -53,7 +53,7 @@ def main():
     aggregate_classes = True
     reread_hdf5_data = False
     retrain_rnn = False
-    train_epochs = 50
+    train_epochs = 25
 
     otherchange = ''
     nchunks = 10000
@@ -61,7 +61,7 @@ def main():
     # Train + Test cuts
     zcut = 0.5
     bcut = True
-    variablescut = True
+    variablescut = False
 
     training_set_dir = 'training_set_files'
     if not os.path.exists(training_set_dir):
@@ -77,7 +77,7 @@ def main():
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_hdf5_data, aggregate_classes, bcut, zcut, variablescut, nchunks=nchunks)
+    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_hdf5_data, aggregate_classes, bcut, zcut, variablescut, nchunks=nchunks, training_set_dir=training_set_dir)
     X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = preparearrays.prepare_training_set_arrays(fpath, otherchange)
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir, retrain=retrain_rnn, epochs=train_epochs)
     plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=timesX_test, orig_lc_test=orig_lc_test, objids_test=objids_test, passbands=passbands)

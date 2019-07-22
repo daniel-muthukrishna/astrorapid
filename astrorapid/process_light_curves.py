@@ -117,7 +117,7 @@ class InputLightCurve(object):
         # Account for distance and time dilation if redshift is known
         if self.known_redshift and self.redshift is not None:
             self.t = self.correct_time_dilation(self.t)
-            self.flux, self.fluxerr = self.correct_for_distance(self.flux, self.fluxerr)
+            # self.flux, self.fluxerr = self.correct_for_distance(self.flux, self.fluxerr)
 
         obsid = np.arange(len(self.t))
 
@@ -130,7 +130,10 @@ class InputLightCurve(object):
         otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd]
 
         if self.training_set_parameters is not None:
-            t0 = self.compute_t0(outlc)
+            try:
+                t0 = self.compute_t0(outlc)
+            except Exception as e:
+                print(e)
             otherinfo += [t0, self.peakmjd]
 
         savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 3, 4, 7]].rename(
