@@ -16,9 +16,9 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
 
     colour = np.log10(X_train[:,:,0]) - np.log10(X_train[:,:,1])
-    X_train = np.dstack((X_train, colour)).shape
+    X_train = np.dstack((X_train, colour))
     colour = np.log10(X_test[:,:,0]) - np.log10(X_test[:,:,1])
-    X_test = np.dstack((X_test, colour)).shape
+    X_test = np.dstack((X_test, colour))
 
     if not retrain and os.path.isfile(model_filename):
         model = load_model(model_filename)
