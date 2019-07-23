@@ -1,6 +1,11 @@
 """
 Example usage:
-nice -n 19 python -m astrorapid.read_from_database.read_light_curves_from_snana_fits --offset 0 --offsetnext 3 --nprocesses 8 --savename 'testing' --combinefiles
+
+.. code-block:: bash
+
+    python -m astrorapid.read_from_database.read_light_curves_from_snana_fits --offset 0
+    --offsetnext 3 --nprocesses 8 --savename 'testing' --combinefiles
+
 """
 
 import os
@@ -17,7 +22,9 @@ from astrorapid.process_light_curves import InputLightCurve
 
 
 class GetData(object):
-    def __init__(self,):
+    def __init__(self):
+        """ Get light curves. """
+
         self.phot_fields = ['MJD', 'FLT', 'FLUXCAL', 'FLUXCALERR', 'ZEROPT', 'PHOTFLAG']
         self.phot_fields_dtypes = {'FLT': np.str_, 'PHOTFLAG': np.int_}
 
@@ -75,7 +82,6 @@ class GetData(object):
     def convert_pandas_lc_to_recarray_lc(self, phot, passbands=('u', 'g', 'r', 'i', 'z', 'Y')):
         """
         ANTARES_object not Pandas format broken up by passband
-        TODO: This is ugly - just have an option for get_lcs_data to return one or the other
         """
         pbs = passbands
         # name mapping for the defaults in phot_fields
@@ -159,7 +165,7 @@ def read_light_curves_from_snana_fits_files(save_fname, head_files, phot_files, 
 
             lc = getter.convert_pandas_lc_to_recarray_lc(phot_data, passbands=passbands)
 
-            inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['zpt'], lc['photflag'], ra,
+            inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['photflag'], ra,
                                               dec, objid, redshift, mwebv, known_redshift=known_redshift,
                                               training_set_parameters={'class_number': int(model_num), 'peakmjd': peakmjd})
 
@@ -201,6 +207,10 @@ def create_all_hdf_files(args):
 
 
 def main():
+    """
+    Save light curves to HDF5 files.
+    """
+
     passbands = ('g', 'r')
     data_release = 'ZTF_20190512'
     field = 'MSIP'

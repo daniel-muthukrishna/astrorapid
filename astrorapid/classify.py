@@ -106,7 +106,7 @@ class Classify(object):
         return X, orig_lc, timesX, objids_list, trigger_mjds
 
     def get_predictions(self, light_curves, return_predictions_at_obstime=False):
-        """ Return the classifcation accuracies as a function of time for each class
+        """ Return the classification accuracies as a function of time for each class
 
         Parameters
         ----------

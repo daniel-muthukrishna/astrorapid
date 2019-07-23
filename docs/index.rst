@@ -11,12 +11,13 @@ several different transient classes. It uses a deep recurrent neural network to 
 .. image:: classification_vs_time.gif
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    installation
    usage
    example
+   api
 
 
 Contribute
@@ -34,6 +35,12 @@ License
 -------
 
 The project is licensed under the MIT license.
+
+Citation
+--------
+
+You can cite the following paper for this work: https://ui.adsabs.harvard.edu/abs/2019arXiv190400014M/abstract
+
 
 Author
 ------

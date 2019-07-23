@@ -1,3 +1,7 @@
+"""
+Plot overall classification performance metrics.
+"""
+
 import os
 import sys
 import numpy as np
@@ -32,6 +36,7 @@ def plasticc_log_loss(y_true, y_pred, relative_class_weights=None):
     """
     Implementation of weighted log loss used for the Kaggle challenge
     """
+
     if np.nonzero(y_true[:, 0])[0].size == 0:
         start_index = 1
     else:
@@ -56,6 +61,10 @@ def plasticc_log_loss(y_true, y_pred, relative_class_weights=None):
 
 
 def compute_precision_recall(classes, y_test, y_pred_prob, name='', fig_dir='.', title=None):
+    """
+    Plot Precision-Recall curves.
+    """
+
     if np.nonzero(y_test[:, 0])[0].size == 0:
         start_index = 1
     else:
@@ -123,6 +132,10 @@ def compute_precision_recall(classes, y_test, y_pred_prob, name='', fig_dir='.',
 
 
 def compute_multiclass_roc_auc(classes, y_test, y_pred_prob, name='', fig_dir='.', title=None, logyscale=False):
+    """
+    Plot multiclass Receiver Operating Characteristic curves.
+    """
+
     if np.nonzero(y_test[:, 0])[0].size == 0:
         start_index = 1
     else:
@@ -205,9 +218,10 @@ def compute_multiclass_roc_auc(classes, y_test, y_pred_prob, name='', fig_dir='.
 def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.RdBu, fig_dir='.', name='',
                           combine_kfolds=False, show_uncertainties=False):
     """
-    This function prints and plots the confusion matrix.
+    Plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
+
     if combine_kfolds:
         uncertainties = np.std(cm, axis=0)
         cm = np.sum(cm, axis=0)
