@@ -29,39 +29,39 @@ The full documentation of useful classes and methods can be found below.
 Full Documentation
 ------------------
 
-.. autoclass:: astrorapid.classify.Classify
+.. autoclass:: astrorapid.astrorapid.classify.Classify
     :members:
 
 
 ------
 
 
-.. autoclass:: astrorapid.process_light_curves.InputLightCurve
+.. autoclass:: astrorapid.astrorapid.process_light_curves.InputLightCurve
     :members:
 
 
 ------
 
 
-.. autofunction:: astrorapid.process_light_curves.read_multiple_light_curves
+.. autofunction:: astrorapid.astrorapid.process_light_curves.read_multiple_light_curves
 
 
 ------
 
 
-.. autoclass:: astrorapid.prepare_arrays.PrepareArrays
+.. autoclass:: astrorapid.astrorapid.prepare_arrays.PrepareArrays
 
 
 ------
 
 
-.. autoclass:: astrorapid.prepare_arrays.PrepareInputArrays
+.. autoclass:: astrorapid.astrorapid.prepare_arrays.PrepareInputArrays
 
 
 ------
 
 
-.. autoclass:: astrorapid.prepare_arrays.PrepareTrainingSetArrays
+.. autoclass:: astrorapid.astrorapid.prepare_arrays.PrepareTrainingSetArrays
 
 
 ------
@@ -70,10 +70,10 @@ astrorapid.read_from_database.read_light_curves_from_snana_fits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-.. automodule:: astrorapid.read_from_database.read_light_curves_from_snana_fits
+.. automodule:: astrorapid.astrorapid.read_from_database.read_light_curves_from_snana_fits
     :members:
 
-.. autoclass:: astrorapid.read_from_database.read_light_curves_from_snana_fits.GetData
+.. autoclass:: astrorapid.astrorapid.read_from_database.read_light_curves_from_snana_fits.GetData
     :members:
 
 
@@ -82,7 +82,7 @@ astrorapid.read_from_database.read_light_curves_from_snana_fits
 astrorapid.train_neural_network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: astrorapid.train_neural_network
+.. automodule:: astrorapid.astrorapid.train_neural_network
     :members:
 
 
@@ -91,7 +91,7 @@ astrorapid.train_neural_network
 astrorapid.classifier_metrics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: astrorapid.classifier_metrics
+.. automodule:: astrorapid.astrorapid.classifier_metrics
     :members:
 
 
