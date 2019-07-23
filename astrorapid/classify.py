@@ -189,7 +189,7 @@ class Classify(object):
         return y_predict, time_steps
 
     def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.',
-                                              light_curves=None, plot_matrix_input=False):
+                                              plot_matrix_input=False, light_curves=None):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -205,6 +205,8 @@ class Classify(object):
             Use all 50 timesteps when plotting classification probabilities rather than just at the timesteps with data.
         figdir : str
             Directory to save figure.
+        plot_matrix_input : bool
+            Plots the interpolated light curve passed into the neural network on top of the observations.
         light_curves : list
             This argument is only required if the get_predictions() method has not been run.
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
@@ -224,6 +226,10 @@ class Classify(object):
         if not hasattr(self, 'y_predict'):
             self.get_predictions(light_curves)
 
+        if plot_matrix_input:
+            alpha_observations = 0.2
+        else:
+            alpha_observations = 1.
         for idx in indexes_to_plot:
             argmax = self.timesX[idx].argmax() + 1
             fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
@@ -235,7 +241,7 @@ class Classify(object):
                 if pb in self.orig_lc[idx].keys():
                     ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['flux'],
                                  yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
-                                 c=PB_COLOR[pb], lw=3, markersize=10, alpha=0.2)
+                                 c=PB_COLOR[pb], lw=3, markersize=10, alpha=alpha_observations)
                 if plot_matrix_input:
                     ax1.plot(self.timesX[idx][:argmax], self.X[idx][:, pbidx][:argmax], c=PB_COLOR[pb], lw=3)
 
