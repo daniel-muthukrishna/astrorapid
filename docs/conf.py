@@ -16,6 +16,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, 'astrorapid')
 sys.path.insert(0, 'astrorapid/read_from_database')
 sys.path.insert(0, '../astrorapid')
