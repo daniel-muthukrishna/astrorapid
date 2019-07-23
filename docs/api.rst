@@ -29,7 +29,7 @@ The full documentation of useful classes and methods can be found below.
 Full Documentation
 ------------------
 
-.. autoclass:: astrorapid.astrorapid.classify.Classify
+.. autoclass:: astrorapid.classify.Classify
     :members:
 
 
