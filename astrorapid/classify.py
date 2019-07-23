@@ -114,18 +114,27 @@ class Classify(object):
             Is a list of tuples. Each tuple contains the light curve information of a transient object in the form
             (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
             Here, mjd, flux, fluxerr, passband, and photflag are arrays.
-            ra, dec, objid, redshift, and mwebv are floats.
-            mjd: list of Modified Julian Dates of light curve
-            flux: list of fluxes at each mjd
-            fluxerr: list of flux errors
-            passband: list of strings indicating the passband. 'r' or 'g' for r-band or g-band observations.
-            photflag: list of flags identifiying whether the observation is a detection (4096), non-detection (0),
+            And ra, dec, objid, redshift, and mwebv are floats.
+                mjd: list of Modified Julian Dates of light curve
+
+                flux: list of fluxes at each mjd
+
+                fluxerr: list of flux errors
+
+                passband: list of strings indicating the passband. 'r' or 'g' for r-band or g-band observations.
+
+                photflag: list of flags identifying whether the observation is a detection (4096), non-detection (0),
                 or the first detection (6144).
-            ra: Right Ascension (float value).
-            dec: Declination (float value).
-            objid: Object Identifier (String).
-            redshift: Cosmological redshift of object (float). Set to NoneType if redshift is unknown.
-            mwebv: Milky way extinction.
+
+                ra: Right Ascension (float value).
+
+                dec: Declination (float value).
+
+                objid: Object Identifier (String).
+
+                redshift: Cosmological redshift of object (float). Set to NoneType if redshift is unknown.
+
+                mwebv: Milky way extinction.
 
         return_predictions_at_obstime: bool
             Return the predictions at the observation times instead of at the 50 interpolated timesteps.
