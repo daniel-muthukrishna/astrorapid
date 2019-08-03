@@ -105,7 +105,7 @@ class Classify(object):
 
         return X, orig_lc, timesX, objids_list, trigger_mjds
 
-    def get_predictions(self, light_curves, return_predictions_at_obstime=False):
+    def get_predictions(self, light_curves, return_predictions_at_obstime=False, return_objids=False):
         """ Return the classification accuracies as a function of time for each class
 
         Parameters
@@ -138,6 +138,8 @@ class Classify(object):
 
         return_predictions_at_obstime: bool
             Return the predictions at the observation times instead of at the 50 interpolated timesteps.
+        return_objids : bool, optional
+            If True, also return the object IDs (objids) in the same order as the returned predictions.
 
         Returns
         -------
@@ -148,7 +150,9 @@ class Classify(object):
             n is the number of times steps, and m is the number of classes.
         time_steps: array
             MJD time steps corresponding to the timesteps of the y_predict array.
-
+        objids : array, optional
+            The object ids (objids) that were input into light_curves are returned in the same order as y_predict.
+            Only provided if return_objids is True.
         """
 
         # Do error checks
@@ -193,6 +197,9 @@ class Classify(object):
         else:
             y_predict = [self.y_predict[i][:argmax[i]] for i in range(nobjects)]
             time_steps = [self.timesX[i][:argmax[i]] + self.trigger_mjds[i] for i in range(nobjects)]
+
+        if return_objids:
+            return y_predict, time_steps, self.objids
 
         return y_predict, time_steps
 
