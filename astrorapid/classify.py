@@ -151,6 +151,14 @@ class Classify(object):
 
         """
 
+        # Do error checks
+        mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curves
+        _lcshape = len(mjd)
+        assert _lcshape == len(flux)
+        assert _lcshape == len(fluxerr)
+        assert _lcshape == len(passband)
+        assert _lcshape == len(photflag)
+
         self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves(light_curves)
         nobjects = len(self.objids)
 
