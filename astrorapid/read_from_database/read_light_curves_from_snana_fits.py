@@ -122,8 +122,10 @@ def read_light_curves_from_snana_fits_files(save_fname, head_files, phot_files, 
     ----------
     save_fname : str
         Filename to save hdf5 file.
-    dir_name : str
-        Directory path of all SNANA HEAD and PHOT files.
+    head_files : list
+        List of SNANA header filepaths (.HEAD files).
+    phot_files : list
+        List of SNANA photometric filepaths (.PHOT files). Must be in the same order as the phot files.
     passbands : tuple
         passband filters.
     known_redshift : bool
