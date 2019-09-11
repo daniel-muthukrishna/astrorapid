@@ -138,7 +138,7 @@ def read_light_curves_from_snana_fits_files(save_fname, head_files, phot_files, 
     for fileidx, headfilepath in enumerate(head_files):
         print(fileidx, headfilepath)
         # Check that phot file correponds to head file
-        assert phot_files[i].split('_')[-2] == head_files[i].split('_')[-2]
+        assert phot_files[fileidx].split('_')[-2] == head_files[fileidx].split('_')[-2]
         header_HDU = afits.open(head_files[fileidx])
         header_data = header_HDU[1].data
 
