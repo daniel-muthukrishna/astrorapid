@@ -227,7 +227,7 @@ def main():
             filepath = os.path.join(subdir, file)
             if filepath.endswith('HEAD.FITS'):
                 head_files.append(filepath)
-                phot_files.append(file.replace('_HEAD.FITS', '_PHOT.FITS'))
+                phot_files.append(filepath.replace('_HEAD.FITS', '_PHOT.FITS'))
             print(filepath)
     # head_files = np.sort(head_files)
     # phot_files = np.sort(phot_files)
