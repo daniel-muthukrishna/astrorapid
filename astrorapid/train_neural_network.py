@@ -1,12 +1,12 @@
 import os
 import numpy as np
-from keras.models import Sequential
-from keras.models import load_model
-from keras.layers import Dense, Input
-from keras.layers import LSTM, GRU
-from keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed
-from keras.layers.convolutional import Conv1D, Conv2D
-from keras.layers.convolutional import MaxPooling1D, MaxPooling2D
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.models import load_model
+from tensorflow.python.keras.layers import Dense, Input
+from tensorflow.python.keras.layers import LSTM, GRU
+from tensorflow.python.keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed, Masking
+from tensorflow.python.keras.layers.convolutional import Conv1D, Conv2D
+from tensorflow.python.keras.layers.convolutional import MaxPooling1D, MaxPooling2D
 
 from astrorapid.prepare_arrays import PrepareTrainingSetArrays
 from astrorapid.plot_metrics import plot_metrics

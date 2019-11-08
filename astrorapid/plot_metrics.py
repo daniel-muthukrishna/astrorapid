@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from distutils.spawn import find_executable
 from scipy.interpolate import interp1d
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import confusion_matrix
 from collections import OrderedDict
 
