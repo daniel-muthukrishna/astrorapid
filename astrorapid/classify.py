@@ -1,7 +1,8 @@
 import os
+import numbers
 import numpy as np
 from collections import OrderedDict
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from pkg_resources import resource_filename
 from distutils.spawn import find_executable
 
@@ -105,6 +106,31 @@ class Classify(object):
 
         return X, orig_lc, timesX, objids_list, trigger_mjds
 
+    def _do_error_checks(self, light_curves):
+        assert isinstance(light_curves, (list, np.ndarray))
+        for light_curve in light_curves:
+            assert len(light_curve) == 10
+            mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
+            _lcshape = len(mjd)
+            assert _lcshape == len(flux)
+            assert _lcshape == len(fluxerr)
+            assert _lcshape == len(passband)
+            assert _lcshape == len(photflag)
+            assert all(isinstance(n, numbers.Number) and np.isfinite(n) for n in mjd)
+            assert all(isinstance(n, numbers.Number) and np.isfinite(n) for n in flux)
+            assert all(isinstance(n, numbers.Number) and np.isfinite(n) for n in fluxerr)
+            assert all(isinstance(n, numbers.Number) and np.isfinite(n) for n in photflag)
+            assert all(isinstance(n, str) for n in passband)
+            assert isinstance(ra, numbers.Number)
+            assert isinstance(dec, numbers.Number)
+            assert isinstance(mwebv, numbers.Number)
+            assert np.isfinite(ra)
+            assert np.isfinite(dec)
+            assert np.isfinite(mwebv)
+            if self.known_redshift:
+                assert isinstance(redshift, numbers.Number)
+                assert np.isfinite(redshift)
+
     def get_predictions(self, light_curves, return_predictions_at_obstime=False, return_objids=False):
         """ Return the classification accuracies as a function of time for each class
 
@@ -155,23 +181,17 @@ class Classify(object):
             Only provided if return_objids is True.
         """
 
-        # Do error checks
-        assert isinstance(light_curves, (list, np.ndarray))
-        for light_curve in light_curves:
-            assert len(light_curve) == 10
-            mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
-            _lcshape = len(mjd)
-            assert _lcshape == len(flux)
-            assert _lcshape == len(fluxerr)
-            assert _lcshape == len(passband)
-            assert _lcshape == len(photflag)
+        self._do_error_checks(light_curves)
 
         self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves(light_curves)
         nobjects = len(self.objids)
 
         if nobjects == 0:
             print("No objects to classify. These may have been removed from the chosen selection cuts")
-            return None, None
+            if return_objids:
+                return None, None, self.objids
+            else:
+                return None, None
 
         if self.graph is not None:
             with self.graph.as_default():
@@ -263,7 +283,7 @@ class Classify(object):
                 if plot_matrix_input:
                     ax1.plot(self.timesX[idx][:argmax], self.X[idx][:, pbidx][:argmax], c=PB_COLOR[pb], lw=3)
 
-            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands if pb in self.orig_lc[idx]]).flatten()
             new_t = np.sort(new_t[~np.isnan(new_t)])
             if not use_interp_flux and not plot_matrix_input:
                 new_y_predict = []
@@ -332,7 +352,7 @@ class Classify(object):
             self.get_predictions(light_curves)
 
         for idx in indexes_to_plot:
-            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
+            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands if pb in self.orig_lc[idx]]).flatten()
             all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
 
             argmax = self.timesX[idx].argmax() + 1
