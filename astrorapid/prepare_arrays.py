@@ -19,9 +19,9 @@ class PrepareArrays(object):
     def __init__(self, passbands=('g', 'r'), contextual_info=(0,)):
         self.passbands = passbands
         self.contextual_info = contextual_info
-        self.nobs = 50
+        self.nobs = 50  # 100
         self.npassbands = len(passbands)
-        self.nfeatures = self.npassbands + len(self.contextual_info)
+        self.nfeatures = self.npassbands + len(self.contextual_info)  # 4 + len(self.contextual_info)  #
         self.timestep = 3.0
         self.mintime = -70
         self.maxtime = 80
@@ -117,11 +117,12 @@ class PrepareArrays(object):
             n = len(flux)  # Get vector length (could be less than nobs)
 
             if n > 1:
-                if flux[-1] > flux[-2]:  # If last values are increasing, then set fill_values to zero
-                    f = interp1d(time, flux, kind='linear', bounds_error=False, fill_value=0.)
-                else:
-                    f = interp1d(time, flux, kind='linear', bounds_error=False,
-                                 fill_value='extrapolate')  # extrapolate until all passbands finished.
+                # if flux[-1] > flux[-2]:  # If last values are increasing, then set fill_values to zero
+                #     f = interp1d(time, flux, kind='linear', bounds_error=False, fill_value=0.)
+                # else:
+                #     f = interp1d(time, flux, kind='linear', bounds_error=False,
+                #                  fill_value='extrapolate')  # extrapolate until all passbands finished.
+                f = interp1d(time, flux, kind='linear', bounds_error=False, fill_value=0.)
 
                 fluxinterp = f(tinterp)
                 fluxinterp = np.nan_to_num(fluxinterp)
@@ -144,6 +145,57 @@ class PrepareArrays(object):
                 X[i][j + jj][0:len_t] = otherinfo[c_idx] * np.ones(len_t)
             except Exception as e:
                 X[i][j + jj][0:len_t] = otherinfo[c_idx].values[0] * np.ones(len_t)
+
+        return X
+
+    def update_X_nonuniformtime(self, X, i, data, objid, contextual_info, otherinfo):
+        # Drop infinite values
+        data.replace([np.inf, -np.inf], np.nan)
+
+        timeallpb = []
+        fluxallpb = []
+        fluxerrallpb = []
+        photflagallpb = []
+        passbandsallpb = []
+
+        for j, pb in enumerate(self.passbands):
+            if pb not in data:
+                print("No", pb, "in objid:", objid)
+                continue
+
+            # Get data
+            time = data[pb]['time'][0:self.nobs].dropna().values
+            flux = data[pb]['flux'][0:self.nobs].dropna().values
+            fluxerr = data[pb]['fluxErr'][0:self.nobs].dropna().values
+            photflag = data[pb]['photflag'][0:self.nobs].dropna().values
+
+            # Mask out times outside of mintime and maxtime
+            timemask = (time > self.mintime) & (time < self.maxtime)
+            time = time[timemask]
+            flux = flux[timemask]
+            fluxerr = fluxerr[timemask]
+            photflag = photflag[timemask]
+
+            n = len(flux)  # Get vector length (could be less than nobs)
+
+            timeallpb += list(time)
+            fluxallpb += list(flux)
+            fluxerrallpb += list(fluxerr)
+            photflagallpb += list(photflag)
+            wave = [477, 621]
+            passbandsallpb += [wave[j]]*len(time)
+
+        length = len(timeallpb)
+        X[i][0][0:length] = timeallpb
+        X[i][1][0:length] = fluxallpb
+        X[i][2][0:length] = fluxerrallpb
+        X[i][3][0:length] = passbandsallpb
+
+        X[i].sort(axis=0)
+
+        # Add contextual information
+        for jj, c_idx in enumerate(contextual_info, 1):
+            X[i][3 + jj][0:length] = otherinfo[c_idx] * np.ones(length)
 
         return X
 
@@ -251,7 +303,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             labels = np.zeros(shape=nobjects, dtype=np.uint16)
             y = np.zeros(shape=(nobjects, self.nobs), dtype=np.uint16)
             X = np.memmap(os.path.join(self.training_set_dir, 'X_lc_data.dat'), dtype=np.float32, mode='w+',
-                          shape=(nobjects, self.nfeatures, self.nobs))
+                          shape=(nobjects, self.nfeatures, self.nobs))  # 4+len(self.contextual_info), 100))
             X[:] = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
             timesX = np.zeros(shape=(nobjects, self.nobs))
             objids_list = []
@@ -262,11 +314,13 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Store light curves into X (fluxes) and y (labels)
             pool = mp.Pool()
-            results = pool.map_async(self.multi_read_obj, multi_objids)
+            results = pool.map_async(self.multi_read_obj, multi_objids) ##
             pool.close()
             pool.join()
 
             outputs = results.get()
+
+            # outputs = self.multi_read_obj_nonuniformtime(objids[0:100])
 
             sum_deleterows = 0
             startidx = 0
@@ -514,6 +568,63 @@ class PrepareTrainingSetArrays(PrepareArrays):
             activeindexes = (tinterp > t0)
             labels[i] = int(model)
             y[i][0:len_t] = int(model) * activeindexes
+
+        deleterows = np.array(deleterows)
+        X = np.delete(X, deleterows, axis=0)
+        y = np.delete(y, deleterows, axis=0)
+        labels = np.delete(labels, deleterows, axis=0)
+        timesX = np.delete(timesX, deleterows, axis=0)
+        count_deleterows = len(deleterows)
+        num_objects = X.shape[0]
+
+        return labels, y, X, timesX, objids_list, orig_lc, count_deleterows, num_objects
+
+    def multi_read_obj_nonuniformtime(self, objids):
+        nobjects = len(objids)
+
+        labels = np.zeros(shape=nobjects, dtype=np.uint16)
+        y = np.zeros(shape=(nobjects, self.nobs), dtype=np.uint16)
+        X = np.zeros(shape=(nobjects, 4+len(self.contextual_info), 100))
+        timesX = np.zeros(shape=(nobjects, self.nobs))
+        objids_list = []
+        orig_lc = []
+        deleterows = []
+
+        for i, objid in enumerate(objids):
+            print("Preparing {} light curve {} of {}".format(objid, i, nobjects))
+
+            # Get aggregate model
+            field, model, base, snid = objid.astype(str).split('_')
+            if self.aggregate_classes:
+                model = self.agg_map[int(model)]
+            class_num = int(model)
+
+            # Get data for each object
+            try:
+                data = pd.read_hdf(self.fpath, key=objid)
+            except AttributeError:
+                print("ignoring: cannot read", objid)
+                deleterows.append(i)
+                continue
+
+            otherinfo = data['otherinfo'].values.flatten()
+            redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
+
+            # Make cuts
+            deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=model, bcut=self.bcut,
+                                                 zcut=self.zcut, variables_cut=self.variablescut, pre_trigger=False)
+            if deleted:
+                continue
+
+            tinterp, len_t = self.get_t_interp(data)
+            timesX[i][0:len_t] = tinterp
+            orig_lc.append(data)
+            objids_list.append(objid)
+            X = self.update_X_nonuniformtime(X, i, data, objid, self.contextual_info, otherinfo)
+
+            activeindexes = (X[i][0] > t0)
+            labels[i] = int(model)
+            y[i][0:len(X[i][0])] = int(model) * activeindexes
 
         deleterows = np.array(deleterows)
         X = np.delete(X, deleterows, axis=0)

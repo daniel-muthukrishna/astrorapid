@@ -25,7 +25,7 @@ except ImportError:
 
 
 CLASS_NAMES = ['Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'point-Ia', 'Kilonova', 'SLSN-I',
-               'PISN', 'ILOT', 'CART', 'TDE', 'AGN']
+               'PISN', 'ILOT', 'CART', 'TDE']#, 'AGN']
 CLASS_COLOR = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:orange', 'SNII': 'tab:blue',
                'SNIa-91bg': 'tab:red', 'SNIa-x': 'tab:purple', 'point-Ia': 'tab:brown', 'Kilonova': '#aaffc3',
                'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink',
@@ -73,7 +73,7 @@ class Classify(object):
 
         if self.known_redshift:
             self.contextual_info = (0,)
-            filename = 'keras_model_with_redshift.hdf5'
+            filename = '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_fpsaved_lc_MSIP_ZTF_20190512_firsttry.hdf5_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'keras_model_with_redshift.hdf5'
         else:
             self.contextual_info = ()
             filename = 'keras_model_no_redshift.hdf5'
