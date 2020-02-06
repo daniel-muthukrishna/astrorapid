@@ -274,36 +274,11 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         return light_curves
 
-    @staticmethod
-    def get_saved_light_curves_from_database(fpath_saved_lc):
-        """ Get objids from hdf5 file
-
-        Parameters
-        ----------
-        fpath_saved_lc : str
-            File path of the light curves saved as a hdf5 file.
-
-        Returns
-        -------
-        objids : list
-            list of object IDs as strings.
-        fpath_saved_lc : str
-            Same as input argument
-
-        """
-
-        with h5py.File(fpath_saved_lc, 'r') as hdffile:
-            objids = np.array(list(hdffile.keys()))
-        np.random.shuffle(objids)
-
-        return objids, fpath_saved_lc
-
-    def prepare_training_set_arrays(self, fpath_saved_lc, otherchange='', class_nums=(1,), nprocesses=1):
+    def prepare_training_set_arrays(self, otherchange='', class_nums=(1,), nprocesses=1):
         savepath = os.path.join(self.training_set_dir,
-                                "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                              self.contextual_info,
-                                                                              os.path.basename(fpath_saved_lc),
-                                                                              self.zcut, self.bcut, self.variablescut))
+                                "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                                                              self.contextual_info, self.zcut,
+                                                                              self.bcut, self.variablescut))
         print(savepath)
         if self.reread is True or not os.path.isfile(savepath):
             for class_num in class_nums:
@@ -311,7 +286,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
                 self.light_curves.update(lcs)
 
             objids = list(set(self.light_curves.keys()))
-            # objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
             nobjects = len(objids)
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
@@ -360,45 +334,39 @@ class PrepareTrainingSetArrays(PrepareArrays):
             timesX = np.delete(timesX, deleterows, axis=0)
 
             np.save(os.path.join(self.training_set_dir,
-                                 "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                 "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                self.contextual_info,
-                                                                               os.path.basename(fpath_saved_lc),
                                                                                self.zcut, self.bcut,
                                                                                self.variablescut)), X)
             np.save(os.path.join(self.training_set_dir,
-                                 "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                 "y_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                self.contextual_info,
-                                                                               os.path.basename(fpath_saved_lc),
                                                                                self.zcut, self.bcut,
                                                                                self.variablescut)), y)
             np.save(os.path.join(self.training_set_dir,
-                                 "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                 "labels_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                     self.contextual_info,
-                                                                                    os.path.basename(fpath_saved_lc),
                                                                                     self.zcut,
                                                                                     self.bcut, self.variablescut)),
                     labels)
-            np.save(os.path.join(self.training_set_dir, "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+            np.save(os.path.join(self.training_set_dir, "tinterp_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                                             self.aggregate_classes,
                                                                                                             self.contextual_info,
-                                                                                                            os.path.basename(
-                                                                                                                fpath_saved_lc),
+
                                                                                                             self.zcut,
                                                                                                             self.bcut,
                                                                                                             self.variablescut)),
                     timesX)
             np.save(os.path.join(self.training_set_dir,
-                                 "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                 "objids_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                     self.contextual_info,
-                                                                                    os.path.basename(fpath_saved_lc),
                                                                                     self.zcut,
                                                                                     self.bcut, self.variablescut)),
                     objids_list)
             with open(os.path.join(self.training_set_dir,
-                                   "origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                   "origlc_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                       self.aggregate_classes,
                                                                                       self.contextual_info,
-                                                                                      os.path.basename(fpath_saved_lc),
                                                                                       self.zcut,
                                                                                       self.bcut, self.variablescut)),
                       'wb') as f:
@@ -408,47 +376,38 @@ class PrepareTrainingSetArrays(PrepareArrays):
             X = np.load(os.path.join(self.training_set_dir,
                                      "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                    self.contextual_info,
-                                                                                   os.path.basename(fpath_saved_lc),
                                                                                    self.zcut, self.bcut,
                                                                                    self.variablescut)), mmap_mode='r')
             y = np.load(os.path.join(self.training_set_dir,
-                                     "y_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                     "y_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                    self.contextual_info,
-                                                                                   os.path.basename(fpath_saved_lc),
                                                                                    self.zcut, self.bcut,
                                                                                    self.variablescut)))
             labels = np.load(os.path.join(self.training_set_dir,
-                                          "labels_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                          "labels_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                              self.aggregate_classes,
                                                                                              self.contextual_info,
-                                                                                             os.path.basename(
-                                                                                                 fpath_saved_lc),
                                                                                              self.zcut,
                                                                                              self.bcut,
                                                                                              self.variablescut)))
             timesX = np.load(os.path.join(self.training_set_dir,
-                                          "tinterp_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                          "tinterp_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                               self.aggregate_classes,
                                                                                               self.contextual_info,
-                                                                                              os.path.basename(
-                                                                                                  fpath_saved_lc),
                                                                                               self.zcut,
                                                                                               self.bcut,
                                                                                               self.variablescut)))
             objids_list = np.load(os.path.join(self.training_set_dir,
-                                               "objids_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                               "objids_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                                   self.aggregate_classes,
                                                                                                   self.contextual_info,
-                                                                                                  os.path.basename(
-                                                                                                      fpath_saved_lc),
                                                                                                   self.zcut,
                                                                                                   self.bcut,
                                                                                                   self.variablescut)))
             with open(os.path.join(self.training_set_dir,
-                                   "origlc_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange,
+                                   "origlc_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
                                                                                       self.aggregate_classes,
                                                                                       self.contextual_info,
-                                                                                      os.path.basename(fpath_saved_lc),
                                                                                       self.zcut,
                                                                                       self.bcut, self.variablescut)),
                       'rb') as f:
@@ -559,13 +518,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Get data for each object
             data = self.light_curves[objid]
-            # try:
-            #     data = pd.read_hdf(self.fpath, key=objid)
-            # except AttributeError:
-            #     print("ignoring: cannot read", objid)
-            #     deleterows.append(i)
-            #     continue
-
             otherinfo = data['otherinfo'].values.flatten()
             redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
 
@@ -616,13 +568,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             class_num = int(model)
 
             # Get data for each object
-            try:
-                data = pd.read_hdf(self.fpath, key=objid)
-            except AttributeError:
-                print("ignoring: cannot read", objid)
-                deleterows.append(i)
-                continue
-
+            data = self.light_curves[objid]
             otherinfo = data['otherinfo'].values.flatten()
             redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
 

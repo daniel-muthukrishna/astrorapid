@@ -81,17 +81,12 @@ def main():
     nprocesses = None  # None means os.cpu_count() otherwise use integer
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    training_set_dir = os.path.join(SCRIPT_DIR, '..', 'training_set_files')
     data_dir = os.path.join(SCRIPT_DIR, '..', 'data/ZTF_20190512')
+    training_set_dir = os.path.join(SCRIPT_DIR, '..', 'training_set_files')
     save_dir = os.path.join(SCRIPT_DIR, '..', 'data/saved_light_curves')
     for dirname in [training_set_dir, data_dir, save_dir]:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-
-    data_release = 'ZTF_20190512'
-    field = 'MSIP'
-    savename = 'firsttry'
-    fpath = '/Volumes/Seagate Backup Plus Drive/saved_lc_MSIP_ZTF_20190512_firsttry.hdf5' # os.path.join(training_set_dir, 'saved_lc_{}_{}_{}.hdf5'.format(field, data_release, savename))
 
     fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}_noAGN_batch500_unnormalised_epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
     for dirname in [fig_dir, fig_dir+'/cf_since_trigger', fig_dir+'/cf_since_t0', fig_dir+'/roc_since_trigger', fig_dir+'/lc_pred', fig_dir+'/pr_since_trigger', fig_dir+'/truth_table_since_trigger']:
