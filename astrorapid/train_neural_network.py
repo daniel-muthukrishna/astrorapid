@@ -88,13 +88,13 @@ def main():
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}_noAGN_batch500_unnormalised_epochs{}_ag{}_ci{}_fp{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, os.path.basename(fpath), zcut, bcut, variablescut))
+    fig_dir = os.path.join(training_set_dir, 'Figures', 'classify', 'ZTF_{}_noAGN_batch500_unnormalised_epochs{}_ag{}_ci{}_zcut{}_bcut{}_varcut{}'.format(otherchange, train_epochs, aggregate_classes, contextual_info, zcut, bcut, variablescut))
     for dirname in [fig_dir, fig_dir+'/cf_since_trigger', fig_dir+'/cf_since_t0', fig_dir+'/roc_since_trigger', fig_dir+'/lc_pred', fig_dir+'/pr_since_trigger', fig_dir+'/truth_table_since_trigger']:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
     preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_hdf5_data, aggregate_classes, bcut, zcut, variablescut, nchunks=nchunks, training_set_dir=training_set_dir, data_dir=data_dir, save_dir=save_dir)
-    X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = preparearrays.prepare_training_set_arrays(fpath, otherchange, class_nums, nprocesses)
+    X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = preparearrays.prepare_training_set_arrays(otherchange, class_nums, nprocesses)
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir, retrain=retrain_rnn, epochs=train_epochs)
     plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=timesX_test, orig_lc_test=orig_lc_test, objids_test=objids_test, passbands=passbands)
 
