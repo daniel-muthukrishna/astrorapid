@@ -298,7 +298,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         return objids, fpath_saved_lc
 
-    def prepare_training_set_arrays(self, fpath_saved_lc, otherchange=''):
+    def prepare_training_set_arrays(self, fpath_saved_lc, otherchange='', class_nums=(1,), nprocesses=1):
         savepath = os.path.join(self.training_set_dir,
                                 "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                               self.contextual_info,
