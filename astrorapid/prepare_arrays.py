@@ -10,6 +10,7 @@ import itertools
 from scipy.interpolate import interp1d
 
 from astrorapid import helpers
+from astrorapid.get_training_data import get_data
 
 # fix random seed for reproducibility
 np.random.seed(42)
@@ -57,8 +58,8 @@ class PrepareArrays(object):
             print("Not including variable models", class_num)
             deleterows.append(i)
             deleted = True
-        elif class_num in [50]:
-            print("Deleting unused kilonova model")
+        elif class_num in [50, 61, 62]:
+            print("Deleting unused kilonova model and PISN and ILOT")
             deleterows.append(i)
             deleted = True
 
@@ -249,7 +250,8 @@ class PrepareInputArrays(PrepareArrays):
 
 class PrepareTrainingSetArrays(PrepareArrays):
     def __init__(self, passbands=('g', 'r'), contextual_info=(0,), reread=False, aggregate_classes=False, bcut=True,
-                 zcut=None, variablescut=False, nchunks=10000, training_set_dir='training_set_files'):
+                 zcut=None, variablescut=False, nchunks=10000, training_set_dir='data/training_set_files',
+                 data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/',):
         PrepareArrays.__init__(self, passbands, contextual_info)
         self.passbands = passbands
         self.contextual_info = contextual_info
@@ -261,8 +263,16 @@ class PrepareTrainingSetArrays(PrepareArrays):
         self.nchunks = nchunks
         self.agg_map = helpers.aggregate_sntypes()
         self.training_set_dir = training_set_dir
+        self.data_dir = data_dir
+        self.save_dir = save_dir
+        self.light_curves = {}
         if not os.path.exists(self.training_set_dir):
             os.makedirs(self.training_set_dir)
+
+    def get_light_curves(self, class_num, nprocesses=1):
+        light_curves = get_data(class_num, self.data_dir, self.save_dir, self.passbands, nprocesses, self.reread)
+
+        return light_curves
 
     @staticmethod
     def get_saved_light_curves_from_database(fpath_saved_lc):
@@ -296,7 +306,12 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                               self.zcut, self.bcut, self.variablescut))
         print(savepath)
         if self.reread is True or not os.path.isfile(savepath):
-            objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
+            for class_num in class_nums:
+                lcs = self.get_light_curves(class_num, nprocesses)
+                self.light_curves.update(lcs)
+
+            objids = list(set(self.light_curves.keys()))
+            # objids, self.fpath = self.get_saved_light_curves_from_database(fpath_saved_lc)
             nobjects = len(objids)
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
@@ -313,7 +328,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             multi_objids = np.array_split(objids, self.nchunks)
 
             # Store light curves into X (fluxes) and y (labels)
-            pool = mp.Pool()
+            pool = mp.Pool(nprocesses)
             results = pool.map_async(self.multi_read_obj, multi_objids) ##
             pool.close()
             pool.join()
@@ -543,12 +558,13 @@ class PrepareTrainingSetArrays(PrepareArrays):
             class_num = int(model)
 
             # Get data for each object
-            try:
-                data = pd.read_hdf(self.fpath, key=objid)
-            except AttributeError:
-                print("ignoring: cannot read", objid)
-                deleterows.append(i)
-                continue
+            data = self.light_curves[objid]
+            # try:
+            #     data = pd.read_hdf(self.fpath, key=objid)
+            # except AttributeError:
+            #     print("ignoring: cannot read", objid)
+            #     deleterows.append(i)
+            #     continue
 
             otherinfo = data['otherinfo'].values.flatten()
             redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
