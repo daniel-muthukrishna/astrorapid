@@ -127,10 +127,7 @@ class InputLightCurve(object):
         otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd]
 
         if self.training_set_parameters is not None:
-            try:
-                t0 = self.compute_t0(outlc)
-            except Exception as e:
-                print(e)
+            t0 = self.compute_t0(outlc)
             otherinfo += [t0, self.peakmjd]
 
         savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 3, 4, 7]].rename(
@@ -155,7 +152,8 @@ def read_multiple_light_curves(light_curve_list, known_redshift=True, training_s
     processed_light_curves = {}
     for light_curve in light_curve_list:
         mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
-        inputlightcurve = InputLightCurve(*light_curve, known_redshift, training_set_parameters)
+        inputlightcurve = InputLightCurve(*light_curve, known_redshift=known_redshift,
+                                          training_set_parameters=training_set_parameters)
         processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
     return processed_light_curves
