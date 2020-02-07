@@ -374,7 +374,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         else:
             X = np.load(os.path.join(self.training_set_dir,
-                                     "X_{}ag{}_ci{}_fp{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
+                                     "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                                    self.contextual_info,
                                                                                    self.zcut, self.bcut,
                                                                                    self.variablescut)), mmap_mode='r')
