@@ -62,7 +62,7 @@ def main():
     """ Train Neural Network classifier """
 
     passbands = ('g', 'r')
-    contextual_info = (0,)
+    contextual_info = ('redshift',)
 
     aggregate_classes = True
     reread_hdf5_data = False

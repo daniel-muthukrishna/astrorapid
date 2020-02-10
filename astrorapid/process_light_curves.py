@@ -122,23 +122,15 @@ class InputLightCurve(object):
                             obsId=obsid, passband=self.passband, per=False, mag=False,
                             photflag=self.photflag, z=self.redshift)
 
-        outlc = laobject.get_lc(recompute=True)
-
-        otherinfo = [self.redshift, self.b, self.mwebv, self.trigger_mjd]
+        outlc = laobject.get_lc_as_table()
+        outlc.meta = {'redshift': self.redshift, 'b': self.b, 'mwebv': self.mwebv, 'trigger_mjd': self.trigger_mjd}
 
         if self.training_set_parameters is not None:
             t0 = self.compute_t0(outlc)
-            otherinfo += [t0, self.peakmjd]
+            outlc.meta['t0'] = t0
+            outlc.meta['peakmjd'] = self.peakmjd
 
-        savepd = {pb: pd.DataFrame(lcinfo).loc[[0, 3, 4, 7]].rename(
-            {0: 'time', 3: 'flux', 4: 'fluxErr', 7: 'photflag'}).T for pb, lcinfo in
-                  outlc.items()}  # Convert to dataframe rows: time, fluxNorm, fluxNormErr, photFlag; columns: ugrizY
-        savepd['otherinfo'] = pd.DataFrame(otherinfo)
-        savepd = pd.DataFrame(
-            {(outerKey, innerKey): values for outerKey, innerDict in savepd.items() for innerKey, values in
-             innerDict.items()})  # Use multilevel indexing
-
-        return savepd
+        return outlc
 
 
 def read_multiple_light_curves(light_curve_list, known_redshift=True, training_set_parameters=None):

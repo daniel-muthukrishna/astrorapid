@@ -6,6 +6,7 @@ Functions for the derivation of base features with LAobjects
 from __future__ import absolute_import
 from __future__ import unicode_literals
 import numpy as np
+import astropy.table as at
 
 
 class BaseMixin(object):
@@ -39,3 +40,14 @@ class BaseMixin(object):
             out[pb] = [getattr(self, column)[ind] for column in self._default_cols]
 
         return out
+
+    def get_lc_as_table(self):
+        columns = ['passband', 'time', 'fluxUnred', 'fluxErrUnred', 'photflag']
+        out = [getattr(self, col) for col in columns]
+
+        out_table = at.Table(out, names=columns)
+        out_table = out_table.group_by('passband')
+
+        return out_table
+
+
