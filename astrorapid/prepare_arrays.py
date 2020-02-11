@@ -97,12 +97,10 @@ class PrepareArrays(object):
 
     def update_X(self, X, i, data, tinterp, len_t, objid, contextual_info, meta_data):
         for j, pb in enumerate(self.passbands):
-            if pb not in data:
-                print("No", pb, "in objid:", objid)
-                continue
-
-            # Drop infinite values
-            data.replace([np.inf, -np.inf], np.nan)
+            # Drop infinite or nan values in any row
+            data.remove_rows(np.where(~np.isfinite(data['time']))[0])
+            data.remove_rows(np.where(~np.isfinite(data['flux']))[0])
+            data.remove_rows(np.where(~np.isfinite(data['fluxErr']))[0])
 
             # Get data
             pbmask = data['passband']==pb

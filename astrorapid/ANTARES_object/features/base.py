@@ -43,9 +43,10 @@ class BaseMixin(object):
 
     def get_lc_as_table(self):
         columns = ['passband', 'time', 'fluxUnred', 'fluxErrUnred', 'photflag']
+        rename_columns = ['passband', 'time', 'flux', 'fluxErr', 'photflag']
         out = [getattr(self, col) for col in columns]
 
-        out_table = at.Table(out, names=columns)
+        out_table = at.Table(out, names=rename_columns)
         out_table = out_table.group_by('passband')
 
         return out_table

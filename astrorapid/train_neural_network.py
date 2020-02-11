@@ -69,7 +69,7 @@ def main():
     retrain_rnn = False
     train_epochs = 50
 
-    otherchange = ''  # nonuniformtime' #'withdropout'##'no_dc_and_late_start_lcs_with_colour'
+    otherchange = 'pytables'  # nonuniformtime' #'withdropout'##'no_dc_and_late_start_lcs_with_colour'
     nchunks = 10000
 
     # Train + Test cuts

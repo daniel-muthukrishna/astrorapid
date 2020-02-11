@@ -35,23 +35,34 @@ def fit_early_lightcurve(outlc, earlytime=10):
     times = OrderedDict()
     fluxes = OrderedDict()
     fluxerrs = OrderedDict()
-    for i, pb in enumerate(outlc):
-        tlc = outlc.get(pb)
-        ttime, tFlux, tFluxErr, tFluxUnred, tFluxErrUnred, tFluxRenorm, tFluxErrRenorm, tphotflag, tzeropoint, tobsId = tlc
+    passbands = np.unique(outlc['passband'].data)
+    for i, pb in enumerate(passbands):
+        pbmask = outlc['passband'] == pb
+        ttime = outlc[pbmask]['time'].data
+        tflux = outlc[pbmask]['flux'].data
+        tfluxerr = outlc[pbmask]['fluxErr'].data
+        tphotflag = outlc[pbmask]['photflag'].data
+
+        minfluxpb = tflux.min()
+        maxfluxpb = tflux.max()
+        norm = maxfluxpb - minfluxpb
+
+        tfluxrenorm = (tflux - minfluxpb) / norm
+        tfluxerrrenorm = tfluxerr / norm
 
         if len(ttime) <= 1 or not np.any(ttime < 0):
-            tFluxRenorm = tFluxRenorm - min(tFluxRenorm)
+            tfluxrenorm = tfluxrenorm - min(tfluxrenorm)
         else:
-            tFluxRenorm = tFluxRenorm - np.median(tFluxRenorm[ttime < 0])
+            tfluxrenorm = tfluxrenorm - np.median(tfluxrenorm[ttime < 0])
         # mask = ttime > -30
-        # tFluxRenorm = tFluxRenorm[mask]
+        # tfluxrenorm = tfluxrenorm[mask]
         # ttime = ttime[mask]
-        # tFluxErrRenorm = tFluxErrRenorm[mask]
+        # tfluxerrrenorm = tfluxerrrenorm[mask]
 
         earlymask = ttime <= earlytime
         times[pb] = ttime[earlymask]
-        fluxes[pb] = tFluxRenorm[earlymask]
-        fluxerrs[pb] = tFluxErrRenorm[earlymask]
+        fluxes[pb] = tfluxrenorm[earlymask]
+        fluxerrs[pb] = tfluxerrrenorm[earlymask]
 
     remove_pbs = []
     x0 = [-12]
