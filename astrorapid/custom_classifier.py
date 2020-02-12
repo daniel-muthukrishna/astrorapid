@@ -12,22 +12,22 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), reread_
                  fig_dir='Figures', plot=True):
 
     """
-    Create a classifer with your own data and own taining parameters.
+    Create a classifier with your own data and own training parameters.
 
     Parameters
     ----------
     get_data_func : func
         Function that reads your data and returns a light_curves object.
-         It takes at least the arguments: class_num, data_dir, save_dir, passbands, known_redshift.
-         See get_custom_data.py for an example template.
-         E.g. get_data_func = get_data_custom(class_num, data_dir, save_dir, passbands)
+        It takes at least the arguments: class_num, data_dir, save_dir, passbands, known_redshift.
+        See get_custom_data.py for an example template.
+        E.g. get_data_func = get_data_custom(class_num, data_dir, save_dir, passbands)
     data_dir : str
         Directory where data is stored. E.g. data_dir='data/ZTF_20190512/'
     class_nums : tuple of ints
         Class numbers to train on. E.g. class_nums=(1, 5, 6, 41, 43, 51, 60)
         E.g. SNIa is 1. See helpers.py for lookup table. You may add your own classes.
-            sntypes_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova',
-                           60: 'SLSN-I', 64: 'TDE', 70: 'AGN', 80: 'RRLyrae', 81: 'Mdwarf', 83: 'EBE'}
+        sntypes_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova',
+        60: 'SLSN-I', 64: 'TDE', 70: 'AGN', 80: 'RRLyrae', 81: 'Mdwarf', 83: 'EBE'}
     reread_data : bool
         If this is True, then it will reread your data and resave the processed files, otherwise
         it will check if the data has already been read, processed and saved.

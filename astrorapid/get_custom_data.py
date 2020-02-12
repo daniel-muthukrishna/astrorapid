@@ -10,40 +10,7 @@ from astrorapid.process_light_curves import InputLightCurve
 def get_custom_data(class_num, data_dir, save_dir, passbands, known_redshift, nprocesses, redo):
     """
     Get data from custom data files.
-    You will need to write this function with the following skeleton function:
-
-    def get_data_from_custom(class_num, data_dir, save_dir, passbands, nprocesses, redo):
-        # If the data has already been run and processed load it. Otherwise read it and save it
-        save_lc_filepath = os.path.join(save_dir, f"lc_classnum_{class_num}.pickle")
-        if os.path.exists(save_lc_filepath) and not redo:
-            with open(save_lc_filepath, "rb") as fp:  # Unpickling
-                light_curves = pickle.load(fp)
-        else:
-            light_curves = {}
-            # Read in data from data_dir and get the mjd, flux, fluxerr, passband, photflag as 1D numpy arrays for
-            # each light curve. Get the ra, dec, objid, redshift, mwebv, model_num, peak_mjd as floats or strings.
-            # Set whether you'd like to train a model with a known redshift or not. Set known_redshift as a boolean.
-
-            # Enter your own data-reading code here that gets the mjds, fluxes, fluxerrs, passbands, photflags,
-            # ras, decs, objids, redshifts, mwebvs, model_nums, peak_mjds for all the light curves from the data_dir
-
-            # Once you have the required data information for each light curve, pass it into InputLightCurve with
-            # something like the following code:
-            for i, objid in enumerate(objids):
-                inputlightcurve = InputLightCurve(mjds[i], fluxes[i], fluxerrs[i], passbands[i], photflags[i],
-                                                  ras[i], decs[i], objids[i], redshifts[i], mwebvs[i],
-                                                  known_redshift=known_redshift,
-                                                  training_set_parameters={'class_number': int(class_num),
-                                                                           'peakmjd': peakmjds[i]})
-                light_curves[objid] = inputlightcurve.preprocess_light_curve()
-
-            # If you think that reading the data is too slow, you may want to replace the for loop above with
-            # multiprocessing. See the example function in get_training_data.py if you need help doing this.
-
-            # Next, we save it:
-            with open(save_lc_filepath, "wb") as fp:  # Pickling
-                pickle.dump(light_curves, fp)
-
+    You will need to write this function with this following skeleton function.
 
     Parameters
     ----------
