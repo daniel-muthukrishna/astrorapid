@@ -27,10 +27,8 @@ Use the following example code:
 
 Train your own classifier with your own data
 ++++++++++++++++++++++++++++++++++++++++++++
-You'll simply need to run the function `create_custom_classifier` to get started with training your own classifier.
+You'll simply need to run the function :func:`astrorapid.custom_classifier.create_custom_classifier` to get started with training your own classifier.
 An example is shown below.
-
-* :func:`astrorapid.custom_classifier.create_custom_classifier`
 
 .. code-block:: python
 
