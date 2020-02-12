@@ -39,7 +39,7 @@ class PrepareArrays(object):
             return deleterows, deleted
 
         if len(data) < 4:
-            print("Less than 4 epochs. nobs = {}".format(data.shape))
+            print("Less than 4 epochs. nobs = {}".format(len(data)))
             deleterows.append(i)
             deleted = True
         elif pre_trigger and len(time[time < 0]) < 3:
