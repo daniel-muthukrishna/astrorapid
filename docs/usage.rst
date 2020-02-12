@@ -33,6 +33,7 @@ An example is shown below.
 * :func:`astrorapid.custom_classifier.create_custom_classifier`
 
 .. code-block:: python
+
     from astrorapid.train_your_own_network import create_custom_classifier
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,6 +63,7 @@ You'll need to write your own function `get_data_func` to read your data and use
 Use the skeleton function here :func:`astrorapid.get_custom_data.get_custom_data`, or as rewritten below.
 
 .. code-block:: python
+
     def get_custom_data(class_num, data_dir, save_dir, passbands, known_redshift, nprocesses, redo):
         """
         Get data from custom data files.
