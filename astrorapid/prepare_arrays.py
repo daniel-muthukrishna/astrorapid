@@ -59,7 +59,7 @@ class PrepareArrays(object):
             deleterows.append(i)
             deleted = True
         elif class_num in [50, 61, 62]:
-            print("Deleting unused kilonova model and PISN and ILOT")
+            print("Deleting unused kilonova class and PISN and ILOT")
             deleterows.append(i)
             deleted = True
 
@@ -171,7 +171,6 @@ class PrepareInputArrays(PrepareArrays):
 
             redshift = data.meta['redshift']
             b = data.meta['b']
-            mwebv = data.meta['mwebv']
             trigger_mjd = data.meta['trigger_mjd']
 
             # Make cuts
@@ -200,7 +199,7 @@ class PrepareInputArrays(PrepareArrays):
 class PrepareTrainingSetArrays(PrepareArrays):
     def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), reread=False, aggregate_classes=False, bcut=True,
                  zcut=None, variablescut=False, nchunks=10000, training_set_dir='data/training_set_files',
-                 data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/',):
+                 data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/', get_data_func=None):
         PrepareArrays.__init__(self, passbands, contextual_info)
         self.passbands = passbands
         self.contextual_info = contextual_info
@@ -215,24 +214,32 @@ class PrepareTrainingSetArrays(PrepareArrays):
         self.data_dir = data_dir
         self.save_dir = save_dir
         self.light_curves = {}
+        self.get_data_func = get_data_func
+        if 'redshift' in contextual_info:
+            self.known_redshift = True
+        else:
+            self.known_redshift = False
         if not os.path.exists(self.training_set_dir):
             os.makedirs(self.training_set_dir)
 
-    def get_light_curves(self, class_num, nprocesses=1):
-        light_curves = get_data(class_num, self.data_dir, self.save_dir, self.passbands, nprocesses, self.reread)
+    def get_light_curves(self, class_nums=(1,), nprocesses=1):
+        light_curves = {}
+
+        for class_num in class_nums:
+            lcs = get_data(self.get_data_func, class_num, self.data_dir, self.save_dir, self.passbands,
+                           self.known_redshift, nprocesses, self.reread)
+            light_curves.update(lcs)
 
         return light_curves
 
-    def prepare_training_set_arrays(self, otherchange='', class_nums=(1,), nprocesses=1):
+    def prepare_training_set_arrays(self, otherchange='', class_nums=(1,), nprocesses=1, train_size=0.6):
         savepath = os.path.join(self.training_set_dir,
                                 "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
                                                                               self.contextual_info, self.zcut,
                                                                               self.bcut, self.variablescut))
         print(savepath)
         if self.reread is True or not os.path.isfile(savepath):
-            for class_num in class_nums:
-                lcs = self.get_light_curves(class_num, nprocesses)
-                self.light_curves.update(lcs)
+            self.light_curves = self.get_light_curves(class_nums, nprocesses)
 
             objids = list(set(self.light_curves.keys()))
             nobjects = len(objids)
@@ -425,9 +432,9 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
 
 
-        X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = train_test_split(
-            X, y, labels, timesX, orig_lc, objids_list, train_size=0.60,
-            shuffle=False, random_state=42)
+        X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, \
+        orig_lc_test, objids_train, objids_test = train_test_split(
+            X, y, labels, timesX, orig_lc, objids_list, train_size=train_size, shuffle=False, random_state=42)
 
         counts = np.unique(labels_train, return_counts=True)[-1]
         class_weights = max(counts) / counts
@@ -460,7 +467,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             print("Preparing {} light curve {} of {}".format(objid, i, nobjects))
 
             # Get aggregate model
-            field, model, base, snid = objid.astype(str).split('_')
+            model, snid = objid.astype(str).split('_')
             if self.aggregate_classes:
                 model = self.agg_map[int(model)]
             class_num = int(model)
@@ -470,8 +477,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             redshift = data.meta['redshift']
             b = data.meta['b']
-            mwebv = data.meta['mwebv']
-            trigger_mjd = data.meta['trigger_mjd']
             t0 = data.meta['t0']
 
             # Make cuts
@@ -487,8 +492,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
             X = self.update_X(X, i, data, tinterp, len_t, objid, self.contextual_info, data.meta)
 
             activeindexes = (tinterp > t0)
-            labels[i] = int(model)
-            y[i][0:len_t] = int(model) * activeindexes
+            labels[i] = class_num
+            y[i][0:len_t] = class_num * activeindexes
 
         deleterows = np.array(deleterows)
         X = np.delete(X, deleterows, axis=0)

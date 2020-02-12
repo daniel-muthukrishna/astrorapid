@@ -114,25 +114,19 @@ def read_fits_file(args):
     header_data = header_HDU[1].data
 
     for i, head in enumerate(header_data):
-        model_num = head['SIM_TYPE_INDEX']
+        class_num = head['SIM_TYPE_INDEX']
         snid = head['SNID']
-        objid = 'field_{}_base_{}'.format(model_num, snid)
+        objid = '{}_{}'.format(class_num, snid)
         ptrobs_min = head['PTROBS_MIN']
         ptrobs_max = head['PTROBS_MAX']
-        peakmag_g = head['SIM_PEAKMAG_g']
-        peakmag_r = head['SIM_PEAKMAG_r']
         redshift = head['SIM_REDSHIFT_HOST']
-        dlmu = head['SIM_DLMU']
         peakmjd = head['PEAKMJD']
         mwebv = head['MWEBV']
-        mwebv_err = head['MWEBV_ERR']
         ra = head['RA']
         if 'DEC' in header_data.names:
             dec = head['DEC']
         else:
             dec = head['DECL']
-        photoz = head['HOSTGAL_PHOTOZ']
-        photozerr = head['HOSTGAL_PHOTOZ_ERR']
         print(i, len(header_data))
 
         try:
@@ -142,7 +136,7 @@ def read_fits_file(args):
 
             inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['photflag'], ra,
                                               dec, objid, redshift, mwebv, known_redshift=known_redshift,
-                                              training_set_parameters={'class_number': int(model_num), 'peakmjd': peakmjd})
+                                              training_set_parameters={'class_number': int(class_num), 'peakmjd': peakmjd})
             light_curves[objid] = inputlightcurve.preprocess_light_curve()
         except IndexError as e:
             print("No detections:", e)  # TODO: maybe do better error checking in future
@@ -154,7 +148,8 @@ def read_fits_file(args):
     return light_curves
 
 
-def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('g', 'r'), known_redshift=True, nprocesses=1):
+def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('g', 'r'), known_redshift=True,
+                                            nprocesses=1):
     """ Save lightcurves from SNANA HEAD AND PHOT FITS files
 
     Parameters

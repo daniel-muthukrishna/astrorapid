@@ -20,8 +20,8 @@ Plot classifications
 Train your own classifier
 -------------------------
 
-* :func:`astrorapid.read_from_database.read_light_curves_from_snana_fits.main` - Store SNANA lightcurves into a HDF5 file
-* :func:`astrorapid.train_neural_network.main` - Run preprocessing and train neural network classification model
+* :func:`astrorapid.get_custom_data.get_custom_data` - Read custom data files and save preprocessed light curves.
+* :func:`astrorapid.custom_classifier.create_custom_classifier` - Run preprocessing and train neural network classification model.
 
 
 The full documentation of useful classes and methods can be found below.
@@ -70,19 +70,15 @@ astrorapid.read_from_database.read_light_curves_from_snana_fits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-.. automodule:: astrorapid.read_from_database.read_light_curves_from_snana_fits
+.. automodule:: astrorapid.get_custom_data
     :members:
-
-.. autoclass:: astrorapid.read_from_database.read_light_curves_from_snana_fits.GetData
-    :members:
-
 
 ------
 
 astrorapid.train_neural_network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: astrorapid.train_neural_network
+.. automodule:: astrorapid.custom_classifier
     :members:
 
 
