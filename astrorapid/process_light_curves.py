@@ -120,7 +120,7 @@ class InputLightCurve(object):
 
         laobject = LAobject(locusId=self.objid, objectId=self.objid, time=self.t, flux=self.flux, fluxErr=self.fluxerr,
                             obsId=obsid, passband=self.passband, per=False, mag=False,
-                            photflag=self.photflag, z=self.redshift)
+                            photflag=self.photflag, z=self.redshift, mwebv=self.mwebv)
 
         outlc = laobject.get_lc_as_table()
         outlc.meta = {'redshift': self.redshift, 'b': self.b, 'mwebv': self.mwebv, 'trigger_mjd': self.trigger_mjd}
