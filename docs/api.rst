@@ -43,6 +43,18 @@ Full Documentation
 ------
 
 
+.. autoclass:: astrorapid.prepare_arrays.PrepareInputArrays
+
+
+------
+
+
+.. autoclass:: astrorapid.prepare_arrays.PrepareTrainingSetArrays
+
+
+------
+
+
 .. autofunction:: astrorapid.process_light_curves.read_multiple_light_curves
 
 
@@ -55,37 +67,17 @@ Full Documentation
 ------
 
 
-.. autoclass:: astrorapid.prepare_arrays.PrepareInputArrays
-
-
-------
-
-
-.. autoclass:: astrorapid.prepare_arrays.PrepareTrainingSetArrays
-
-
-------
-
-astrorapid.read_from_database.read_light_curves_from_snana_fits
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 .. automodule:: astrorapid.get_custom_data
     :members:
 
 ------
 
-astrorapid.train_neural_network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: astrorapid.custom_classifier
     :members:
 
 
 ------
-
-astrorapid.classifier_metrics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: astrorapid.classifier_metrics
     :members:
