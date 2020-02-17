@@ -16,17 +16,17 @@ def main():
                              contextual_info=('redshift',),
                              passbands=('g', 'r'),
                              retrain_network=False,
-                             train_epochs=50,
+                             train_epochs=100,
                              zcut=0.5,
                              bcut=True,
                              variablescut=True,
                              nprocesses=None,
                              nchunks=10000,
-                             aggregate_classes=False,
+                             aggregate_classes=True,
                              otherchange='',
                              training_set_dir=os.path.join(script_dir, '..', 'training_set_files'),
                              save_dir=os.path.join(script_dir, '..', 'data/saved_light_curves'),
-                             fig_dir=os.path.join(script_dir, '..', 'training_set_files', 'Figures', 'ZTF_{}'),
+                             fig_dir=os.path.join(script_dir, '..', 'training_set_files', 'Figures', 'ZTF_with_redshift'),
                              plot=True
                              )
 

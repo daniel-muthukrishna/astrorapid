@@ -24,8 +24,6 @@ except ImportError:
     print("Warning: You will need to install 'matplotlib' if you wish to plot the classifications.")
 
 
-CLASS_NAMES = ['Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'point-Ia', 'Kilonova', 'SLSN-I',
-               'PISN', 'ILOT', 'CART', 'TDE']#, 'AGN']
 CLASS_COLOR = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:orange', 'SNII': 'tab:blue',
                'SNIa-91bg': 'tab:red', 'SNIa-x': 'tab:purple', 'point-Ia': 'tab:brown', 'Kilonova': '#aaffc3',
                'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink',
@@ -38,6 +36,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Classify(object):
     def __init__(self, known_redshift=True, model_filepath='', passbands=('g', 'r'),
+                 class_names=('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'CART', 'TDE'),
                  bcut=False, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 
@@ -49,6 +48,10 @@ class Classify(object):
             Optional argument. The model is taken from the pre-trained model ZTF model if not specified.
         passbands : tuple
             Optional argument. A tuple listing each passband. E.g. ('g', 'r').
+        class_names : tuple
+            List of class names that the model has been trained on. Note that this must be in the same order
+            as used in training for the model specified in the argument model_filepath.
+            If you are using the default model, leave this argument out.
         bcut : bool
             Cut on galactic latitude.
             Do not set unless you know what you are doing.
@@ -69,11 +72,11 @@ class Classify(object):
         self.passbands = passbands
         self.bcut = bcut
         self.zcut = zcut
-        self.class_names = CLASS_NAMES
+        self.class_names = class_names
 
         if self.known_redshift:
             self.contextual_info = ('redshift',)
-            filename = '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_fpsaved_lc_MSIP_ZTF_20190512_firsttry.hdf5_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'keras_model_with_redshift.hdf5'
+            filename = '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/ZTF_with_redshift/keras_model.hdf5'  # '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_fpsaved_lc_MSIP_ZTF_20190512_firsttry.hdf5_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'keras_model_with_redshift.hdf5'
         else:
             self.contextual_info = ()
             filename = 'keras_model_no_redshift.hdf5'
@@ -208,12 +211,14 @@ class Classify(object):
             for idx in range(s):
                 obs_time = []
                 for pb in self.passbands:
+                    lc_data = self.orig_lc[idx]
+                    pbmask = lc_data['passband'] == pb
                     if pb in self.orig_lc[idx]:
-                        obs_time.append(self.orig_lc[idx][pb]['time'].values)
+                        obs_time.append(lc_data[pbmask]['time'].data)
                 obs_time = np.array(obs_time)
                 obs_time = np.sort(obs_time[~np.isnan(obs_time)])
                 y_predict_at_obstime = []
-                for classnum, classname in enumerate(CLASS_NAMES):
+                for classnum, classname in enumerate(self.class_names):
                     y_predict_at_obstime.append(np.interp(obs_time, self.timesX[idx][:argmax[idx]], self.y_predict[idx][:, classnum][:argmax[idx]]))
                 y_predict.append(np.array(y_predict_at_obstime).T)
                 time_steps.append(obs_time + self.trigger_mjds[idx])
@@ -275,22 +280,24 @@ class Classify(object):
             # ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
             # ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
 
+            lc_data = self.orig_lc[idx]
+
             for pbidx, pb in enumerate(self.passbands):
-                if pb in self.orig_lc[idx].keys():
-                    ax1.errorbar(self.orig_lc[idx][pb]['time'], self.orig_lc[idx][pb]['flux'],
-                                 yerr=self.orig_lc[idx][pb]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
-                                 c=PB_COLOR[pb], lw=3, markersize=10, alpha=alpha_observations)
+                pbmask = lc_data['passband'] == pb
+                ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
+                             yerr=lc_data[pbmask]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
+                             c=PB_COLOR[pb], lw=3, markersize=10, alpha=alpha_observations)
                 if plot_matrix_input:
                     ax1.plot(self.timesX[idx][:argmax], self.X[idx][:, pbidx][:argmax], c=PB_COLOR[pb], lw=3)
 
-            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands if pb in self.orig_lc[idx]]).flatten()
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
             new_t = np.sort(new_t[~np.isnan(new_t)])
             if not use_interp_flux and not plot_matrix_input:
                 new_y_predict = []
-                for classnum, classname in enumerate(CLASS_NAMES):
+                for classnum, classname in enumerate(self.class_names):
                     new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))
 
-            for classnum, classname in enumerate(CLASS_NAMES):
+            for classnum, classname in enumerate(self.class_names):
                 if use_interp_flux or plot_matrix_input:
                     ax2.plot(self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax], '-', label=classname,
                              color=CLASS_COLOR[classname], linewidth=3)
@@ -352,8 +359,9 @@ class Classify(object):
             self.get_predictions(light_curves)
 
         for idx in indexes_to_plot:
-            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands if pb in self.orig_lc[idx]]).flatten()
-            all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
+            lc_data = self.orig_lc[idx]
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
+            all_flux = list(lc_data[lc_data['passband'] == 'g']['flux']) + list(lc_data[lc_data['passband'] == 'r']['flux'])
 
             argmax = self.timesX[idx].argmax() + 1
             fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
@@ -382,7 +390,7 @@ class Classify(object):
                     ax1.plot(self.timesX[idx][:argmax][:int(i + 1)], self.X[idx][:, pbidx][:argmax][:int(i + 1)],
                              label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
 
-                for classnum, classname in enumerate(CLASS_NAMES):
+                for classnum, classname in enumerate(self.class_names):
                     ax2.plot(self.timesX[idx][:argmax][:int(i + 1)],
                              self.y_predict[idx][:, classnum][:argmax][:int(i + 1)],
                              '-', label=classname, color=CLASS_COLOR[classname], linewidth=3)
@@ -434,10 +442,11 @@ class Classify(object):
             self.get_predictions()
 
         for idx in indexes_to_plot:
-            new_t = np.array([self.orig_lc[idx][pb]['time'].values for pb in self.passbands]).flatten()
+            lc_data = self.orig_lc[idx]
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
             new_t = np.sort(new_t[~np.isnan(new_t)])
             new_y_predict = []
-            all_flux = list(self.orig_lc[idx]['g']['flux']) + list(self.orig_lc[idx]['r']['flux'])
+            all_flux = list(lc_data[lc_data['passband'] == 'g']['flux']) + list(lc_data[lc_data['passband'] == 'r']['flux'])
 
             argmax = self.timesX[idx].argmax() + 1
             fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15),
@@ -461,7 +470,7 @@ class Classify(object):
             Writer = animation.writers['ffmpeg']
             writer = Writer(fps=2, bitrate=1800)
 
-            for classnum, classname in enumerate(CLASS_NAMES):
+            for classnum, classname in enumerate(self.class_names):
                 new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))
 
             def animate(i):
@@ -473,13 +482,14 @@ class Classify(object):
                     if i + 1 >= len(new_t):
                         break
 
-                    dea = [self.orig_lc[idx][pb]['time'] < new_t[int(i+1)]]
+                    pbmask = lc_data['passband'] == pb
+                    dea = [lc_data[pbmask]['time'] < new_t[int(i+1)]]
 
-                    ax1.errorbar(np.array(self.orig_lc[idx][pb]['time'])[dea], np.array(self.orig_lc[idx][pb]['flux'])[dea],
-                                 yerr=np.array(self.orig_lc[idx][pb]['fluxErr'])[dea], fmt=PB_MARKER[pb], label=pb,
+                    ax1.errorbar(np.array(lc_data[pbmask]['time'])[dea], np.array(lc_data[pbmask]['flux'])[dea],
+                                 yerr=np.array(lc_data[pbmask]['fluxErr'])[dea], fmt=PB_MARKER[pb], label=pb,
                                  c=PB_COLOR[pb], lw=3, markersize=10)
 
-                for classnum, classname in enumerate(CLASS_NAMES):
+                for classnum, classname in enumerate(self.class_names):
                     # ax2.plot(self.timesX[idx][:argmax][:int(i + 1)],
                     #          self.y_predict[idx][:, classnum][:argmax][:int(i + 1)],
                     #          '-', label=classname, color=CLASS_COLOR[classname], linewidth=3)

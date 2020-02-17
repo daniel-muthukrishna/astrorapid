@@ -74,8 +74,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         print("Plotting example vs time", idx)
         argmax = timesX_test[idx].argmax() + 1
 
-        #
-        new_t = np.array([orig_lc_test[idx][pb]['time'].values for pb in passbands]).flatten()
+        lc_data = orig_lc_test[idx]
+        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in passbands])
         new_t = np.sort(new_t[~np.isnan(new_t)])
         new_y_predict = []
 
@@ -83,11 +83,11 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
                                        sharex=True)
 
         for pbidx, pb in enumerate(passbands):
-            if pb in orig_lc_test[idx].keys():
-                # masktime = (orig_lc_test[idx][pb]['time'] > MINTIME) & (orig_lc_test[idx][pb]['time'] < MAXTIME)
-                ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb]['flux'],
-                             yerr=orig_lc_test[idx][pb]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
-                             lw=3, markersize=10, alpha=0.2)
+            pbmask = lc_data['passband'] == pb
+            # masktime = (lc_data[pbmask]['time'] > MINTIME) & (lc_data[pbmask]['time'] < MAXTIME)
+            ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
+                         yerr=lc_data[pbmask]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
+                         lw=3, markersize=10, alpha=0.2)
             ax1.plot(timesX_test[idx][:argmax], X_test[idx][:, pbidx][:argmax], c=COLPB[pb],
                      lw=3)  # , markersize=10, marker=MARKPB[pb])
 
@@ -95,13 +95,18 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
         ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
         try:
-            otherinfo = orig_lc_test[idx]['otherinfo'].values.flatten()
-            redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
+            redshift = lc_data.meta['redshift']
+            mwebv = lc_data.meta['mwebv']
+            b = lc_data.meta['b']
+            trigger_mjd = lc_data.meta['trigger_mjd']
+            t0 = lc_data.meta['t0']
+            peakmjd = lc_data.meta['peakmjd']
+
             if t0 != -99:
                 ax1.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
                 ax2.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
                 ax1.annotate('$t_0 = {}$'.format(round(t0, 1)), xy=(t0, 1), xytext=(t0 - 33, 0.9*max(orig_lc_test[idx]['r']['flux'])), color='grey')
-            print(otherinfo[0:6])
+
             ax1.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
             ax2.axvline(x=peakmjd - trigger_mjd, color='k', linestyle=':', linewidth=1)
         except Exception as e:
@@ -126,8 +131,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax2.set_ylabel("Class Probability")  # , fontsize=18)
         # ax1.set_ylim(-0.1, 1.1)
         # ax2.set_ylim(0, 1)
-        mintime_lc = min([min(orig_lc_test[idx][pb]['time']) for pb in passbands])
-        maxtime_lc = max([max(orig_lc_test[idx][pb]['time']) for pb in passbands])
+        mintime_lc = min([min(lc_data[lc_data['passband'] == pb]['time']) for pb in passbands])
+        maxtime_lc = max([max(lc_data[lc_data['passband'] == pb]['time']) for pb in passbands])
         ax1.set_xlim(max(mintime_lc, MINTIME), min(maxtime_lc, MAXTIME))
         # ax1.set_xlim(MINTIME, MAXTIME)
         plt.setp(ax1.get_xticklabels(), visible=False)
@@ -147,12 +152,12 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         print("Plotting animation example vs time", idx)
 
         #
-        new_t = np.array([orig_lc_test[idx][pb]['time'].values for pb in passbands]).flatten()
+        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].values for pb in passbands])
         new_t = np.sort(new_t[~np.isnan(new_t)])
         new_y_predict = []
-        all_flux = list(orig_lc_test[idx]['g']['flux']) + list(orig_lc_test[idx]['r']['flux'])
+        # all_flux = list(orig_lc_test[idx]['g']['flux']) + list(orig_lc_test[idx]['r']['flux'])
 
-        timestep = timesX_test[idx][1] - timesX_test[idx][0]
+        # timestep = timesX_test[idx][1] - timesX_test[idx][0]
         argmax = timesX_test[idx].argmax() + 1
         fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15), num="animation_classification_vs_time_{}".format(idx), sharex=True)
 
@@ -162,7 +167,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax1.set_ylabel("Relative Flux")  # , fontsize=15)
         ax2.set_ylabel("Class Probability")  # , fontsize=18)
         ax2.set_ylim(bottom=0, top=0.9)
-        ax1.set_ylim(top=1.15*max([max(orig_lc_test[idx][pb]['flux']) for pb in passbands]), bottom=-2700)
+        ax1.set_ylim(top=1.15*max([max(lc_data[pbmask]['flux']) for pb in passbands]), bottom=-2700)
         ax1.set_xlim(MINTIME, MAXTIME)
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
@@ -170,8 +175,14 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         fig.subplots_adjust(hspace=0)
 
         true_class = int(max(y_test_indexes[idx]))
-        otherinfo = orig_lc_test[idx]['otherinfo'].values.flatten()
-        redshift, b, mwebv, trigger_mjd, t0, peakmjd = otherinfo[0:6]
+
+        redshift = lc_data.meta['redshift']
+        mwebv = lc_data.meta['mwebv']
+        b = lc_data.meta['b']
+        trigger_mjd = lc_data.meta['trigger_mjd']
+        t0 = lc_data.meta['t0']
+        peakmjd = lc_data.meta['peakmjd']
+
         t0 = -7.3
         ax1.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
         ax2.axvline(x=t0, color='grey', linestyle='--', linewidth=2)
@@ -197,10 +208,10 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
                 if (i + 1) < len(new_t) and (new_t[int(i + 1)] - new_t[int(i)]) < 0.4:
                     break
 
-                dea = [orig_lc_test[idx][pb]['time'] < new_t[int(i + 1)]]
+                dea = [lc_data[pbmask]['time'] < new_t[int(i + 1)]]
 
-                ax1.errorbar(np.array(orig_lc_test[idx][pb]['time'])[dea], np.array(orig_lc_test[idx][pb]['flux'])[dea],
-                             yerr=np.array(orig_lc_test[idx][pb]['fluxErr'])[dea], fmt=MARKPB[pb], label=pb,
+                ax1.errorbar(np.array(lc_data[pbmask]['time'])[dea], np.array(lc_data[pbmask]['flux'])[dea],
+                             yerr=np.array(lc_data[pbmask]['fluxErr'])[dea], fmt=MARKPB[pb], label=pb,
                              c=COLPB[pb], lw=3, markersize=10)
 
             for classnum, classname in enumerate(class_names):
@@ -428,7 +439,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     #     for pb in passbands:
     #         if pb in orig_lc_test[idx].keys():
     #             try:
-    #                 ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb]['flux'],
+    #                 ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
     #                              yerr=orig_lc_test[idx][pb]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
     #                              lw=3, markersize=10)
     #             except KeyError:
