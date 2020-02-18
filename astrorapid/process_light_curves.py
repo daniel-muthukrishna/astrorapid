@@ -36,6 +36,7 @@ class InputLightCurve(object):
             Optional parameter. Cosmological redshift.
         mwebv : float
             Optional parameter. Milky Way E(B-V) extinction.
+            If mwebv is None, then light curve will not be corrected for Milky Way Extinction.
         known_redshift : bool
             Whether to use redshift in processing the light curves and making the arrays.
         training_set_parameters : dict
