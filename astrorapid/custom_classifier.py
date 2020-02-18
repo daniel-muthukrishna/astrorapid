@@ -1,7 +1,7 @@
 import os
 from astrorapid.prepare_arrays import PrepareTrainingSetArrays
 from astrorapid.plot_metrics import plot_metrics
-from astrorapid.train_neural_network import train_model
+from astrorapid.neural_network_model import train_model
 import astrorapid.get_custom_data
 
 

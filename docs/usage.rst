@@ -32,7 +32,7 @@ An example is shown below.
 
 .. code-block:: python
 
-    from astrorapid.train_your_own_network import create_custom_classifier
+    from astrorapid.custom_classifier import create_custom_classifier
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
