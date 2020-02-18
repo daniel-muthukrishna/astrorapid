@@ -320,38 +320,30 @@ class LAobject(BaseMixin):
             fluxerr_pb = self.fluxErr[mask]
             npbobs = len(flux_pb)
 
-            if npbobs > 1:
-                # there's at least enough observations to find minimum and maximum
-                if self.mwebv:
-                    flux_out = extinction.apply(extinctions[i], flux_pb, inplace=False)
-                    fluxerr_out = extinction.apply(extinctions[i], fluxerr_pb, inplace=False)
-                else:
-                    flux_out = flux_pb
-                    fluxerr_out = fluxerr_pb
+            if npbobs < 1:
+                return
+
+            if self.mwebv:
+                flux_out = extinction.apply(extinctions[i], flux_pb, inplace=False)
+                fluxerr_out = extinction.apply(extinctions[i], fluxerr_pb, inplace=False)
+            else:
+                flux_out = flux_pb
+                fluxerr_out = fluxerr_pb
                 self.fluxUnred[mask] = flux_out
                 self.fluxErrUnred[mask] = fluxerr_out
 
+            if npbobs > 1:
+                # there's at least enough observations to find minimum and maximum
                 minfluxpb = flux_out.min()
                 maxfluxpb = flux_out.max()
                 norm = maxfluxpb - minfluxpb
-
-                self.fluxRenorm[mask] = flux_out - minfluxpb
-                self.fluxErrRenorm[mask] = fluxerr_out
-
-                self.fluxRenorm[mask] /= norm
-                self.fluxErrRenorm[mask] /= norm
+                self.fluxRenorm[mask] = (flux_out - minfluxpb) / norm
+                self.fluxErrRenorm[mask] = fluxerr_out / norm
             elif npbobs == 1:
                 # deal with the case with one observation in this passband by setting renorm = 0.5
-                flux_out = extinction.apply(extinctions[i], flux_pb, inplace=False)
-                fluxerr_out = extinction.apply(extinctions[i], fluxerr_pb, inplace=False)
-                self.fluxUnred[mask] = flux_out
-                self.fluxErrUnred[mask] = fluxerr_out
-
                 norm = self.fluxUnred[mask] / 0.5
                 self.fluxRenorm[mask] /= norm
                 self.fluxErrRenorm[mask] /= norm
-            else:
-                pass
 
         self._default_cols = ['time', 'flux', 'fluxErr', 'fluxUnred', 'fluxErrUnred', \
                               'fluxRenorm', 'fluxErrRenorm', 'photflag', 'zeropoint', 'obsId']
