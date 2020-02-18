@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pickle
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.models import load_model
 from tensorflow.python.keras.layers import Dense, Input
@@ -7,9 +8,10 @@ from tensorflow.python.keras.layers import LSTM, GRU
 from tensorflow.python.keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed, Masking
 from tensorflow.python.keras.layers.convolutional import Conv1D, Conv2D
 from tensorflow.python.keras.layers.convolutional import MaxPooling1D, MaxPooling2D
+import matplotlib.pyplot as plt
 
 
-def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25):
+def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25, plot_loss=True):
     """ Train Neural Network classifier and save model. """
 
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
@@ -46,9 +48,40 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
         model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=500, verbose=2, sample_weight=sample_weights)
+        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=500,
+                            verbose=2, sample_weight=sample_weights)
 
         print(model.summary())
         model.save(model_filename)
 
+        with open(os.path.join(fig_dir, "model_history.pickle"), 'wb') as fp:
+            pickle.dump(history.history, fp)
+
+        if plot_loss:
+            plot_history(history.history, fig_dir)
+
     return model
+
+
+def plot_history(history, fig_dir):
+    # Plot loss vs epochs
+    plt.figure()
+    train_loss = history['loss']
+    val_loss = history['val_loss']
+    plt.plot(train_loss)
+    plt.plot(val_loss)
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig(os.path.join(fig_dir, "model_loss_history.pdf"))
+
+    # Plot accuracy vs figure
+    plt.figure()
+    train_acc = history['acc']
+    val_acc = history['val_acc']
+    plt.plot(train_acc)
+    plt.plot(val_acc)
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig(os.path.join(fig_dir, "model_accuracy_history.pdf"))
