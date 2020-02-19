@@ -27,7 +27,7 @@ class PrepareArrays(object):
         self.mintime = -70
         self.maxtime = 80
 
-    def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, variables_cut=True,
+    def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, ignore_classes=(),
                   pre_trigger=True):
         deleted = False
         try:
@@ -54,12 +54,8 @@ class PrepareArrays(object):
             print("Redshift cut. z = {}".format(redshift))
             deleterows.append(i)
             deleted = True
-        elif class_num is not None and variables_cut is True and class_num in [70, 80, 81, 83, 84, 90, 91, 92, 93]:
-            print("Not including variable models", class_num)
-            deleterows.append(i)
-            deleted = True
-        elif class_num in [50, 61, 62]:
-            print("Deleting unused kilonova class and PISN and ILOT")
+        elif class_num in ignore_classes:
+            print("Not including class:", class_num)
             deleterows.append(i)
             deleted = True
 
@@ -197,19 +193,17 @@ class PrepareInputArrays(PrepareArrays):
 
 
 class PrepareTrainingSetArrays(PrepareArrays):
-    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), reread=False, aggregate_classes=False, bcut=True,
-                 zcut=None, variablescut=False, nchunks=10000, training_set_dir='data/training_set_files',
+    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), reread=False, bcut=True, zcut=None,
+                 ignore_classes=(), class_name_map=None, nchunks=10000,  training_set_dir='data/training_set_files',
                  data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/', get_data_func=None):
         PrepareArrays.__init__(self, passbands, contextual_info)
         self.passbands = passbands
         self.contextual_info = contextual_info
         self.reread = reread
-        self.aggregate_classes = aggregate_classes
         self.bcut = bcut
         self.zcut = zcut
-        self.variablescut = variablescut
+        self.ignore_classes = ignore_classes
         self.nchunks = nchunks
-        self.agg_map = helpers.aggregate_sntypes()
         self.training_set_dir = training_set_dir
         self.data_dir = data_dir
         self.save_dir = save_dir
@@ -219,6 +213,11 @@ class PrepareTrainingSetArrays(PrepareArrays):
             self.known_redshift = True
         else:
             self.known_redshift = False
+        if class_name_map is None:
+            self.class_name_map = helpers.get_sntypes()
+        else:
+            self.class_name_map = class_name_map
+
         if not os.path.exists(self.training_set_dir):
             os.makedirs(self.training_set_dir)
 
@@ -234,9 +233,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
     def prepare_training_set_arrays(self, otherchange='', class_nums=(1,), nprocesses=1, train_size=0.6):
         savepath = os.path.join(self.training_set_dir,
-                                "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                              self.contextual_info, self.zcut,
-                                                                              self.bcut, self.variablescut))
+                                "X_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                         self.bcut, self.ignore_classes))
         print(savepath)
         if self.reread is True or not os.path.isfile(savepath):
             self.light_curves = self.get_light_curves(class_nums, nprocesses)
@@ -290,88 +288,53 @@ class PrepareTrainingSetArrays(PrepareArrays):
             timesX = np.delete(timesX, deleterows, axis=0)
 
             np.save(os.path.join(self.training_set_dir,
-                                 "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                               self.contextual_info,
-                                                                               self.zcut, self.bcut,
-                                                                               self.variablescut)), X)
+                                 "X_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                    self.bcut, self.ignore_classes)), X)
             np.save(os.path.join(self.training_set_dir,
-                                 "y_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                               self.contextual_info,
-                                                                               self.zcut, self.bcut,
-                                                                               self.variablescut)), y)
+                                 "y_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                    self.bcut, self.ignore_classes)), y)
             np.save(os.path.join(self.training_set_dir,
-                                 "labels_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                                    self.contextual_info,
-                                                                                    self.zcut,
-                                                                                    self.bcut, self.variablescut)),
-                    labels)
-            np.save(os.path.join(self.training_set_dir, "tinterp_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                                            self.aggregate_classes,
-                                                                                                            self.contextual_info,
-
-                                                                                                            self.zcut,
-                                                                                                            self.bcut,
-                                                                                                            self.variablescut)),
-                    timesX)
+                                 "labels_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                         self.bcut, self.ignore_classes)), labels)
             np.save(os.path.join(self.training_set_dir,
-                                 "objids_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                                    self.contextual_info,
-                                                                                    self.zcut,
-                                                                                    self.bcut, self.variablescut)),
+                                 "tinterp_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                          self.bcut, self.ignore_classes)), timesX)
+            np.save(os.path.join(self.training_set_dir,
+                                 "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                         self.bcut, self.ignore_classes)),
                     objids_list)
             with open(os.path.join(self.training_set_dir,
-                                   "origlc_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                      self.aggregate_classes,
-                                                                                      self.contextual_info,
-                                                                                      self.zcut,
-                                                                                      self.bcut, self.variablescut)),
+                                   "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                           self.bcut, self.ignore_classes)),
                       'wb') as f:
                 pickle.dump(orig_lc, f)
 
         else:
             X = np.load(os.path.join(self.training_set_dir,
-                                     "X_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                                   self.contextual_info,
-                                                                                   self.zcut, self.bcut,
-                                                                                   self.variablescut)), mmap_mode='r')
+                                     "X_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                        self.bcut, self.ignore_classes)), mmap_mode='r')
             y = np.load(os.path.join(self.training_set_dir,
-                                     "y_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange, self.aggregate_classes,
-                                                                                   self.contextual_info,
-                                                                                   self.zcut, self.bcut,
-                                                                                   self.variablescut)))
+                                     "y_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                        self.bcut, self.ignore_classes)))
             labels = np.load(os.path.join(self.training_set_dir,
-                                          "labels_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                             self.aggregate_classes,
-                                                                                             self.contextual_info,
-                                                                                             self.zcut,
-                                                                                             self.bcut,
-                                                                                             self.variablescut)))
+                                          "labels_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
+                                                                                  self.zcut, self.bcut,
+                                                                                  self.ignore_classes)))
             timesX = np.load(os.path.join(self.training_set_dir,
-                                          "tinterp_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                              self.aggregate_classes,
-                                                                                              self.contextual_info,
-                                                                                              self.zcut,
-                                                                                              self.bcut,
-                                                                                              self.variablescut)))
+                                          "tinterp_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
+                                                                                   self.zcut, self.bcut,
+                                                                                   self.ignore_classes)))
             objids_list = np.load(os.path.join(self.training_set_dir,
-                                               "objids_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                                  self.aggregate_classes,
-                                                                                                  self.contextual_info,
-                                                                                                  self.zcut,
-                                                                                                  self.bcut,
-                                                                                                  self.variablescut)))
+                                               "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange,
+                                                                                       self.contextual_info, self.zcut,
+                                                                                       self.bcut, self.ignore_classes)))
             with open(os.path.join(self.training_set_dir,
-                                   "origlc_{}ag{}_ci{}_z{}_b{}_var{}.npy".format(otherchange,
-                                                                                      self.aggregate_classes,
-                                                                                      self.contextual_info,
-                                                                                      self.zcut,
-                                                                                      self.bcut, self.variablescut)),
-                      'rb') as f:
+                                   "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
+                                                                           self.bcut, self.ignore_classes)), 'rb') as f:
                 orig_lc = pickle.load(f)
 
         classes = sorted(list(set(labels)))
-        sntypes_map = helpers.get_sntypes()
-        class_names = [sntypes_map[class_num] for class_num in classes]
+        class_names = [self.class_name_map[class_num] for class_num in classes]
 
         # Count nobjects per class
         for c in classes:
@@ -466,22 +429,17 @@ class PrepareTrainingSetArrays(PrepareArrays):
         for i, objid in enumerate(objids):
             print("Preparing {} light curve {} of {}".format(objid, i, nobjects))
 
-            # Get aggregate model
-            model, snid = objid.astype(str).split('_')
-            if self.aggregate_classes:
-                model = self.agg_map[int(model)]
-            class_num = int(model)
-
             # Get data for each object
             data = self.light_curves[objid]
 
             redshift = data.meta['redshift']
             b = data.meta['b']
             t0 = data.meta['t0']
+            class_num = data.meta['class_num']
 
             # Make cuts
-            deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=model, bcut=self.bcut,
-                                                 zcut=self.zcut, variables_cut=self.variablescut, pre_trigger=False)
+            deleterows, deleted = self.make_cuts(data, i, deleterows, b, redshift, class_num=class_num, bcut=self.bcut,
+                                                 zcut=self.zcut, ignore_classes=self.ignore_classes, pre_trigger=False)
             if deleted:
                 continue
 

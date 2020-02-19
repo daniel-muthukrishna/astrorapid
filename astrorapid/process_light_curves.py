@@ -130,6 +130,7 @@ class InputLightCurve(object):
             t0 = self.compute_t0(outlc)
             outlc.meta['t0'] = t0
             outlc.meta['peakmjd'] = self.peakmjd
+            outlc.meta['class_num'] = self.class_number
 
         return outlc
 

@@ -1,6 +1,4 @@
-import os
 import numpy as np
-import h5py
 import multiprocessing as mp
 import pandas as pd
 import astropy.io.fits as afits

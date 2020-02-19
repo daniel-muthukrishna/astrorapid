@@ -5,11 +5,11 @@ from astrorapid.neural_network_model import train_model
 import astrorapid.get_custom_data
 
 
-def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), reread_data=False, train_size=0.6,
-                 contextual_info=('redshift',), passbands=('g', 'r'), retrain_network=False, train_epochs=50,
-                 zcut=0.5, bcut=True, variablescut=True, nprocesses=1, nchunks=1000, aggregate_classes=False,
-                 otherchange='', training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
-                 fig_dir='Figures', plot=True):
+def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_name_map=None, reread_data=False, train_size=0.6,
+                             contextual_info=('redshift',), passbands=('g', 'r'), retrain_network=False, train_epochs=50,
+                             zcut=0.5, bcut=True, ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
+                             training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
+                             fig_dir='Figures', plot=True):
 
     """
     Create a classifier with your own data and own training parameters.
@@ -24,10 +24,11 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), reread_
     data_dir : str
         Directory where data is stored. E.g. data_dir='data/ZTF_20190512/'
     class_nums : tuple of ints
-        Class numbers to train on. E.g. class_nums=(1, 5, 6, 41, 43, 51, 60)
-        E.g. SNIa is 1. See helpers.py for lookup table. You may add your own classes.
-        sntypes_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova',
-        60: 'SLSN-I', 64: 'TDE', 70: 'AGN', 80: 'RRLyrae', 81: 'Mdwarf', 83: 'EBE'}
+        Class numbers to train on. E.g. class_nums=(1, 5, 6, 41, 43, 51)
+    class_name_map : dict or None
+        This maps the class_nums onto class names.
+        E.g. class_name_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova'}.
+        If this is None, it will use the default mapping listed in get_sntypes in helpers.py.
     reread_data : bool
         If this is True, then it will reread your data and resave the processed files, otherwise
         it will check if the data has already been read, processed and saved.
@@ -51,17 +52,14 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), reread_
         Do not train on objects with redshifts higher than zcut.
     bcut : bool
         If True, do not train on objects within 15 degrees of the galactic plane
-    variablescut : bool
-        If True, do not train on variable objects even if they are specified in class_nums.
-        variable objects, here, are defined as class_nums 70, 80, 81, 83, 84, 90, 91, 92, 93.
+    ignore_classes : tuple
+        Will not train or test on classes listed in this tuple.
     nprocesses : int or None
         Number of computer processes to use while processing the data.
         If None, it will use all the available processors from os.cpu_count().
     nchunks : int
         Number of chunks to split the data set into before doing multiprocessing.
         This should be a small fraction of the number of total objects.
-    aggregate_classes : bool
-        Whether to aggregate classes in the way listed in the helpers.py in class_nums. Usually leave this False.
     other_change : str
         A change in this text will signify that a change has been made to one of these training parameters
         and that the data should be resaved and the model retrained should resave the data and retrained.
@@ -85,9 +83,10 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), reread_
             os.makedirs(dirname)
 
     # Prepare the training set, read the data files, and save processed files
-    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_data, aggregate_classes, bcut, zcut,
-                                             variablescut, nchunks=nchunks, training_set_dir=training_set_dir,
-                                             data_dir=data_dir, save_dir=save_dir, get_data_func=get_data_func)
+    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_data, bcut, zcut, ignore_classes,
+                                             class_name_map=class_name_map, nchunks=nchunks,
+                                             training_set_dir=training_set_dir, data_dir=data_dir, save_dir=save_dir,
+                                             get_data_func=get_data_func)
     X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, \
     timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = \
         preparearrays.prepare_training_set_arrays(otherchange, class_nums, nprocesses, train_size)
