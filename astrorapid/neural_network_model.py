@@ -77,8 +77,8 @@ def plot_history(history, fig_dir):
 
     # Plot accuracy vs figure
     plt.figure()
-    train_acc = history['acc']
-    val_acc = history['val_acc']
+    train_acc = history['accuracy']
+    val_acc = history['val_accuracy']
     plt.plot(train_acc)
     plt.plot(val_acc)
     plt.ylabel('Accuracy')

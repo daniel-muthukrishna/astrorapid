@@ -76,7 +76,7 @@ class Classify(object):
 
         if self.known_redshift:
             self.contextual_info = ('redshift',)
-            filename = '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/ZTF_with_redshift/keras_model.hdf5'  # '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_fpsaved_lc_MSIP_ZTF_20190512_firsttry.hdf5_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'keras_model_with_redshift.hdf5'
+            filename = 'keras_model_with_redshift.hdf5'  # '/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'/Users/danmuth/OneDrive - University of Cambridge/PycharmProjects/astrorapid/astrorapid/training_set_files/Figures/classify/ZTF__noAGN_batch500_unnormalised_epochs50_agTrue_ci(0,)_fpsaved_lc_MSIP_ZTF_20190512_firsttry.hdf5_zcut0.5_bcutTrue_varcutTrue/keras_model.hdf5' #'keras_model_with_redshift.hdf5'
         else:
             self.contextual_info = ()
             filename = 'keras_model_no_redshift.hdf5'
