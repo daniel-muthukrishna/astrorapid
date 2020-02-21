@@ -210,8 +210,9 @@ class Classify(object):
             time_steps = []
             for idx in range(s):
                 obs_time = []
-                for pb in self.passbands:
-                    lc_data = self.orig_lc[idx]
+                lc_data = self.orig_lc[idx]
+                used_passbands = [pb for pb in self.passbands if pb in lc_data['passband']]
+                for pb in used_passbands:
                     pbmask = lc_data['passband'] == pb
                     if pb in self.orig_lc[idx]:
                         obs_time.append(lc_data[pbmask]['time'].data)
@@ -281,8 +282,9 @@ class Classify(object):
             # ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
 
             lc_data = self.orig_lc[idx]
+            used_passbands = [pb for pb in self.passbands if pb in lc_data['passband']]
 
-            for pbidx, pb in enumerate(self.passbands):
+            for pbidx, pb in enumerate(used_passbands):
                 pbmask = lc_data['passband'] == pb
                 ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
                              yerr=lc_data[pbmask]['fluxErr'], fmt=PB_MARKER[pb], label=pb,
@@ -290,7 +292,7 @@ class Classify(object):
                 if plot_matrix_input:
                     ax1.plot(self.timesX[idx][:argmax], self.X[idx][:, pbidx][:argmax], c=PB_COLOR[pb], lw=3)
 
-            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in used_passbands])
             new_t = np.sort(new_t[~np.isnan(new_t)])
             if not use_interp_flux and not plot_matrix_input:
                 new_y_predict = []
@@ -360,7 +362,9 @@ class Classify(object):
 
         for idx in indexes_to_plot:
             lc_data = self.orig_lc[idx]
-            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
+            used_passbands = [pb for pb in self.passbands if pb in lc_data['passband']]
+
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in used_passbands])
             all_flux = list(lc_data[lc_data['passband'] == 'g']['flux']) + list(lc_data[lc_data['passband'] == 'r']['flux'])
 
             argmax = self.timesX[idx].argmax() + 1
@@ -386,7 +390,7 @@ class Classify(object):
             writer = Writer(fps=5, bitrate=1800)
 
             def animate(i):
-                for pbidx, pb in enumerate(self.passbands):
+                for pbidx, pb in enumerate(used_passbands):
                     ax1.plot(self.timesX[idx][:argmax][:int(i + 1)], self.X[idx][:, pbidx][:argmax][:int(i + 1)],
                              label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
 
@@ -443,7 +447,9 @@ class Classify(object):
 
         for idx in indexes_to_plot:
             lc_data = self.orig_lc[idx]
-            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in self.passbands])
+            used_passbands = [pb for pb in self.passbands if pb in lc_data['passband']]
+
+            new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in used_passbands])
             new_t = np.sort(new_t[~np.isnan(new_t)])
             new_y_predict = []
             all_flux = list(lc_data[lc_data['passband'] == 'g']['flux']) + list(lc_data[lc_data['passband'] == 'r']['flux'])
@@ -474,7 +480,7 @@ class Classify(object):
                 new_y_predict.append(np.interp(new_t, self.timesX[idx][:argmax], self.y_predict[idx][:, classnum][:argmax]))
 
             def animate(i):
-                for pbidx, pb in enumerate(self.passbands):
+                for pbidx, pb in enumerate(used_passbands):
                     # ax1.plot(self.timesX[idx][:argmax][:int(i + 1)], self.X[idx][:, pbidx][:argmax][:int(i + 1)],
                     #          label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
 

@@ -75,14 +75,16 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         argmax = timesX_test[idx].argmax() + 1
 
         lc_data = orig_lc_test[idx]
-        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in passbands])
+        used_passbands = [pb for pb in passbands if pb in lc_data['passband']]
+
+        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].data for pb in used_passbands])
         new_t = np.sort(new_t[~np.isnan(new_t)])
         new_y_predict = []
 
         fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15), num="classification_vs_time_{}".format(idx),
                                        sharex=True)
 
-        for pbidx, pb in enumerate(passbands):
+        for pbidx, pb in enumerate(used_passbands):
             pbmask = lc_data['passband'] == pb
             # masktime = (lc_data[pbmask]['time'] > MINTIME) & (lc_data[pbmask]['time'] < MAXTIME)
             ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
@@ -131,8 +133,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax2.set_ylabel("Class Probability")  # , fontsize=18)
         # ax1.set_ylim(-0.1, 1.1)
         # ax2.set_ylim(0, 1)
-        mintime_lc = min([min(lc_data[lc_data['passband'] == pb]['time']) for pb in passbands])
-        maxtime_lc = max([max(lc_data[lc_data['passband'] == pb]['time']) for pb in passbands])
+        mintime_lc = min([min(lc_data[lc_data['passband'] == pb]['time']) for pb in used_passbands])
+        maxtime_lc = max([max(lc_data[lc_data['passband'] == pb]['time']) for pb in used_passbands])
         ax1.set_xlim(max(mintime_lc, MINTIME), min(maxtime_lc, MAXTIME))
         # ax1.set_xlim(MINTIME, MAXTIME)
         plt.setp(ax1.get_xticklabels(), visible=False)
@@ -152,7 +154,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         print("Plotting animation example vs time", idx)
 
         #
-        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].values for pb in passbands])
+        new_t = np.concatenate([lc_data[lc_data['passband'] == pb]['time'].values for pb in used_passbands])
         new_t = np.sort(new_t[~np.isnan(new_t)])
         new_y_predict = []
         # all_flux = list(orig_lc_test[idx]['g']['flux']) + list(orig_lc_test[idx]['r']['flux'])
@@ -167,7 +169,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         ax1.set_ylabel("Relative Flux")  # , fontsize=15)
         ax2.set_ylabel("Class Probability")  # , fontsize=18)
         ax2.set_ylim(bottom=0, top=0.9)
-        ax1.set_ylim(top=1.15*max([max(lc_data[pbmask]['flux']) for pb in passbands]), bottom=-2700)
+        ax1.set_ylim(top=1.15*max([max(lc_data[lc_data['passband'] == pb]['flux']) for pb in used_passbands]), bottom=-2700)
         ax1.set_xlim(MINTIME, MAXTIME)
         plt.setp(ax1.get_xticklabels(), visible=False)
         ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
@@ -200,7 +202,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
             new_y_predict.append(np.interp(new_t, timesX_test[idx][:argmax], y_pred[idx][:, classnum][:argmax]))
 
         def animate(i):
-            for pbidx, pb in enumerate(passbands):
+            for pbidx, pb in enumerate(used_passbands):
                 # ax1.plot(timesX_test[idx][:argmax][:int(i+1)], X_test[idx][:, pbidx][:argmax][:int(i+1)], label=pb, c=COLPB[pb], lw=3)#, markersize=10, marker=MARKPB[pb])
                 if i + 1 >= len(new_t):
                     break
