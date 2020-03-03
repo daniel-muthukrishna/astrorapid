@@ -6,8 +6,9 @@ import astrorapid.get_custom_data
 
 
 def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_name_map=None, reread_data=False, train_size=0.6,
-                             contextual_info=('redshift',), passbands=('g', 'r'), retrain_network=False, train_epochs=50,
-                             zcut=0.5, bcut=True, ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
+                             contextual_info=('redshift',), passbands=('g', 'r'), nobs=50, mintime=-70, maxtime=80,
+                             timestep=3.0, retrain_network=False, train_epochs=50, zcut=0.5, bcut=True,
+                             ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
                              training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
                              fig_dir='Figures', plot=True):
 
@@ -41,6 +42,14 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     passbands : tuple of str
         Passbands to use.
         E.g. passbands=('g', 'r')
+    nobs : int
+        Number of points to use in interpolation of light curve between mintime and maxtime.
+    mintime : int
+        Days from trigger (minimum) to extract from light curve.
+    maxtime : int
+        Days from trigger (maximum) to extract from light curve.
+    timestep : float
+        Time-step between interpolated points in light curve.
     retrain_network : bool
         Whether to retrain the neural network or to use the saved network model.
     train_epochs : int
@@ -83,7 +92,8 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
             os.makedirs(dirname)
 
     # Prepare the training set, read the data files, and save processed files
-    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, reread_data, bcut, zcut, ignore_classes,
+    preparearrays = PrepareTrainingSetArrays(passbands, contextual_info, nobs, mintime, maxtime, timestep,
+                                             reread_data, bcut, zcut, ignore_classes,
                                              class_name_map=class_name_map, nchunks=nchunks,
                                              training_set_dir=training_set_dir, data_dir=data_dir, save_dir=save_dir,
                                              get_data_func=get_data_func)

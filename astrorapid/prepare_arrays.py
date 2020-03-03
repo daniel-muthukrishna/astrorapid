@@ -17,15 +17,16 @@ np.random.seed(42)
 
 
 class PrepareArrays(object):
-    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',)):
+    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), nobs=50, mintime=-70, maxtime=80,
+                 timestep=3.0):
         self.passbands = passbands
         self.contextual_info = contextual_info
-        self.nobs = 50  # 100
         self.npassbands = len(passbands)
-        self.nfeatures = self.npassbands + len(self.contextual_info)  # 4 + len(self.contextual_info)  #
-        self.timestep = 3.0
-        self.mintime = -70
-        self.maxtime = 80
+        self.nfeatures = self.npassbands + len(self.contextual_info)
+        self.nobs = nobs
+        self.timestep = timestep
+        self.mintime = mintime
+        self.maxtime = maxtime
 
     def make_cuts(self, data, i, deleterows, b, redshift=None, class_num=None, bcut=True, zcut=0.5, ignore_classes=(),
                   pre_trigger=True):
@@ -145,10 +146,9 @@ class PrepareArrays(object):
 
 
 class PrepareInputArrays(PrepareArrays):
-    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), bcut=True, zcut=None):
-        PrepareArrays.__init__(self, passbands, contextual_info)
-        self.passbands = passbands
-        self.contextual_info = contextual_info
+    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), bcut=True, zcut=None,
+                 nobs=50, mintime=-70, maxtime=80, timestep=3.0):
+        PrepareArrays.__init__(self, passbands, contextual_info, nobs, mintime, maxtime, timestep)
         self.bcut = bcut
         self.zcut = zcut
 
@@ -193,12 +193,11 @@ class PrepareInputArrays(PrepareArrays):
 
 
 class PrepareTrainingSetArrays(PrepareArrays):
-    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), reread=False, bcut=True, zcut=None,
-                 ignore_classes=(), class_name_map=None, nchunks=10000,  training_set_dir='data/training_set_files',
-                 data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/', get_data_func=None):
-        PrepareArrays.__init__(self, passbands, contextual_info)
-        self.passbands = passbands
-        self.contextual_info = contextual_info
+    def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), nobs=50, mintime=-70, maxtime=80,
+                 timestep=3.0, reread=False, bcut=True, zcut=None, ignore_classes=(), class_name_map=None,
+                 nchunks=10000,  training_set_dir='data/training_set_files', data_dir='data/ZTF_20190512/',
+                 save_dir='data/saved_light_curves/', get_data_func=None):
+        PrepareArrays.__init__(self, passbands, contextual_info, nobs, mintime, maxtime, timestep)
         self.reread = reread
         self.bcut = bcut
         self.zcut = zcut

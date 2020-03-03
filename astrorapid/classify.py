@@ -37,7 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 class Classify(object):
     def __init__(self, known_redshift=True, model_filepath='', passbands=('g', 'r'),
                  class_names=('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'CART', 'TDE'),
-                 bcut=False, zcut=None, graph=None, model=None):
+                 nobs=50, mintime=-70, maxtime=80, timestep=3.0, bcut=False, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 
         Parameters
@@ -52,6 +52,18 @@ class Classify(object):
             List of class names that the model has been trained on. Note that this must be in the same order
             as used in training for the model specified in the argument model_filepath.
             If you are using the default model, leave this argument out.
+        nobs : int
+            Number of points to use in interpolation of light curve between mintime and maxtime.
+            Do not change this argument unless you are using your own model_filepath
+            and have changed this during training.
+        mintime : int
+            Days from trigger (minimum) to extract from light curve.
+        maxtime : int
+            Days from trigger (maximum) to extract from light curve.
+        timestep : float
+            Time-step between interpolated points in light curve.
+            Do not change this argument unless you are using your own model_filepath
+            and have changed this during training.
         bcut : bool
             Cut on galactic latitude.
             Do not set unless you know what you are doing.
@@ -73,6 +85,10 @@ class Classify(object):
         self.bcut = bcut
         self.zcut = zcut
         self.class_names = class_names
+        self.nobs = nobs
+        self.mintime = mintime
+        self.maxtime = maxtime
+        self.timestep = timestep
 
         if self.known_redshift:
             self.contextual_info = ('redshift',)
@@ -99,7 +115,8 @@ class Classify(object):
     def process_light_curves(self, light_curves):
         processed_lightcurves = read_multiple_light_curves(light_curves, known_redshift=self.known_redshift,
                                                            training_set_parameters=None)
-        prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut)
+        prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut,
+                                                self.nobs, self.mintime, self.maxtime, self.timestep)
         X, orig_lc, timesX, objids_list, trigger_mjds = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
 
         # # REMOVE CORRECTION FACTOR IF NOT USED
