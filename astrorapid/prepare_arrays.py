@@ -32,7 +32,7 @@ class PrepareArrays(object):
                   pre_trigger=True):
         deleted = False
         try:
-            time = data[data['passband']=='r']['time'][0:self.nobs].data
+            time = data[data['passband']=='r']['time'].data
         except KeyError:
             print("No r band data. passbands")
             deleterows.append(i)
@@ -68,7 +68,7 @@ class PrepareArrays(object):
         maxtimes = []
         for j, pb in enumerate(self.passbands):
             pbmask = data['passband']==pb
-            time = data[pbmask]['time'][0:self.nobs].data
+            time = data[pbmask]['time'].data
             try:
                 mintimes.append(time.min())
                 maxtimes.append(time.max())
@@ -101,10 +101,10 @@ class PrepareArrays(object):
 
             # Get data
             pbmask = data['passband']==pb
-            time = data[pbmask]['time'][0:self.nobs].data
-            flux = data[pbmask]['flux'][0:self.nobs].data
-            fluxerr = data[pbmask]['fluxErr'][0:self.nobs].data
-            photflag = data[pbmask]['photflag'][0:self.nobs].data
+            time = data[pbmask]['time'].data
+            flux = data[pbmask]['flux'].data
+            fluxerr = data[pbmask]['fluxErr'].data
+            photflag = data[pbmask]['photflag'].data
 
             # Mask out times outside of mintime and maxtime
             timemask = (time > self.mintime) & (time < self.maxtime)
