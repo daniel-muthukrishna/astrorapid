@@ -25,10 +25,11 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     data_dir : str
         Directory where data is stored. E.g. data_dir='data/ZTF_20190512/'
     class_nums : tuple of ints
-        Class numbers to train on. E.g. class_nums=(1, 5, 6, 41, 43, 51)
+        Class numbers to train on. E.g. class_nums=(1, 5, 6, 12, 41, 43, 51)
     class_name_map : dict or None
         This maps the class_nums onto class names.
-        E.g. class_name_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova'}.
+        E.g. class_name_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 12: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova'}.
+        You may use the same value for a different key if you want the classifier to join these two class_nums under the same label.
         If this is None, it will use the default mapping listed in get_sntypes in helpers.py.
     reread_data : bool
         If this is True, then it will reread your data and resave the processed files, otherwise

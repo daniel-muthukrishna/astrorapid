@@ -448,9 +448,10 @@ class PrepareTrainingSetArrays(PrepareArrays):
             objids_list.append(objid)
             X = self.update_X(X, i, data, tinterp, len_t, objid, self.contextual_info, data.meta)
 
+            class_name = self.class_name_map[class_num]
             activeindexes = (tinterp > t0)
-            labels[i] = class_num
-            y[i][0:len_t] = class_num * activeindexes
+            labels[i] = class_name
+            y[i][0:len_t] = class_name * activeindexes
 
         deleterows = np.array(deleterows)
         X = np.delete(X, deleterows, axis=0)

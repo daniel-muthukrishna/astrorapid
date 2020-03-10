@@ -121,7 +121,7 @@ def read_lasair_json(object_name='ZTF18acsovsw'):
         else:
             magerr.append(None)#0.01 * cand['magpsf'])  #magerr.append(None)  #magerr.append(0.1 * cand['magpsf'])  #
             photflag.append(0)
-            zeropoint.append(None)#26.2)
+            zeropoint.append(None)
 
     mjd, passband, mag, magerr, photflag, zeropoint = convert_lists_to_arrays(mjd, passband, mag, magerr, photflag, zeropoint)
 
@@ -202,19 +202,19 @@ def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), plot=True, figd
     #     pickle.dump([mjds, passbands, mags, magerrs, photflags, zeropoints, ras, decs, objids, redshifts, mwebvs], f)
     # # np.savez('save_real_ZTF_unprocessed_data_snia_osc_12nov2019.npz', mjds=mjds, passbands=passbands, mags=mags, magerrs=magerrs, photflags=photflags, zeropoints=zeropoints, ras=ras, decs=decs, objids=objids, redshifts=redshifts, mwebvs=mwebvs)# , peakflux_g=peakfluxes_g, peakflux_r=peakfluxes_r)
     # print("finished")
-    # # sys.exit(0)
-    # with open('save_real_ZTF_unprocessed_data_snia_osc_12nov2019.npz', 'rb') as f:
-    #     a = pickle.load(f)
+    # # # sys.exit(0)
+    # # with open('save_real_ZTF_unprocessed_data_snia_osc_12nov2019.npz', 'rb') as f:
+    # #     a = pickle.load(f)
 
     classification = Classify(known_redshift=True, bcut=False, zcut=None)
     predictions, time_steps = classification.get_predictions(light_curve_list, return_predictions_at_obstime=False)
     print(predictions)
 
     if plot:
-        try:
-            classification.plot_light_curves_and_classifications(step=True, use_interp_flux=False, figdir=figdir, plot_matrix_input=True)
-        except Exception as e:
-            print(e)
+        # try:
+        classification.plot_light_curves_and_classifications(step=True, use_interp_flux=False, figdir=figdir, plot_matrix_input=True)
+        # except Exception as e:
+        #     print(e)
         # classification.plot_light_curves_and_classifications(step=False, use_interp_flux=True)
         # classification.plot_light_curves_and_classifications(step=False, use_interp_flux=False)
         # classification.plot_classification_animation_step()
@@ -236,8 +236,33 @@ if __name__ == '__main__':
     # classify_lasair_light_curves(object_names=[('ZTF18aazblzy', 0.064), 'ZTF19aabyppp'], figdir='astrorapid')
     # classify_lasair_light_curves(object_names=[('ZTF19abzrhgq', 0.0151), ('ZTF19abuhlxk', 0.02), ('ZTF19abylxyt', 0.0533)], figdir='astrorapid') # (2019qiz TDE), (2019pdx SNIa), (2019qid SNIa)
 
-
-    classify_lasair_light_curves(object_names=(('ZTF18abcrxoj', 0.0309),))#'ZTF18acmxkzj', 'ZTF18adbntwo', 'ZTF18acmzpbf', 'ZTF18acrdmmw', 'ZTF18acsouxk', 'ZTF18aczrafz', 'ZTF18aceynvm', 'ZTF18acdzzyf', 'ZTF18acybdar', 'ZTF18ablhvfr', 'ZTF18acebefc', 'ZTF18acslpba', 'ZTF18aaxcxih', 'ZTF18aaxcntm', 'ZTF18abspqsn', 'ZTF18abvejqt','ZTF18adbntwo', 'ZTF18adasopt', 'ZTF18aajupnt', 'ZTF18aaxkqgy', 'ZTF18abckutn', 'ZTF18abrlljc', 'ZTF18acyybvg', 'ZTF19aadnmgf', 'ZTF18abxftqm',))
+    classify_lasair_light_curves(object_names=(
+('ZTF19abfvnns', 0.14),
+('ZTF19abheamc', 0.037),
+('ZTF19abpfsks', 0.1),
+('ZTF19abuzinv', 0.02),
+('ZTF19abxdnzt', 0.044),
+('ZTF19abzkiuv', 0.059),
+('ZTF19abzrhgq', 0.0151),
+('ZTF19abzsitm', 0.046),
+('ZTF19abzzhsa', 0.041),
+('ZTF19acapeun', 0.019917),
+('ZTF19acbacvu', 0.035),
+('ZTF19acbiwjk', 0.09),
+('ZTF19acbnhkd', 0.067),
+('ZTF19acbswdq', 0.0667),
+('ZTF19acbunmk', 0.028),
+('ZTF19acbykmk', 0.061),
+('ZTF19acchtyp', 0.06),
+('ZTF19acdihrz', 0.066),
+('ZTF19acdtpow', 0.075),
+('ZTF19acdubmt', 0.092),
+('ZTF19acekreh', 0.03480),
+('ZTF19acetxvq', 0.063),
+('ZTF19achagst', 0.068),
+('ZTF19achejoc', 0.05)
+))
+    # classify_lasair_light_curves(object_names=('ZTF18abcrxoj', ('ZTF20aakyoez', 0.041), 'ZTF20aanvqbi',),)#'ZTF18acmxkzj', 'ZTF18adbntwo', 'ZTF18acmzpbf', 'ZTF18acrdmmw', 'ZTF18acsouxk', 'ZTF18aczrafz', 'ZTF18aceynvm', 'ZTF18acdzzyf', 'ZTF18acybdar', 'ZTF18ablhvfr', 'ZTF18acebefc', 'ZTF18acslpba', 'ZTF18aaxcxih', 'ZTF18aaxcntm', 'ZTF18abspqsn', 'ZTF18abvejqt','ZTF18adbntwo', 'ZTF18adasopt', 'ZTF18aajupnt', 'ZTF18aaxkqgy', 'ZTF18abckutn', 'ZTF18abrlljc', 'ZTF18acyybvg', 'ZTF19aadnmgf', 'ZTF18abxftqm',))
 
     # orig_lc, timesX, y_predict = classify_lasair_light_curves(object_names=[
     #                                                             ('ZTF19abzcaod', 0.052098),
@@ -319,22 +344,22 @@ if __name__ == '__main__':
     # plt.tight_layout()
     # plt.savefig('astrorapid/cumulativeTDE_210819.pdf')
 
-    # Type Ia SNe in ZTF from OSC
-    snia_names = []
-    import json
-    with open('ZTF_SNIa_osc_12092019.json') as json_file:
-        data = json.load(json_file)
-    for i, sn in enumerate(data):
-        try:
-            snia_name = [name for name in data[i]['Name'].split() if 'ZTF' in name][0]
-            snia_z = float(data[i]['z'].split()[0])
-            snia_names.append((snia_name, snia_z))
-            print(i, snia_name, snia_z)
-        except IndexError as e:
-            print(f"failed on {i} {data[i]['Name']}")
-
-    classify_lasair_light_curves(object_names=snia_names[0:20], figdir='astrorapid/real_snia_from_osc/newmodel_noAGN_wredshift_batch500')
-
+    # # Type Ia SNe in ZTF from OSC
+    # snia_names = []
+    # import json
+    # with open('ZTF_SNIa_osc_12092019.json') as json_file:
+    #     data = json.load(json_file)
+    # for i, sn in enumerate(data):
+    #     try:
+    #         snia_name = [name for name in data[i]['Name'].split() if 'ZTF' in name][0]
+    #         snia_z = float(data[i]['z'].split()[0])
+    #         snia_names.append((snia_name, snia_z))
+    #         print(i, snia_name, snia_z)
+    #     except IndexError as e:
+    #         print(f"failed on {i} {data[i]['Name']}")
+    #
+    # classify_lasair_light_curves(object_names=snia_names, figdir='astrorapid/real_snia_from_osc/newmodel_noAGN_wredshift_batch500')
+    #
 
 
 

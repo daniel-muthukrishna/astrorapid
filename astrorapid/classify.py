@@ -36,7 +36,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Classify(object):
     def __init__(self, known_redshift=True, model_filepath='', passbands=('g', 'r'),
-                 class_names=('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'CART', 'TDE'),
+                 class_names=('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'TDE'),
                  nobs=50, mintime=-70, maxtime=80, timestep=3.0, bcut=False, zcut=None, graph=None, model=None):
         """ Takes a list of photometric information and classifies light curves as a function of time
 

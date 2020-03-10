@@ -20,7 +20,7 @@ def main():
                              train_epochs=100,
                              zcut=0.5,
                              bcut=True,
-                             ignore_classes=(61, 62, 64, 70),
+                             ignore_classes=(61, 62, 63, 70),
                              nprocesses=None,
                              nchunks=10000,
                              otherchange='',
