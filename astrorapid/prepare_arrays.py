@@ -243,7 +243,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
             labels = np.empty(shape=nobjects, dtype=object)
-            y = np.empty(shape=(nobjects, self.nobs), dtype=object)
+            y = np.zeros(shape=(nobjects, self.nobs), dtype=object)
             X = np.memmap(os.path.join(self.training_set_dir, 'X_lc_data.dat'), dtype=np.float32, mode='w+',
                           shape=(nobjects, self.nfeatures, self.nobs))  # 4+len(self.contextual_info), 100))
             X[:] = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
@@ -335,7 +335,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
                 orig_lc = pickle.load(f)
 
         classes = sorted(list(set(labels)))
-        class_names = [self.class_name_map[class_num] for class_num in classes]
 
         # Count nobjects per class
         for c in classes:
@@ -413,14 +412,14 @@ class PrepareTrainingSetArrays(PrepareArrays):
         for key, val in class_weights.items():
             sample_weights[l_train_indexes == key] = val
 
-        return X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, \
+        return X_train, X_test, y_train, y_test, labels_train, labels_test, classes, class_weights, \
                sample_weights, timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test
 
     def multi_read_obj(self, objids):
         nobjects = len(objids)
 
         labels = np.empty(shape=nobjects, dtype=object)
-        y = np.empty(shape=(nobjects, self.nobs), dtype=object)
+        y = np.zeros(shape=(nobjects, self.nobs), dtype=object)
         X = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
         timesX = np.zeros(shape=(nobjects, self.nobs))
         objids_list = []
