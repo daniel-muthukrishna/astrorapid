@@ -255,14 +255,16 @@ class PrepareTrainingSetArrays(PrepareArrays):
             multi_objids = np.array_split(objids, self.nchunks)
 
             # Store light curves into X (fluxes) and y (labels)
-            pool = mp.Pool(nprocesses)
-            results = pool.map_async(self.multi_read_obj, multi_objids) ##
-            pool.close()
-            pool.join()
-
-            outputs = results.get()
-
-            # outputs = self.multi_read_obj_nonuniformtime(objids[0:100])
+            if nprocesses == 1:
+                outputs = []
+                for arg in multi_objids:
+                    outputs.append(self.multi_read_obj(arg))
+            else:
+                pool = mp.Pool(nprocesses)
+                results = pool.map_async(self.multi_read_obj, multi_objids) ##
+                pool.close()
+                pool.join()
+                outputs = results.get()
 
             sum_deleterows = 0
             startidx = 0
