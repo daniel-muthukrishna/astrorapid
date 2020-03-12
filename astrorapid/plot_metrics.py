@@ -142,10 +142,10 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         plt.tight_layout()
         fig.subplots_adjust(hspace=0)
         plt.savefig(os.path.join(fig_dir + '/lc_pred',
-                                 "classification_vs_time_{}_{}_{}_{}_matrix_input2.pdf".format(idx, class_names[true_class], redshift,
+                                 "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
                                                                                  peakmjd - trigger_mjd)))
         plt.savefig(os.path.join(fig_dir + '/lc_pred', class_names[true_class],
-                                 "classification_vs_time_{}_{}_{}_{}_matrix_input2.pdf".format(idx, class_names[true_class], redshift,
+                                 "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
                                                                                  peakmjd - trigger_mjd)))
         plt.close()
 
