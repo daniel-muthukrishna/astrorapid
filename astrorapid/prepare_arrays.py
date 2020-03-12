@@ -293,17 +293,19 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                     self.bcut, self.ignore_classes)), X)
             np.save(os.path.join(self.training_set_dir,
                                  "y_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
-                                                                    self.bcut, self.ignore_classes)), y)
+                                                                    self.bcut, self.ignore_classes)), y,
+                    allow_pickle=True)
             np.save(os.path.join(self.training_set_dir,
                                  "labels_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
-                                                                         self.bcut, self.ignore_classes)), labels)
+                                                                         self.bcut, self.ignore_classes)), labels,
+                    allow_pickle=True)
             np.save(os.path.join(self.training_set_dir,
                                  "tinterp_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                           self.bcut, self.ignore_classes)), timesX)
             np.save(os.path.join(self.training_set_dir,
                                  "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
-                                                                         self.bcut, self.ignore_classes)),
-                    objids_list)
+                                                                         self.bcut, self.ignore_classes)), objids_list,
+                    allow_pickle=True)
             with open(os.path.join(self.training_set_dir,
                                    "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                            self.bcut, self.ignore_classes)),
@@ -316,11 +318,13 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                         self.bcut, self.ignore_classes)), mmap_mode='r')
             y = np.load(os.path.join(self.training_set_dir,
                                      "y_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
-                                                                        self.bcut, self.ignore_classes)))
+                                                                        self.bcut, self.ignore_classes)),
+                        allow_pickle=True)
             labels = np.load(os.path.join(self.training_set_dir,
                                           "labels_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
                                                                                   self.zcut, self.bcut,
-                                                                                  self.ignore_classes)))
+                                                                                  self.ignore_classes)),
+                             allow_pickle=True)
             timesX = np.load(os.path.join(self.training_set_dir,
                                           "tinterp_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
                                                                                    self.zcut, self.bcut,
@@ -328,7 +332,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
             objids_list = np.load(os.path.join(self.training_set_dir,
                                                "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange,
                                                                                        self.contextual_info, self.zcut,
-                                                                                       self.bcut, self.ignore_classes)))
+                                                                                       self.bcut, self.ignore_classes)),
+                                  allow_pickle=True)
             with open(os.path.join(self.training_set_dir,
                                    "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                            self.bcut, self.ignore_classes)), 'rb') as f:
