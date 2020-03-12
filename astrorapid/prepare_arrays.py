@@ -243,7 +243,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
             labels = np.empty(shape=nobjects, dtype=object)
-            y = np.zeros(shape=(nobjects, self.nobs), dtype=np.uint16)
+            y = np.empty(shape=(nobjects, self.nobs), dtype=object)
             X = np.memmap(os.path.join(self.training_set_dir, 'X_lc_data.dat'), dtype=np.float32, mode='w+',
                           shape=(nobjects, self.nfeatures, self.nobs))  # 4+len(self.contextual_info), 100))
             X[:] = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
