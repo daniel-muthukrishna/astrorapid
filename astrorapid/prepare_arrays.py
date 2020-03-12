@@ -420,7 +420,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         nobjects = len(objids)
 
         labels = np.empty(shape=nobjects, dtype=object)
-        y = np.zeros(shape=(nobjects, self.nobs), dtype=np.uint16)
+        y = np.empty(shape=(nobjects, self.nobs), dtype=object)
         X = np.zeros(shape=(nobjects, self.nfeatures, self.nobs))
         timesX = np.zeros(shape=(nobjects, self.nobs))
         objids_list = []
@@ -453,7 +453,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
             class_name = self.class_name_map[class_num]
             activeindexes = (tinterp > t0)
             labels[i] = class_name
-            y[i][0:len_t] = class_name * activeindexes
+            y[i][0:len_t][activeindexes] = class_name
 
         deleterows = np.array(deleterows)
         X = np.delete(X, deleterows, axis=0)
