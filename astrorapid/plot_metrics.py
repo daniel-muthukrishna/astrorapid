@@ -87,7 +87,9 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(13, 15), num="classification_vs_time_{}".format(idx),
                                        sharex=True)
 
-        for pbidx, pb in enumerate(used_passbands):
+        for pbidx, pb in enumerate(passbands):
+            if pb not in used_passbands:
+                continue
             pbmask = lc_data['passband'] == pb
             # masktime = (lc_data[pbmask]['time'] > MINTIME) & (lc_data[pbmask]['time'] < MAXTIME)
             ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
@@ -205,7 +207,9 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
             new_y_predict.append(np.interp(new_t, timesX_test[idx][:argmax], y_pred[idx][:, classnum][:argmax]))
 
         def animate(i):
-            for pbidx, pb in enumerate(used_passbands):
+            for pbidx, pb in enumerate(passbands):
+                if pb not in used_passbands:
+                    continue
                 # ax1.plot(timesX_test[idx][:argmax][:int(i+1)], X_test[idx][:, pbidx][:argmax][:int(i+1)], label=pb, c=COLPB[pb], lw=3)#, markersize=10, marker=MARKPB[pb])
                 if i + 1 >= len(new_t):
                     break
