@@ -69,7 +69,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     matplotlib.rc('font', **font)
 
     # Plot classification example vs time
-    for idx in np.arange(0, 1):
+    for idx in np.arange(0, 100):
         true_class = int(max(y_test_indexes[idx]))
         print(true_class)
         # if true_class != 1:
