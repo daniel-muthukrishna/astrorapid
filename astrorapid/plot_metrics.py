@@ -53,7 +53,10 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
 
     class_names = ["Pre-explosion"] + class_names
 
-    timesX_test[timesX_test == 0] = -200
+    # Set trailing zeros to -200
+    for i in range(timesX_test.shape[0]):
+        timesX_test[i][:np.argmin(timesX_test[i])] = -200
+        timesX_test[i][np.argmax(timesX_test[i]) + 1:] = -200
 
     for cname in class_names:
         dirname = os.path.join(fig_dir + '/lc_pred', cname)
@@ -71,7 +74,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         print(true_class)
         # if true_class != 1:
         #     continue
-        print("Plotting example vs time", idx)
+        print("Plotting example vs time", idx, objids_test[idx])
         argmax = timesX_test[idx].argmax() + 1
 
         lc_data = orig_lc_test[idx]

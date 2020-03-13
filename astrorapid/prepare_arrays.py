@@ -7,6 +7,8 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 import itertools
+import copy
+from sklearn.utils import shuffle
 from scipy.interpolate import interp1d
 
 from astrorapid import helpers
@@ -339,7 +341,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                            self.bcut, self.ignore_classes)), 'rb') as f:
                 orig_lc = pickle.load(f)
 
-        classes = sorted(list(set(labels)))
+        classes = list(set(labels))
 
         # Count nobjects per class
         for c in classes:
@@ -375,34 +377,47 @@ class PrepareTrainingSetArrays(PrepareArrays):
         # orig_lc = list(itertools.compress(orig_lc, finitemask))
         # labels = labels[finitemask]
 
-        newX = np.zeros(X.shape)
-        newy = np.zeros(y.shape)
-        lenX = len(X)
-        for i in range(lenX):
-            if i % 1000 == 0:
-                print(f"new {i} of {lenX}")
-            mask = timesX[i] > 0
-            nmask = sum(mask)
-            newX[i][:nmask] = X[i][mask]
-            newy[i][:nmask] = y[i][mask]
-
-        print("Concatenating")
-        X = np.concatenate((X, newX))
-        y = np.concatenate((y, newy))
-        labels = np.concatenate((labels, labels))
-        timesX = np.concatenate((timesX, timesX))
-        orig_lc = orig_lc * 2
-        objids_list = np.concatenate((objids_list, objids_list))
         print("Shuffling")
-        from sklearn.utils import shuffle
         X, y, labels, timesX, orig_lc, objids_list = shuffle(X, y, labels, timesX, orig_lc, objids_list)
         print("Done shuffling")
-
-
 
         X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, \
         orig_lc_test, objids_train, objids_test = train_test_split(
             X, y, labels, timesX, orig_lc, objids_list, train_size=train_size, shuffle=False, random_state=42)
+
+        def augment_crop_lightcurves(X_local, y_local, labels_local, timesX_local, orig_lc_local, objids_local):
+            X_local = copy.copy(X_local)
+            y_local = copy.copy(y_local)
+            labels_local = copy.copy(labels_local)
+            timesX_local = copy.copy(timesX_local)
+            orig_lc_local = copy.copy(orig_lc_local)
+            objids_local = copy.copy(objids_local)
+
+            newX = np.zeros(X_local.shape)
+            newy = np.zeros(y_local.shape)
+            lenX = len(X_local)
+            for i in range(lenX):
+                if i % 1000 == 0:
+                    print(f"new {i} of {lenX}")
+                mask = timesX_local[i] >= 0
+                nmask = sum(mask)
+                newX[i][:nmask+1] = X_local[i][mask]
+                newy[i][:nmask+1] = y_local[i][mask]
+
+            print("Concatenating")
+            X_local = np.concatenate((X_local, newX))
+            y_local = np.concatenate((y_local, newy))
+            labels_local = np.concatenate((labels_local, labels_local))
+            timesX_local = np.concatenate((timesX_local, timesX_local))
+            orig_lc_local = orig_lc_local * 2
+            objids_local = np.concatenate((objids_local, objids_local))
+
+            return X_local, y_local, labels_local, timesX_local, orig_lc_local, objids_local
+
+        X_train, y_train, labels_train, timesX_train, orig_lc_train, objids_train = augment_crop_lightcurves(X_train, y_train, labels_train, timesX_train, orig_lc_train, objids_train)
+        X_test, y_test, labels_test, timesX_test, orig_lc_test, objids_test = augment_crop_lightcurves(X_test, y_test, labels_test, timesX_test, orig_lc_test, objids_test)
+
+        X_train, y_train, labels_train, timesX_train, orig_lc_train, objids_train = shuffle(X_train, y_train, labels_train, timesX_train, orig_lc_train, objids_train)
 
         counts = np.unique(labels_train, return_counts=True)[-1]
         class_weights = max(counts) / counts
