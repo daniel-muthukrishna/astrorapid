@@ -401,8 +401,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
                     print(f"new {i} of {lenX}")
                 mask = timesX_local[i] >= 0
                 nmask = sum(mask)
-                newX[i][:nmask+1] = X_local[i][mask]
-                newy[i][:nmask+1] = y_local[i][mask]
+                newX[i][:nmask] = X_local[i][mask]
+                newy[i][:nmask] = y_local[i][mask]
 
             print("Concatenating")
             X_local = np.concatenate((X_local, newX))
