@@ -345,8 +345,11 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
                                                                           title=title)
         images_pr.append(imageio.imread(figname_pr))
 
-        wlogloss[days_since_trigger] = plasticc_log_loss(to_categorical(y_test_on_day_i, num_classes=nclasses),
-                                                         y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS)
+        try:
+            wlogloss[days_since_trigger] = plasticc_log_loss(to_categorical(y_test_on_day_i, num_classes=nclasses),
+                                                             y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS)
+        except Exception as e:
+            print("Cannot compute weighted PLAsTiCC Log Loss.", e)
 
         plt.close()
 
