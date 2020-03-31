@@ -14,6 +14,7 @@ def main():
                              class_nums=(1, 2, 12, 14, 3, 13, 41, 43, 51, 60, 61, 62, 63, 64, 70),
                              class_name_map={1: 'SNIa-norm', 2: 'SNII', 12: 'SNII', 14: 'SNII', 3: 'SNIbc', 13: 'SNIbc', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova', 60: 'SLSN-I', 61: 'PISN', 62: 'ILOT', 63: 'CART', 64: 'TDE', 70: 'AGN'},
                              reread_data=False,
+                             train_size=0.6,
                              contextual_info=('redshift',),
                              passbands=('g', 'r'),
                              retrain_network=False,

@@ -99,8 +99,9 @@ class Classify(object):
 
         if model_filepath != '' and os.path.exists(model_filepath):
             self.model_filepath = model_filepath
-            print("Invalid keras model. Using default model...")
         else:
+            if not os.path.exists(model_filepath):
+                print("Invalid keras model. Using default model...")
             self.model_filepath = os.path.join(SCRIPT_DIR, filename)
             if not os.path.exists(self.model_filepath):
                 self.model_filepath = resource_filename(__name__, 'keras_model_with_redshift.hdf5')

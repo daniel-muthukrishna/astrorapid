@@ -36,7 +36,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         it will check if the data has already been read, processed and saved.
     train_size : float
         Fraction of data to use for training, the remainder will be used for testing/validation.
-        Usually choose a value between 0.5 - 1.0 depending on how much data you have. If low data, use 0.8.
+        Usually choose a value between 0.5 - 1.0 depending on how much data you have.
     contextual_info : tuple of strings
         What contextual information to use while training. You can write any string in this tuple provided that it
         is stored as a keyword in the metadata of the light_curve Table object returned by the `get_data_func`.
