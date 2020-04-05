@@ -341,7 +341,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                                            self.bcut, self.ignore_classes)), 'rb') as f:
                 orig_lc = pickle.load(f)
 
-        classes = list(set(labels))
+        classes = sorted(list(set(labels)))
 
         # Count nobjects per class
         for c in classes:

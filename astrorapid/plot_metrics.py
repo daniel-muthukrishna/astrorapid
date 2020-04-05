@@ -43,6 +43,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     scores = model.evaluate(X_test, y_test, verbose=0)
     print("Accuracy: %.2f%%" % (scores[1] * 100))
 
+    class_names = sorted(class_names)
+
     y_pred = model.predict(X_test)
     y_test_indexes = np.argmax(y_test, axis=-1)
     y_pred_indexes = np.argmax(y_pred, axis=-1)
