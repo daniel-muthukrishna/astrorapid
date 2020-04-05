@@ -90,7 +90,7 @@ class InputLightCurve(object):
         """ Calculate the explosion time for the trianing set if certain conditions are met. """
         calc_params = True
         inrange_mask = self.t < self.peakmjd
-        if int(self.class_number) in [70, 80, 82, 83]:  # No t0 if model types (AGN, RRlyrae, Eclipsing Binaries)
+        if self.class_number in [70, 80, 82, 83]:  # No t0 if model types (AGN, RRlyrae, Eclipsing Binaries)
             calc_params = False
         elif self.peakmjd - self.trigger_mjd < 0:  # No t0 if trigger to peak time is small
             calc_params = False
