@@ -226,8 +226,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
         light_curves = {}
 
         for class_num in class_nums:
-            lcs = get_data(self.get_data_func, class_num, self.data_dir, self.save_dir,
-                           self.known_redshift, nprocesses, self.reread, passbands=self.passbands)
+            lcs = get_data(self.get_data_func, class_num, self.data_dir, self.save_dir, self.passbands,
+                           self.known_redshift, nprocesses, self.reread)
             light_curves.update(lcs)
 
         return light_curves

@@ -7,7 +7,7 @@ from astrorapid.helpers import delete_indexes
 from astrorapid.process_light_curves import InputLightCurve
 
 
-def get_data(get_data_func, class_num, data_dir, save_dir, known_redshift=True, nprocesses=1, redo=False, **kwargs):
+def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_redshift=True, nprocesses=1, redo=False):
     """
     Get data using some function.
 
@@ -25,14 +25,15 @@ def get_data(get_data_func, class_num, data_dir, save_dir, known_redshift=True, 
     save_dir : str
         Directory to save processed data
         E.g. save_dir='data/saved_light_curves/'
+    passbands : tuple
+        Passbands to use.
+        E.g. passbands=('g', 'r')
     known_redshift : bool
         Whether to correct the light curves for cosmological time dilation or not.
     nprocesses : int or None
         Number of processes to use
     redo : bool
         Whether to redo reading the data and saving the processed data.
-    kwargs :
-        Any other arguments required
 
     Returns
     -------
@@ -64,11 +65,11 @@ def get_data(get_data_func, class_num, data_dir, save_dir, known_redshift=True, 
                        r 103.8734   27.178356 115.537704     4096
     """
 
-    return get_data_func(class_num, data_dir, save_dir, known_redshift, nprocesses, redo, **kwargs)
+    return get_data_func(class_num, data_dir, save_dir, passbands, known_redshift, nprocesses, redo)
 
 
 def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/',
-                             known_redshift=True, nprocesses=1, redo=False, passbands=('g', 'r')):
+                             passbands=('g', 'r'), known_redshift=True, nprocesses=1, redo=False):
     """
     Get data from SNANA fits data files.
 
@@ -101,7 +102,7 @@ def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir=
 
 
 def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc',
-                               save_dir='data/saved_light_curves_pandas',
+                               save_dir='data/saved_light_curves_pandas', pbs=('g', 'r'),
                                known_redshift=True, nprocesses=1, redo=False):
     """
     Get data from saved real ZTF data with names and types from the Open Supernova Catalog
