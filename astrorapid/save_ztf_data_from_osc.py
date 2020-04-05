@@ -47,7 +47,7 @@ def read_lasair_json(object_name='ZTF18acsovsw'):
         photoZ = cross_match['photoZ']
         separation_arcsec = cross_match['separationArcsec']
         catalogue_object_type = cross_match['catalogue_object_type']
-    if z_in is not None:
+    if z_in is not None and not np.isnan(z_in):
         redshift = z_in
     else:
         if photoZ is None:  # TODO: Get correct redshift
@@ -342,5 +342,5 @@ if __name__ == '__main__':
 
     for sntype in SN.keys():
         names_and_redshifts = list(SN[sntype].items())
-        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-2020-Apr-2020.pickle')
+        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-5-Apr-2020.pickle')
 

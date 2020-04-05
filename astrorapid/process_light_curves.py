@@ -60,6 +60,10 @@ class InputLightCurve(object):
             self.class_number = training_set_parameters['class_number']
             self.peakmjd = training_set_parameters['peakmjd']
 
+        if self.known_redshift and (np.isnan(redshift) or redshift is None):
+            raise(f"Redshift of object {objid} is unknown but you are trying to classify with the known_redshift model."
+                  f"Please input the redshift or set known_redshift to False when classifying this object.")
+
         self.b = self.get_galactic_latitude()
         self.trigger_mjd, self.t = self.get_trigger_time()
 

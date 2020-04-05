@@ -120,6 +120,10 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
             sigmagnrs, isdiffposs, ras, decs, objids, redshifts, mwebvs = pickle.load(fp)
 
         for i, objid in enumerate(objids):
+            if np.isnan(redshifts[i]) and known_redshift:
+                print(f"Skipping {objid} because redshift is unknown and known_redshift model is selected")
+                continue
+
             flux = 10. ** (-0.4 * (mags[i] - zeropoints[i]))
             fluxerr = np.abs(flux * magerrs[i] * (np.log(10.) / 2.5))
 
