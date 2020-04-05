@@ -114,7 +114,7 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
             light_curves = pickle.load(fp)
     else:
         light_curves = {}
-        data_filepath = os.path.join(data_dir, f"ZTF_data_{class_name}_osc-2020-Apr-2020.pickle")
+        data_filepath = os.path.join(data_dir, f"ZTF_data_{class_name}_osc-5-Apr-2020.pickle")
         with open(data_filepath, "rb") as fp:
             mjds, passbands, mags, magerrs, photflags, zeropoints, dc_mags, dc_magerrs, magnrs, \
             sigmagnrs, isdiffposs, ras, decs, objids, redshifts, mwebvs = pickle.load(fp)
@@ -129,7 +129,7 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
             mjd_first_detection = min(mjds[i][photflags[i] == 4096])
             photflags[i][np.where(mjds[i] == mjd_first_detection)] = 6144
 
-            deleteindexes = np.where(((passbands[i] == 3) | (passbands[i] == '3')) | (mjds[i] > mjd_first_detection) & (photflags[i] == 0))
+            deleteindexes = np.where(((passbands[i] == 3) | (passbands[i] == '3')) | ((mjds[i] > mjd_first_detection) & (photflags[i] == 0)) | (np.isnan(flux)))
             if deleteindexes[0].size > 0:
                 print("Deleting indexes {} at mjd {} and passband {}".format(deleteindexes, mjds[i][deleteindexes], passbands[i][deleteindexes]))
             mjd, passband, flux, fluxerr, zeropoint, photflag = delete_indexes(deleteindexes, mjds[i], passbands[i], flux, fluxerr, zeropoints[i], photflags[i])

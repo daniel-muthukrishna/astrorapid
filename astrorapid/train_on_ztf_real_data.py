@@ -29,7 +29,7 @@ def main():
                              zcut=0.5,
                              bcut=True,
                              ignore_classes=('CC',),
-                             nprocesses=None,
+                             nprocesses=1,
                              nchunks=10000,
                              otherchange='real-ztf-Ia-II-Ibc-SLSN',
                              training_set_dir=os.path.join(script_dir, '..', 'training_set_files'),
