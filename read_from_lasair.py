@@ -8,29 +8,12 @@ import astropy.units as u
 
 
 from astrorapid.classify import Classify
+from astrorapid.helpers import delete_indexes, convert_lists_to_arrays
 
 
 def read_json(url):
     response = urlopen(url)
     return json.loads(response.read(), object_pairs_hook=OrderedDict)
-
-
-def delete_indexes(deleteindexes, *args):
-    newarrs = []
-    for arr in args:
-        newarr = np.delete(arr, deleteindexes)
-        newarrs.append(newarr)
-
-    return newarrs
-
-
-def convert_lists_to_arrays(*args):
-    output = []
-    for arg in args:
-        out_array = np.asarray(arg)
-        output.append(out_array)
-
-    return output
 
 
 def read_lasair_json(object_name='ZTF18acsovsw'):

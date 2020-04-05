@@ -64,7 +64,7 @@ def get_custom_data(class_num, data_dir, save_dir, passbands, known_redshift, np
                    r 103.8734   27.178356 115.537704     4096
 
     """
-    # If the data has already been run and processed load it. Otherwise read it and save it
+    # If the data has already been run and processed, load it. Otherwise read it and save it
     save_lc_filepath = os.path.join(save_dir, f"lc_classnum_{class_num}.pickle")
     if os.path.exists(save_lc_filepath) and not redo:
         with open(save_lc_filepath, "rb") as fp:  # Unpickling

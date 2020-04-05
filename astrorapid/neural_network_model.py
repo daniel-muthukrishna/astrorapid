@@ -65,7 +65,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
 def plot_history(history, fig_dir):
     # Plot loss vs epochs
-    plt.figure()
+    plt.figure(figsize=(12,10))
     train_loss = history['loss']
     val_loss = history['val_loss']
     plt.plot(train_loss)
@@ -73,10 +73,11 @@ def plot_history(history, fig_dir):
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['train', 'test'], loc='upper left')
+    plt.title(os.path.basename(fig_dir).replace('_', '-'))
     plt.savefig(os.path.join(fig_dir, "model_loss_history.pdf"))
 
     # Plot accuracy vs figure
-    plt.figure()
+    plt.figure(figsize=(12,10))
     if 'accuracy' in history:
         train_acc = history['accuracy']
         val_acc = history['val_accuracy']
@@ -88,4 +89,5 @@ def plot_history(history, fig_dir):
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
     plt.legend(['train', 'test'], loc='upper left')
+    plt.title(os.path.basename(fig_dir).replace('_', '-'))
     plt.savefig(os.path.join(fig_dir, "model_accuracy_history.pdf"))

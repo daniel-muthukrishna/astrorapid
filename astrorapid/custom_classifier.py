@@ -24,8 +24,8 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         E.g. get_data_func = get_data_custom(class_num, data_dir, save_dir, passbands)
     data_dir : str
         Directory where data is stored. E.g. data_dir='data/ZTF_20190512/'
-    class_nums : tuple of ints
-        Class numbers to train on. E.g. class_nums=(1, 5, 6, 12, 41, 43, 51)
+    class_nums : tuple
+        Class numbers (or names) to train on. E.g. class_nums=(1, 5, 6, 12, 41, 43, 51)
     class_name_map : dict or None
         This maps the class_nums onto class names.
         E.g. class_name_map = {1: 'SNIa-norm', 5: 'SNIbc', 6: 'SNII', 12: 'SNII', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova'}.

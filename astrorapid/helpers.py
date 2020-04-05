@@ -13,6 +13,24 @@ def find_nearest(array, value):
     return idx
 
 
+def delete_indexes(deleteindexes, *args):
+    newarrs = []
+    for arr in args:
+        newarr = np.delete(arr, deleteindexes)
+        newarrs.append(newarr)
+
+    return newarrs
+
+
+def convert_lists_to_arrays(*args):
+    output = []
+    for arg in args:
+        out_array = np.asarray(arg)
+        output.append(out_array)
+
+    return output
+
+
 def calc_luminosity(flux, fluxerr, mu):
     """ Normalise flux light curves with distance modulus.
 
