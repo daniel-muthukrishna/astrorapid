@@ -9,6 +9,7 @@ import itertools
 from distutils.spawn import find_executable
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import f1_score
 from sklearn.metrics import average_precision_score
 from scipy import interp
 
@@ -207,7 +208,7 @@ def compute_multiclass_roc_auc(classes, y_test, y_pred_prob, name='', fig_dir='.
         plt.title(title, fontsize=34)  # plt.title(title, fontsize=70, fontweight="bold", y=1.02) # was size 34
     plt.legend(loc="lower right", frameon=True, fontsize=26)
     plt.tight_layout()
-    figname = os.path.join(fig_dir, 'roc_%s_mask_rare.pdf' % name)
+    figname = os.path.join(fig_dir, 'roc_%s.pdf' % name)
     plt.savefig(figname)
     figname = os.path.join(fig_dir, 'roc_%s.png' % name)
     plt.savefig(figname)
@@ -279,7 +280,7 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
             plt.title(title, fontsize=34)  # plt.title(title, fontsize=70, fontweight="bold", y=1.02) # was size 33
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
-        figname_pdf = os.path.join(fig_dir, 'confusion_matrix_%s_mask_rare.pdf' % name)
+        figname_pdf = os.path.join(fig_dir, 'confusion_matrix_%s.pdf' % name)
         plt.savefig(figname_pdf, bbox_inches="tight")
         if not deleterow:
             figname_png = os.path.join(fig_dir, 'confusion_matrix_%s.png' % name)

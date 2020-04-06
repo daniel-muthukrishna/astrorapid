@@ -120,7 +120,7 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
             sigmagnrs, isdiffposs, ras, decs, objids, redshifts, mwebvs = pickle.load(fp)
 
         for i, objid in enumerate(objids):
-            if np.isnan(redshifts[i]) and known_redshift:
+            if known_redshift and (redshifts[i] is None or np.isnan(redshifts[i])):
                 print(f"Skipping {objid} because redshift is unknown and known_redshift model is selected")
                 continue
 
