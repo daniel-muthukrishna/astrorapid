@@ -59,7 +59,7 @@ def fit_early_lightcurve(outlc, earlytime=10):
         # ttime = ttime[mask]
         # tfluxerrrenorm = tfluxerrrenorm[mask]
 
-        earlymask = ttime <= earlytime
+        earlymask = ttime < earlytime
         times[pb] = ttime[earlymask]
         fluxes[pb] = tfluxrenorm[earlymask]
         fluxerrs[pb] = tfluxerrrenorm[earlymask]
@@ -110,7 +110,7 @@ def lnlike(params, times, fluxes, fluxerrs):
         # print(pb, a, c)
 
     # print('chi2', chi2, params)
-    return np.exp(-0.5*chi2)
+    return -0.5*chi2
 
 
 def lnprior(params):
