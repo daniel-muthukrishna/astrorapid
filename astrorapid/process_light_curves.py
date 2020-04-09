@@ -104,7 +104,8 @@ class InputLightCurve(object):
             calc_params = False
 
         if calc_params:
-            earlytime = self.peakmjd - self.trigger_mjd
+            pk_minus_trig = self.peakmjd - self.trigger_mjd
+            earlytime = pk_minus_trig - 5
             fit_func, parameters = model_early_lightcurve.fit_early_lightcurve(outlc, earlytime)
         else:
             parameters = {pb: [-99, -99, -99] for pb in self.passband}
