@@ -141,7 +141,9 @@ def read_fits_file(args):
         except AttributeError as e:
             print("phot_data is NoneType", e)  # TODO: maybe fix this later - rare case
         except ValueError as e:
-            print("MCMC error while fiiting t0", e)
+            print("MCMC error while fitting t0", e)
+        except Exception as e:
+            print("Unspecified error", e, "Ignoring light curve", objid)
 
     return light_curves
 

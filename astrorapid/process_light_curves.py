@@ -93,20 +93,20 @@ class InputLightCurve(object):
     def compute_t0(self, outlc):
         """ Calculate the explosion time for the trianing set if certain conditions are met. """
         calc_params = True
-        inrange_mask = self.t < self.peakmjd
+        peak_time = self.peakmjd - self.trigger_mjd
+        early_time = peak_time - 5
+        inrange_mask = self.t < early_time
         if self.class_number in [70, 80, 82, 83]:  # No t0 if model types (AGN, RRlyrae, Eclipsing Binaries)
             calc_params = False
         elif self.peakmjd - self.trigger_mjd < 0:  # No t0 if trigger to peak time is small
             calc_params = False
-        elif len(self.t[inrange_mask]) < 3:  # No t0 if not At least 3 points before peak
+        elif len(self.t[inrange_mask]) < 3:  # No t0 if not At least 3 points before peak/early_time
             calc_params = False
-        elif len(self.t[self.t < 0]) < 3:  # No t0 if there are less than three points before trigger
+        elif len(self.t[self.t < 0]) < 4:  # No t0 if there are less than 4 points before trigger
             calc_params = False
 
         if calc_params:
-            pk_minus_trig = self.peakmjd - self.trigger_mjd
-            earlytime = pk_minus_trig - 5
-            fit_func, parameters = model_early_lightcurve.fit_early_lightcurve(outlc, earlytime)
+            fit_func, parameters = model_early_lightcurve.fit_early_lightcurve(outlc, early_time)
         else:
             parameters = {pb: [-99, -99, -99] for pb in self.passband}
 
