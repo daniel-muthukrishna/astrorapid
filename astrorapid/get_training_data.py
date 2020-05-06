@@ -68,7 +68,7 @@ def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_reds
                        r 103.8734   27.178356 115.537704     4096
     """
 
-    return get_data_func(class_num, data_dir, save_dir, passbands, known_redshift, nprocesses, redo)
+    return get_data_func(class_num, data_dir, save_dir, passbands, known_redshift, nprocesses, redo, calculate_t0)
 
 
 def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/',
