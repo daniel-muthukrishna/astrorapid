@@ -10,7 +10,7 @@ from astrorapid.ANTARES_object.LAobject import LAobject
 
 class InputLightCurve(object):
     def __init__(self, mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift=None, mwebv=None,
-                 known_redshift=True, training_set_parameters=None):
+                 known_redshift=True, training_set_parameters=None, calculate_t0=None):
         """
 
         Parameters
@@ -42,6 +42,9 @@ class InputLightCurve(object):
         training_set_parameters : dict
             Optional parameter. If this is not None, then determine the explosion time, t0, for full the training set.
             The dictionary must have the following keys: {class_number, peakmjd}
+        calculate_t0 : bool or None
+            Optional parameter. If this is False, t0 will not be computed
+            even if the training_set_parameters argument is set.
         """
 
         self.mjd = np.array(mjd)
@@ -56,6 +59,7 @@ class InputLightCurve(object):
         self.mwebv = mwebv
         self.known_redshift = known_redshift
         self.training_set_parameters = training_set_parameters
+        self.calculate_t0 = calculate_t0
         if training_set_parameters is not None:
             self.class_number = training_set_parameters['class_number']
             self.peakmjd = training_set_parameters['peakmjd']
@@ -132,8 +136,9 @@ class InputLightCurve(object):
         outlc.meta = {'redshift': self.redshift, 'b': self.b, 'mwebv': self.mwebv, 'trigger_mjd': self.trigger_mjd}
 
         if self.training_set_parameters is not None:
-            t0 = self.compute_t0(outlc)
-            outlc.meta['t0'] = t0
+            if self.calculate_t0 is not False:
+                t0 = self.compute_t0(outlc)
+                outlc.meta['t0'] = t0
             outlc.meta['peakmjd'] = self.peakmjd
             outlc.meta['class_num'] = self.class_number
 

@@ -102,7 +102,7 @@ class GetData(object):
 
 
 def read_fits_file(args):
-    head_file, phot_file, passbands, known_redshift = args
+    head_file, phot_file, passbands, known_redshift, calculate_t0 = args
 
     getter = GetData()
 
@@ -134,7 +134,8 @@ def read_fits_file(args):
 
             inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['photflag'], ra,
                                               dec, objid, redshift, mwebv, known_redshift=known_redshift,
-                                              training_set_parameters={'class_number': int(class_num), 'peakmjd': peakmjd})
+                                              training_set_parameters={'class_number': int(class_num), 'peakmjd': peakmjd},
+                                              calculate_t0=calculate_t0)
             light_curves[objid] = inputlightcurve.preprocess_light_curve()
         except IndexError as e:
             print("No detections:", e)  # TODO: maybe do better error checking in future
@@ -149,7 +150,7 @@ def read_fits_file(args):
 
 
 def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('g', 'r'), known_redshift=True,
-                                            nprocesses=1):
+                                            nprocesses=1, calculate_t0=True):
     """ Save lightcurves from SNANA HEAD AND PHOT FITS files
 
     Parameters
@@ -164,6 +165,8 @@ def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('
         Whether to use redshift during training.
     nprocesses : int
         Number of processes to run multiprocessing on.
+    calculate_t0 : bool
+        Optional parameter. If this is False, t0 will not be computed.
 
     """
 
@@ -172,7 +175,7 @@ def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('
         assert phot_files[i].split('_')[-2].split('-')[1] == head_files[i].split('_')[-2].split('-')[1]
         head_files_part = head_files[i]
         phot_files_part = phot_files[i]
-        args_list.append((head_files_part, phot_files_part, passbands, known_redshift))
+        args_list.append((head_files_part, phot_files_part, passbands, known_redshift, calculate_t0))
 
     light_curves = {}
     if nprocesses == 1:

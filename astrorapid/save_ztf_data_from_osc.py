@@ -239,7 +239,7 @@ if __name__ == '__main__':
                     redshifts = np.array([entry['value'] for entry in data[osc_name]['redshift']]).astype('float')
                     claimed_types = [entry['value'] for entry in data[osc_name]['claimedtype']]
                     redshift = np.median(redshifts)
-                    if len(claimed_types) == 0 or (len(claimed_types) == 1 and claimed_types[0] in ['Candidate', 'Other', 'removed']):
+                    if len(claimed_types) == 0 or (len(claimed_types) == 1 and claimed_types[0] in ['Candidate', 'Other', 'other', 'removed', 'NT']):
                         continue
 
                     if len(claimed_types) == 1:
@@ -265,7 +265,7 @@ if __name__ == '__main__':
                             SN['IIpec'][name] = redshift
                         elif claimed_types[0] in ['IIn']:
                             SN['IIn'][name] = redshift
-                        elif claimed_types[0] in ['IIb' 'II/IIb']:
+                        elif claimed_types[0] in ['IIb', 'II/IIb']:
                             SN['IIb'][name] = redshift
                         elif claimed_types[0] in ['Ib']:
                             SN['Ib'][name] = redshift
@@ -342,5 +342,5 @@ if __name__ == '__main__':
 
     for sntype in SN.keys():
         names_and_redshifts = list(SN[sntype].items())
-        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-5-Apr-2020.pickle')
+        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-6-May-2020.pickle')
 

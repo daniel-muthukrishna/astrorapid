@@ -7,7 +7,8 @@ from astrorapid.helpers import delete_indexes
 from astrorapid.process_light_curves import InputLightCurve
 
 
-def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_redshift=True, nprocesses=1, redo=False):
+def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_redshift=True, nprocesses=1, redo=False,
+             calculate_t0=True):
     """
     Get data using some function.
 
@@ -34,6 +35,8 @@ def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_reds
         Number of processes to use
     redo : bool
         Whether to redo reading the data and saving the processed data.
+    calculate_t0 : bool
+        Whether to calculate t0 during preprocessing.
 
     Returns
     -------
@@ -69,7 +72,7 @@ def get_data(get_data_func, class_num, data_dir, save_dir, passbands, known_reds
 
 
 def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir='data/saved_light_curves/',
-                             passbands=('g', 'r'), known_redshift=True, nprocesses=1, redo=False):
+                             passbands=('g', 'r'), known_redshift=True, nprocesses=1, redo=False, calculate_t0=True):
     """
     Get data from SNANA fits data files.
 
@@ -93,7 +96,8 @@ def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir=
             print(filepath)
 
         light_curves = read_light_curves_from_snana_fits_files(head_files, phot_files, passbands,
-                                                               known_redshift=known_redshift, nprocesses=nprocesses)
+                                                               known_redshift=known_redshift, nprocesses=nprocesses,
+                                                               calculate_t0=calculate_t0)
 
         with open(save_lc_filepath, "wb") as fp:  # Pickling
             pickle.dump(light_curves, fp)
@@ -102,8 +106,8 @@ def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir=
 
 
 def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc',
-                               save_dir='data/saved_light_curves_pandas', pbs=('g', 'r'),
-                               known_redshift=True, nprocesses=1, redo=False):
+                               save_dir='data/saved_light_curves/', pbs=('g', 'r'),
+                               known_redshift=True, nprocesses=1, redo=False, calculate_t0=True):
     """
     Get data from saved real ZTF data with names and types from the Open Supernova Catalog
     """
@@ -143,7 +147,8 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
                                               ras[i], decs[i], objid, redshifts[i], mwebvs[i],
                                               known_redshift=known_redshift,
                                               training_set_parameters={'class_number': class_name,
-                                                                       'peakmjd': peakmjd})
+                                                                       'peakmjd': peakmjd},
+                                              calculate_t0=calculate_t0)
             light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
         with open(save_lc_filepath, "wb") as fp:
