@@ -118,7 +118,7 @@ def get_real_ztf_training_data(class_name, data_dir='data/real_ZTF_data_from_osc
             light_curves = pickle.load(fp)
     else:
         light_curves = {}
-        data_filepath = os.path.join(data_dir, f"ZTF_data_{class_name}_osc-5-Apr-2020.pickle")
+        data_filepath = os.path.join(data_dir, f"ZTF_data_{class_name}_osc-6-May-2020.pickle")
         with open(data_filepath, "rb") as fp:
             mjds, passbands, mags, magerrs, photflags, zeropoints, dc_mags, dc_magerrs, magnrs, \
             sigmagnrs, isdiffposs, ras, decs, objids, redshifts, mwebvs = pickle.load(fp)

@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='astrorapid',
-    version='0.2.9',
+    version='0.2.10',
     description='Real-time Automated Photometric IDentification of astronomical transients',
     url='https://github.com/daniel-muthukrishna/astrorapid',
     author='Daniel Muthukrishna',
