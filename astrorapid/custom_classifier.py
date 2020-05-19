@@ -81,6 +81,11 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         Name of directory to save the Classifier metric figures such as confusion matrices.
     plot : bool
         Whether to plot classier metrics such as confusion matrices after training.
+    num_ex_vs_time : int
+        Number of example vs time light curves to plot.
+    init_day_since_trigger : int
+        Day since trigger from which to start plotting in vs time figures. Input a negative value for a day
+        before trigger.
     """
 
     for dirname in [training_set_dir, data_dir, save_dir]:
