@@ -89,7 +89,7 @@ def get_data_from_snana_fits(class_num, data_dir='data/ZTF_20190512/', save_dir=
         head_files = []
         phot_files = []
         for file in files:
-            filepath = os.path.join(data_dir, class_dir, file)
+            filepath = os.path.join(class_dir, file)
             if filepath.endswith('HEAD.FITS'):
                 head_files.append(filepath)
                 phot_files.append(filepath.replace('_HEAD.FITS', '_PHOT.FITS'))
