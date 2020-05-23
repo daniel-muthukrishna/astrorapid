@@ -39,7 +39,7 @@ MAXTIME = 80
 
 
 def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None,
-                 passbands=('g', 'r')):
+                 passbands=('g', 'r'), num_ex_vs_time=100, init_day_since_trigger=-25):
     scores = model.evaluate(X_test, y_test, verbose=0)
     print("Accuracy: %.2f%%" % (scores[1] * 100))
 
@@ -71,7 +71,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     matplotlib.rc('font', **font)
 
     # Plot classification example vs time
-    for idx in np.arange(0, 100):
+    for idx in np.arange(0, num_ex_vs_time):
         true_class = int(max(y_test_indexes[idx]))
         print(true_class)
         # if true_class != 1:
@@ -317,7 +317,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     images_cf, images_roc, images_pr = [], [], []
     roc_auc, pr_auc = {}, {}
     wlogloss = {}
-    for i, days_since_trigger in enumerate(list(np.arange(0, 75,step=2))):# + list(np.arange(25, 70, step=5))):  # [('early2days', 2), ('late40days', 40)]: # [-25, -20, -15, -10, -5, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]:
+    for i, days_since_trigger in enumerate(list(np.arange(init_day_since_trigger, 25)) + list(np.arange(25, 70, step=5))):  # [('early2days', 2), ('late40days', 40)]: # [-25, -20, -15, -10, -5, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]:
         print("Plotting CF matrix", i, days_since_trigger, "days")
         index = np.where(time_bins == days_since_trigger)[0][0]
         y_test_on_day_i = y_test_indexes_days_past_trigger[:, index]
@@ -328,7 +328,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         title = '{} days since trigger'.format(days_since_trigger)
         cnf_matrix = confusion_matrix(y_test_on_day_i, y_pred_on_day_i)
         print(name, cnf_matrix)
-        figname_cf = plot_confusion_matrix(cnf_matrix, classes=class_names[1:], normalize=True, title=title,
+        figname_cf = plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True, title=title,
                                            fig_dir=fig_dir + '/cf_since_trigger', name=name)
         images_cf.append(imageio.imread(figname_cf))
 
