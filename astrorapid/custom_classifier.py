@@ -10,7 +10,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
                              timestep=3.0, retrain_network=False, train_epochs=50, zcut=0.5, bcut=True,
                              ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
                              training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
-                             fig_dir='Figures', plot=True):
+                             fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25):
 
     """
     Create a classifier with your own data and own training parameters.
@@ -81,6 +81,11 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         Name of directory to save the Classifier metric figures such as confusion matrices.
     plot : bool
         Whether to plot classier metrics such as confusion matrices after training.
+    num_ex_vs_time : int
+        Number of example vs time light curves to plot.
+    init_day_since_trigger : int
+        Day since trigger from which to start plotting in vs time figures. Input a negative value for a day
+        before trigger.
     """
 
     for dirname in [training_set_dir, data_dir, save_dir]:
@@ -109,4 +114,4 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     # Plot classification metrics such as confusion matrices
     if plot:
         plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=timesX_test, orig_lc_test=orig_lc_test,
-                     objids_test=objids_test, passbands=passbands)
+                     objids_test=objids_test, passbands=passbands, num_ex_vs_time=num_ex_vs_time, init_day_since_trigger=init_day_since_trigger)

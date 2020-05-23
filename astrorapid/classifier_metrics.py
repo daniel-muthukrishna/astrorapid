@@ -223,6 +223,9 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
     Normalization can be applied by setting `normalize=True`.
     """
 
+    if cm.shape[0] == 2:
+        classes = [cls_ for cls_ in classes if cls_ != 'Pre-explosion']
+
     if combine_kfolds:
         uncertainties = np.std(cm, axis=0)
         cm = np.sum(cm, axis=0)
@@ -237,8 +240,9 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
 
     print(cm)
     # Multiply off diagonal by -1
-    off_diag = ~np.eye(cm.shape[0], dtype=bool)
-    cm[off_diag] *= -1
+    if cm.shape[0] > 2:
+        off_diag = ~np.eye(cm.shape[0], dtype=bool)
+        cm[off_diag] *= -1
     np.savetxt(os.path.join(fig_dir, 'confusion_matrix_%s.csv' % name), cm)
     print(cm)
 
@@ -285,5 +289,6 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
         if not deleterow:
             figname_png = os.path.join(fig_dir, 'confusion_matrix_%s.png' % name)
             plt.savefig(figname_png, bbox_inches="tight")
+        plt.close()
 
     return figname_png
