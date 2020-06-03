@@ -22,12 +22,12 @@ def main():
                              zcut=0.5,
                              bcut=True,
                              ignore_classes=(61, 62, 63, 70),
-                             nprocesses=None,
+                             nprocesses=1,
                              nchunks=10000,
                              otherchange='',
                              training_set_dir=os.path.join(script_dir, '..', 'training_set_files'),
                              save_dir=os.path.join(script_dir, '..', 'data/saved_light_curves'),
-                             fig_dir=os.path.join(script_dir, '..', 'training_set_files', 'Figures', 'ZTF_with_redshift'),
+                             fig_dir=os.path.join(script_dir, '..', 'training_set_files', 'Figures', 'ZTF_with_redshift_2LSTM100_w_dropout0.0_epochs_100'),
                              plot=True
                              )
 

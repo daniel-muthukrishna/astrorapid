@@ -132,7 +132,7 @@ def read_lasair_json(object_name='ZTF18acsovsw'):
     return mjd, passband, mag, magerr, photflag, zeropoint, ra, dec, objid, redshift, mwebv, dc_mag, dc_magerr, magnr, sigmagnr, isdiffpos
 
 
-def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), savename=''):
+def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), savename='', sntype=''):
     light_curve_list = []
     mjds, passbands, mags, magerrs, zeropoints, photflags = [], [], [], [], [], []
     dc_mags, dc_magerrs, magnrs, sigmagnrs, isdiffposs = [], [], [], [], []
@@ -158,7 +158,7 @@ def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), savename=''):
             obj_names.append(object_name)
             ras.append(ra)
             decs.append(dec)
-            objids.append(objid)
+            objids.append(f"{sntype}_{objid}")
             redshifts.append(redshift)
             mwebvs.append(mwebv)
             peakmags_g.append(min(mag[passband==1]))
@@ -342,5 +342,5 @@ if __name__ == '__main__':
 
     for sntype in SN.keys():
         names_and_redshifts = list(SN[sntype].items())
-        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-6-May-2020.pickle')
+        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-6-May-2020.pickle', sntype=sntype)
 
