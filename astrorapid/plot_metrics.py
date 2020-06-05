@@ -33,52 +33,49 @@ COLCLASS = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:ora
 COLPB = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
 MARKPB = {'g': 'o', 'r': 's'}
 ALPHAPB = {'g': 0.3, 'r': 1.}
-# WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
-WLOGLOSS_WEIGHTS = [1, 1, 1]
+WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 MINTIME = -70
 MAXTIME = 80
 
-def plot_classif_vs_time(model, num_ex_vs_time, objids_test, timesX_test, orig_lc_test, passbands, X_test, y_test, class_names, output_dir, only_misclassified=False):
-    """Plot classification example vs time"""
+def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None,
+                 passbands=('g', 'r'), num_ex_vs_time=100, init_day_since_trigger=-25):
+    scores = model.evaluate(X_test, y_test, verbose=0)
+    print("Accuracy: %.2f%%" % (scores[1] * 100))
 
-    if "Pre-explosion" not in class_names:
-        class_names = sorted(class_names)
-        class_names = ["Pre-explosion"] + class_names
+    class_names = sorted(class_names)
 
     y_pred = model.predict(X_test)
     y_test_indexes = np.argmax(y_test, axis=-1)
     y_pred_indexes = np.argmax(y_pred, axis=-1)
 
-    if only_misclassified:
+    accuracy = len(np.where(y_pred_indexes == y_test_indexes)[0])
+    print("Accuracy is: {}/{} = {}".format(accuracy, len(y_test_indexes.flatten()),
+                                           accuracy / len(y_test_indexes.flatten())))
 
-        # More than 3 photopoints and more than one band
-        filtered_indexes1 = np.array([i for i, lc in enumerate(orig_lc_test) if (len(set(lc['passband'])) >= 2) and (len(lc) > 3)])
+    if "Pre-explosion" not in class_names:
+        class_names = ["Pre-explosion"] + class_names
 
-        # Misclassified objects
-        true_classes = np.amax(y_test_indexes, axis=-1)
-        pred_classes = y_pred_indexes[np.arange(len(y_pred_indexes)),timesX_test.argmax(axis=-1)]
-        filtered_indexes2 = np.argwhere(true_classes != pred_classes).flatten()
+    # Set trailing zeros to -200
+    for i in range(timesX_test.shape[0]):
+        timesX_test[i][:np.argmin(timesX_test[i])] = -200
+        timesX_test[i][np.argmax(timesX_test[i]) + 1:] = -200
 
-        # Objects with > 80% prob
-        y_pred_max = np.max(y_pred, axis=-1)
-        last_y_pred_max = y_pred_max[np.arange(len(y_pred_max)),timesX_test.argmax(axis=-1)]
-        filtered_indexes3 = np.argwhere(last_y_pred_max > 0.8).flatten()
-        
-        # Plot selection
-        # selected_indexes = np.intersect1d(filtered_indexes1, filtered_indexes2, assume_unique=True)
-        selected_indexes = np.intersect1d(filtered_indexes2, filtered_indexes3, assume_unique=True)
-        if num_ex_vs_time >= len(y_test_indexes):
-            raise ValueError("Parameter 'num_ex_vs_time' exceeds number misclassified samples in the test set ({})".format(len(selected_indexes)))
-        selected_indexes = selected_indexes[:num_ex_vs_time]
+    for cname in class_names:
+        dirname = os.path.join(fig_dir + '/lc_pred', cname)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
 
-    else:
-        selected_indexes = np.arange(0, num_ex_vs_time)
+    # Plot accuracy vs time per class
+    font = {'family': 'normal',
+            'size': 36}
+    matplotlib.rc('font', **font)
 
-    for count_idx, idx in enumerate(selected_indexes):
-        true_class = int(max(y_test_indexes[idx]))
+    # Plot classification example vs time
+    for idx in np.arange(0, num_ex_vs_time):
+        # print(true_class)
         # if true_class != 1:
         #     continue
-        print("Plotting example vs time number {}, id \"{}\", true class \"{}\"".format(count_idx+1, objids_test[idx], true_class))
+        print("Plotting example vs time number {}, id \"{}\"...".format(idx, objids_test[idx]))
         argmax = timesX_test[idx].argmax() + 1
 
         lc_data = orig_lc_test[idx]
@@ -150,49 +147,13 @@ def plot_classif_vs_time(model, num_ex_vs_time, objids_test, timesX_test, orig_l
         ax2.yaxis.set_major_locator(MaxNLocator(nbins=6, prune='upper'))  # added
         plt.tight_layout()
         fig.subplots_adjust(hspace=0)
-        plt.savefig(os.path.join(output_dir,
-                                "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
-                                                                                peakmjd - trigger_mjd)))
-        if not only_misclassified:
-            plt.savefig(os.path.join(output_dir, class_names[true_class],
-                                    "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
-                                                                                    peakmjd - trigger_mjd)))
+        plt.savefig(os.path.join(fig_dir + '/lc_pred',
+                                 "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
+                                                                                 peakmjd - trigger_mjd)))
+        plt.savefig(os.path.join(fig_dir + '/lc_pred', class_names[true_class],
+                                 "{}_{}_{}_{}_{}_matrix_input2.pdf".format(objids_test[idx], idx, class_names[true_class], redshift,
+                                                                                 peakmjd - trigger_mjd)))
         plt.close()
-
-def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None,
-                 passbands=('g', 'r'), num_ex_vs_time=100, init_day_since_trigger=-25):
-    scores = model.evaluate(X_test, y_test, verbose=0)
-    print("Accuracy: %.2f%%" % (scores[1] * 100))
-
-    class_names = sorted(class_names)
-
-    y_pred = model.predict(X_test)
-    y_test_indexes = np.argmax(y_test, axis=-1)
-    y_pred_indexes = np.argmax(y_pred, axis=-1)
-
-    accuracy = len(np.where(y_pred_indexes == y_test_indexes)[0])
-    print("Accuracy is: {}/{} = {}".format(accuracy, len(y_test_indexes.flatten()),
-                                           accuracy / len(y_test_indexes.flatten())))
-
-    class_names = ["Pre-explosion"] + class_names
-
-    # Set trailing zeros to -200
-    for i in range(timesX_test.shape[0]):
-        timesX_test[i][:np.argmin(timesX_test[i])] = -200
-        timesX_test[i][np.argmax(timesX_test[i]) + 1:] = -200
-
-    for cname in class_names:
-        dirname = os.path.join(fig_dir + '/lc_pred', cname)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-    # Plot accuracy vs time per class
-    font = {'family': 'normal',
-            'size': 36}
-    matplotlib.rc('font', **font)
-
-    #Plot classification example vs time
-    plot_classif_vs_time(model, num_ex_vs_time, objids_test, timesX_test, orig_lc_test, passbands, X_test, y_test, class_names, output_dir=os.path.join(fig_dir,'lc_pred'), only_misclassified=False)
 
     # Plot animated classification example vs time
     for idx in []: #[869]: #[181, 409, 491, 508, 765, 1156, 1335, 1358, 1570]:  # np.arange(765, 766):  # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 25, 30]:
@@ -383,7 +344,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
 
         try:
             wlogloss[days_since_trigger] = plasticc_log_loss(to_categorical(y_test_on_day_i, num_classes=nclasses),
-                                                             y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS)
+                                                             y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS[:len(class_names)])
         except Exception as e:
             print("Cannot compute weighted PLAsTiCC Log Loss.", e)
 
