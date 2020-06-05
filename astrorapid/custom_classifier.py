@@ -111,10 +111,10 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir,
                         retrain=retrain_network, epochs=train_epochs, plot_loss=plot)
 
-    misclass_output_dir = os.path.join(fig_dir, 'lc_pred_misclass')
-    if not os.path.exists(misclass_output_dir):
-        os.makedirs(misclass_output_dir)
-    plot_classif_vs_time(model, num_ex_vs_time, objids_test, timesX_test, orig_lc_test, passbands, X_test, y_test, class_names, output_dir=misclass_output_dir, only_misclassified=True)
+    # misclass_output_dir = os.path.join(fig_dir, 'lc_pred_misclass')
+    # if not os.path.exists(misclass_output_dir):
+    #     os.makedirs(misclass_output_dir)
+    # plot_classif_vs_time(model, num_ex_vs_time, objids_test, timesX_test, orig_lc_test, passbands, X_test, y_test, class_names, output_dir=misclass_output_dir, only_misclassified=True)
 
     # Plot classification metrics such as confusion matrices
     if plot:

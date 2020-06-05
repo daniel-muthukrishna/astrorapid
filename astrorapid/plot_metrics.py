@@ -33,7 +33,8 @@ COLCLASS = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:ora
 COLPB = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
 MARKPB = {'g': 'o', 'r': 's'}
 ALPHAPB = {'g': 0.3, 'r': 1.}
-WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
+# WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
+WLOGLOSS_WEIGHTS = [1, 1, 1]
 MINTIME = -70
 MAXTIME = 80
 
@@ -285,6 +286,9 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     # fig = plt.figure(figsize=(13, 12))
     for classnum, classname in enumerate(class_names):
         correct_predictions_inclass = (y_test_indexes == classnum) & (y_pred_indexes == y_test_indexes)
+        if not np.any(correct_predictions_inclass):
+            print("There are no correct predictions for class \"{}\".".format(classname))
+            continue
         time_bins = np.arange(-150, 150, 3.)
 
         times_binned_indexes = np.digitize(timesX_test, bins=time_bins, right=True)
@@ -296,24 +300,17 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         time_list_indexes2_inclass = time_list_indexes2_inclass[time_list_indexes2_inclass < len(time_bins)]
         count_objects_vs_binned_time_inclass = count_objects_vs_binned_time_inclass[time_list_indexes2_inclass < len(time_bins)]
 
-        start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[0])[0])
-        end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0]) + 1
+        # start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[0])[0])
+        # end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0]) + 1
+        start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[1])[0])
+        end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0])
 
-        try:
-            accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index]
-        except Exception as e:
-            print(e)
-            continue
+        accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index+1]
 
-        try:
-            assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index])
-        except Exception as e:
-            import pdb; pdb.set_trace()
-            print(e)
-            pass
+        assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index+1])
 
         plt.plot(time_bins[time_list_indexes_inclass[1:]], accuracy_vs_time_inclass, '-', label=classname, color=COLORS[classnum], lw=3)
-    plt.xlim(left=-35, right=70)
+    plt.xlim(left=init_day_since_trigger - 10, right=70)
     plt.xlabel("Days since trigger (rest frame)")
     plt.ylabel("Classification accuracy")
     plt.legend(frameon=True, fontsize=25, ncol=2, loc=0)  # , bbox_to_anchor=(0.05, -0.1))
