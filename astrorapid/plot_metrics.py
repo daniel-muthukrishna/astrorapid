@@ -72,6 +72,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
 
     # Plot classification example vs time
     for idx in np.arange(0, num_ex_vs_time):
+        true_class = int(max(y_test_indexes[idx]))
         # print(true_class)
         # if true_class != 1:
         #     continue
@@ -261,14 +262,20 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         time_list_indexes2_inclass = time_list_indexes2_inclass[time_list_indexes2_inclass < len(time_bins)]
         count_objects_vs_binned_time_inclass = count_objects_vs_binned_time_inclass[time_list_indexes2_inclass < len(time_bins)]
 
-        # start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[0])[0])
-        # end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0]) + 1
         start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[1])[0])
         end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0])
 
-        accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index+1]
+        try:
+            accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index+1]
+        except Exception as e:
+            print(e)
+            continue
 
-        assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index+1])
+        try:
+            assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index+1])
+        except Exception as e:
+            print(e)
+            pass
 
         plt.plot(time_bins[time_list_indexes_inclass[1:]], accuracy_vs_time_inclass, '-', label=classname, color=COLORS[classnum], lw=3)
     plt.xlim(left=init_day_since_trigger - 10, right=70)
