@@ -70,7 +70,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     nchunks : int
         Number of chunks to split the data set into before doing multiprocessing.
         This should be a small fraction of the number of total objects.
-    other_change : str
+    otherchange : str
         A change in this text will signify that a change has been made to one of these training parameters
         and that the data should be resaved and the model retrained should resave the data and retrained.
     training_set_dir : str
@@ -115,3 +115,5 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     if plot:
         plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=timesX_test, orig_lc_test=orig_lc_test,
                      objids_test=objids_test, passbands=passbands, num_ex_vs_time=num_ex_vs_time, init_day_since_trigger=init_day_since_trigger)
+
+    

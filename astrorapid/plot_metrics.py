@@ -37,7 +37,6 @@ WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 MINTIME = -70
 MAXTIME = 80
 
-
 def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, orig_lc_test=None, objids_test=None,
                  passbands=('g', 'r'), num_ex_vs_time=100, init_day_since_trigger=-25):
     scores = model.evaluate(X_test, y_test, verbose=0)
@@ -53,7 +52,8 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     print("Accuracy is: {}/{} = {}".format(accuracy, len(y_test_indexes.flatten()),
                                            accuracy / len(y_test_indexes.flatten())))
 
-    class_names = ["Pre-explosion"] + class_names
+    if "Pre-explosion" not in class_names:
+        class_names = ["Pre-explosion"] + class_names
 
     # Set trailing zeros to -200
     for i in range(timesX_test.shape[0]):
@@ -73,10 +73,10 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     # Plot classification example vs time
     for idx in np.arange(0, num_ex_vs_time):
         true_class = int(max(y_test_indexes[idx]))
-        print(true_class)
+        # print(true_class)
         # if true_class != 1:
         #     continue
-        print("Plotting example vs time", idx, objids_test[idx])
+        print("Plotting example vs time number {}, id \"{}\"...".format(idx, objids_test[idx]))
         argmax = timesX_test[idx].argmax() + 1
 
         lc_data = orig_lc_test[idx]
@@ -248,6 +248,9 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     # fig = plt.figure(figsize=(13, 12))
     for classnum, classname in enumerate(class_names):
         correct_predictions_inclass = (y_test_indexes == classnum) & (y_pred_indexes == y_test_indexes)
+        if not np.any(correct_predictions_inclass):
+            print("There are no correct predictions for class \"{}\".".format(classname))
+            continue
         time_bins = np.arange(-150, 150, 3.)
 
         times_binned_indexes = np.digitize(timesX_test, bins=time_bins, right=True)
@@ -259,24 +262,23 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
         time_list_indexes2_inclass = time_list_indexes2_inclass[time_list_indexes2_inclass < len(time_bins)]
         count_objects_vs_binned_time_inclass = count_objects_vs_binned_time_inclass[time_list_indexes2_inclass < len(time_bins)]
 
-        start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[0])[0])
-        end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0]) + 1
+        start_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[1])[0])
+        end_time_index = int(np.where(time_list_indexes2_inclass == time_list_indexes_inclass[-1])[0])
 
         try:
-            accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index]
+            accuracy_vs_time_inclass = count_correct_vs_binned_time_inclass[1:] / count_objects_vs_binned_time_inclass[start_time_index:end_time_index+1]
         except Exception as e:
             print(e)
             continue
 
         try:
-            assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index])
+            assert np.all(time_list_indexes_inclass[1:] == time_list_indexes2_inclass[start_time_index:end_time_index+1])
         except Exception as e:
-            import pdb; pdb.set_trace()
             print(e)
             pass
 
         plt.plot(time_bins[time_list_indexes_inclass[1:]], accuracy_vs_time_inclass, '-', label=classname, color=COLORS[classnum], lw=3)
-    plt.xlim(left=-35, right=70)
+    plt.xlim(left=init_day_since_trigger - 10, right=70)
     plt.xlabel("Days since trigger (rest frame)")
     plt.ylabel("Classification accuracy")
     plt.legend(frameon=True, fontsize=25, ncol=2, loc=0)  # , bbox_to_anchor=(0.05, -0.1))
@@ -349,7 +351,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
 
         try:
             wlogloss[days_since_trigger] = plasticc_log_loss(to_categorical(y_test_on_day_i, num_classes=nclasses),
-                                                             y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS)
+                                                             y_pred_prob_on_day_i, relative_class_weights=WLOGLOSS_WEIGHTS[:len(class_names)])
         except Exception as e:
             print("Cannot compute weighted PLAsTiCC Log Loss.", e)
 
