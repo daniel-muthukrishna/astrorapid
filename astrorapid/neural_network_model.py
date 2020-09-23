@@ -49,7 +49,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
 
 
-        inputs = Input(shape=(X_train.shape[1], X_train.shape[2]))
+        inputs = Input()
         hidden = Masking(mask_value=0.)(inputs)
 
         hidden = TCN(nunits, return_sequences=True, kernel_size=2, nb_stacks=1, dilations=[1, 2, 4, 8],
