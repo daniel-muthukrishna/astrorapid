@@ -54,6 +54,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
 
         hidden = TCN(nunits, return_sequences=True, kernel_size=2, nb_stacks=1, dilations=[1, 2, 4, 8],
                      padding='causal', use_skip_connections=True, dropout_rate=dropout_rate, activation='sigmoid')(hidden)
+        hidden = TimeDistributed(Dense(2))(hidden)
 
         outputs = hidden
 
