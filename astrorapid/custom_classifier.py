@@ -116,8 +116,8 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
 
     # Train the neural network model on saved files
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir,
-                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot, dropout_frac=dropout_rate,
-                        batch_size=train_batch_size, units=nunits)
+                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot, dropout_rate=dropout_rate,
+                        batch_size=train_batch_size, nunits=nunits)
 
     # Plot classification metrics such as confusion matrices
     if plot:

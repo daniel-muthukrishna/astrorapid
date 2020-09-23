@@ -104,6 +104,11 @@ def read_lasair_json(object_name='ZTF18acsovsw'):
             #      zeropoint.append(26.2)  # TODO: Tell LASAIR their zeropoints are wrong
             # else:
             #     zeropoint.append(cand['magzpsci'])  #26.2) #
+            if cand['magzpsci'] == 0:
+                print(object_name, zeropoint)
+                raise Exception
+                return
+
             zeropoint.append(cand['magzpsci'])
             dc_mag.append(cand['dc_mag'])
             dc_magerr.append(cand['dc_sigmag'])
@@ -341,6 +346,17 @@ if __name__ == '__main__':
                     print(osc_name, name, redshifts, claimed_types)
 
     for sntype in SN.keys():
+        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-20-Sep-2020_removed_zpt0_objects.pickle'
         names_and_redshifts = list(SN[sntype].items())
-        classify_lasair_light_curves(object_names=names_and_redshifts, savename=f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-6-May-2020.pickle', sntype=sntype)
+        classify_lasair_light_curves(object_names=names_and_redshifts, savename=savename, sntype=sntype)
+
+    # List counts of each type
+    print([(sntype, len(snlist)) for sntype, snlist in SN.items()])
+
+    sndata = {}
+    for sntype in SN.keys():
+        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-20-Sep-2020_removed_zpt0_objects.pickle'
+        with open(savename, 'rb') as f:
+            sndata[sntype] = pickle.load(f)
+    print([(sntype, len(data[0])) for sntype, data in sndata.items()])
 
