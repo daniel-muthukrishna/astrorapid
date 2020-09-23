@@ -7,7 +7,8 @@ import astrorapid.get_custom_data
 
 def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_name_map=None, reread_data=False, train_size=0.6,
                              contextual_info=('redshift',), passbands=('g', 'r'), nobs=50, mintime=-70, maxtime=80,
-                             timestep=3.0, retrain_network=False, train_epochs=50, zcut=0.5, bcut=True,
+                             timestep=3.0, retrain_network=False, train_epochs=50, dropout_frac=0,
+                             train_batch_size=64, units=100,zcut=0.5, bcut=True,
                              ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
                              training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
                              fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25):
@@ -58,6 +59,12 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         This is the number of times the nerual network sees each datum in the training set.
         The higher this is the better the classifier will find a local minimum, however, too high, and it might
         overfit and not generalise well to new data
+    dropout_frac : float
+        Value between 0.0 and 1.0 indicating fraction for dropout regularisation.
+    train_batch_size : int
+        Number of objects to use per step in gradient descent.
+    units : int
+        Number of LSTM units.
     zcut : float
         Do not train on objects with redshifts higher than zcut.
     bcut : bool
@@ -109,7 +116,8 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
 
     # Train the neural network model on saved files
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir,
-                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot)
+                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot, dropout_frac=dropout_frac,
+                        batch_size=train_batch_size, units=units)
 
     # Plot classification metrics such as confusion matrices
     if plot:

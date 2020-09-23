@@ -11,7 +11,8 @@ from tensorflow.python.keras.layers.convolutional import MaxPooling1D, MaxPoolin
 import matplotlib.pyplot as plt
 
 
-def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25, plot_loss=True):
+def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25,
+                plot_loss=True, dropout_frac=0, batch_size=100, units=100):
     """ Train Neural Network classifier and save model. """
 
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
@@ -37,18 +38,18 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
         # model.add(MaxPooling1D(pool_size=1))
         # model.add(Dropout(0.2, seed=42))
 
-        model.add(LSTM(100, return_sequences=True))
+        model.add(LSTM(units, return_sequences=True, dropout=dropout_frac))
         # model.add(Dropout(0.2, seed=42))
         # model.add(BatchNormalization())
 
-        model.add(LSTM(100, return_sequences=True))
+        model.add(LSTM(units, return_sequences=True, dropout=dropout_frac))
         # model.add(Dropout(0.2, seed=42))
         # model.add(BatchNormalization())
         # model.add(Dropout(0.2, seed=42))
 
         model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=500,
+        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=batch_size,
                             verbose=2, sample_weight=sample_weights)
 
         print(model.summary())
