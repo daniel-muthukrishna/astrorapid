@@ -33,32 +33,31 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
     else:
         num_classes = y_test.shape[-1]
 
-        # model = Sequential()
-        # model.add(Masking(mask_value=0.))
+        model = Sequential()
+        model.add(Masking(mask_value=0.))
+
+        model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
+        # model.add(Dropout(0.2, seed=42))
+        # model.add(BatchNormalization())
+
+        model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
+        # model.add(Dropout(0.2, seed=42))
+        # model.add(BatchNormalization())
+        # model.add(Dropout(0.2, seed=42))
+
+        model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
+
+        # TCN stuff
+        # inputs = Input(shape=(X_train.shape[1], X_train.shape[2]))
+        # hidden = Masking(mask_value=0.)(inputs)
         #
-        # model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
-        # # model.add(Dropout(0.2, seed=42))
-        # # model.add(BatchNormalization())
+        # hidden = TCN(nunits, return_sequences=True, kernel_size=2, nb_stacks=1, dilations=[1, 2, 4, 8],
+        #              padding='causal', use_skip_connections=True, dropout_rate=dropout_rate, activation='sigmoid')(hidden)
+        # hidden = TimeDistributed(Dense(3))(hidden)
         #
-        # model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
-        # # model.add(Dropout(0.2, seed=42))
-        # # model.add(BatchNormalization())
-        # # model.add(Dropout(0.2, seed=42))
+        # outputs = hidden
         #
-        # model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
-
-        print(X_train.shape)
-
-        inputs = Input(shape=(X_train.shape[1], X_train.shape[2]))
-        hidden = Masking(mask_value=0.)(inputs)
-
-        hidden = TCN(nunits, return_sequences=True, kernel_size=2, nb_stacks=1, dilations=[1, 2, 4, 8],
-                     padding='causal', use_skip_connections=True, dropout_rate=dropout_rate, activation='sigmoid')(hidden)
-        hidden = TimeDistributed(Dense(3))(hidden)
-
-        outputs = hidden
-
-        model = Model(inputs, outputs)
+        # model = Model(inputs, outputs)
 
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
