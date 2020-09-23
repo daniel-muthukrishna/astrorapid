@@ -1,18 +1,23 @@
 import os
 import numpy as np
 import pickle
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.models import load_model
-from tensorflow.python.keras.layers import Dense, Input
-from tensorflow.python.keras.layers import LSTM, GRU
-from tensorflow.python.keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed, Masking
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import LSTM, GRU
+from tensorflow.keras.layers import Dropout, BatchNormalization, Activation, TimeDistributed, Masking
+from tensorflow.keras.models import Sequential, Model
 from tensorflow.python.keras.layers.convolutional import Conv1D, Conv2D
 from tensorflow.python.keras.layers.convolutional import MaxPooling1D, MaxPooling2D
 import matplotlib.pyplot as plt
 
+from tcn import TCN, tcn_full_summary
+import tensorflow_probability as tfp
+
+
 
 def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='.', retrain=True, epochs=25,
-                plot_loss=True, dropout_frac=0, batch_size=100, units=100):
+                plot_loss=True, dropout_rate=0.0, batch_size=100, nunits=100):
     """ Train Neural Network classifier and save model. """
 
     model_filename = os.path.join(fig_dir, "keras_model.hdf5")
@@ -28,26 +33,33 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
     else:
         num_classes = y_test.shape[-1]
 
-        model = Sequential()
+        # model = Sequential()
+        # model.add(Masking(mask_value=0.))
+        #
+        # model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
+        # # model.add(Dropout(0.2, seed=42))
+        # # model.add(BatchNormalization())
+        #
+        # model.add(LSTM(nunits, return_sequences=True, dropout=dropout_rate))
+        # # model.add(Dropout(0.2, seed=42))
+        # # model.add(BatchNormalization())
+        # # model.add(Dropout(0.2, seed=42))
+        #
+        # model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
 
-        model.add(Masking(mask_value=0.))
 
-        # model.add(Conv1D(filters=32, kernel_size=3))
-        # model.add(BatchNormalization())
-        # model.add(Activation('relu'))
-        # model.add(MaxPooling1D(pool_size=1))
-        # model.add(Dropout(0.2, seed=42))
 
-        model.add(LSTM(units, return_sequences=True, dropout=dropout_frac))
-        # model.add(Dropout(0.2, seed=42))
-        # model.add(BatchNormalization())
+        inputs = Input(shape=(X_train.shape[1], X_train.shape[2]))
+        hidden = Masking(mask_value=0.)(inputs)
 
-        model.add(LSTM(units, return_sequences=True, dropout=dropout_frac))
-        # model.add(Dropout(0.2, seed=42))
-        # model.add(BatchNormalization())
-        # model.add(Dropout(0.2, seed=42))
+        hidden = TCN(nunits, return_sequences=True, kernel_size=2, nb_stacks=1, dilations=[1, 2, 4, 8],
+                     padding='causal', use_skip_connections=True, dropout_rate=dropout_rate, activation='sigmoid')(hidden)
 
-        model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
+        outputs = hidden
+
+        model = Model(inputs, outputs)
+
+
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=batch_size,
                             verbose=2, sample_weight=sample_weights)
