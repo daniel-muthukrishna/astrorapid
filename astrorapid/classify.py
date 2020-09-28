@@ -410,7 +410,7 @@ class Classify(object):
             def animate(i):
                 for pbidx, pb in enumerate(used_passbands):
                     ax1.plot(self.timesX[idx][:argmax][:int(i + 1)], self.X[idx][:, pbidx][:argmax][:int(i + 1)],
-                             label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
+                             label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker='.')
 
                 for classnum, classname in enumerate(self.class_names):
                     ax2.plot(self.timesX[idx][:argmax][:int(i + 1)],
@@ -500,7 +500,7 @@ class Classify(object):
             def animate(i):
                 for pbidx, pb in enumerate(used_passbands):
                     # ax1.plot(self.timesX[idx][:argmax][:int(i + 1)], self.X[idx][:, pbidx][:argmax][:int(i + 1)],
-                    #          label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker=MARKPB[pb])
+                    #          label=pb, c=PB_COLOR[pb], lw=3)  # , markersize=10, marker='.')
 
                     # dea = [self.orig_lc[idx][pb]['time'] < self.timesX[idx][:argmax][int(i)]]
                     if i + 1 >= len(new_t):

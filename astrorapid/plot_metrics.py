@@ -31,8 +31,6 @@ COLCLASS = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:ora
             'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink',
             'AGN': 'bisque'}
 COLPB = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
-MARKPB = {'g': 'o', 'r': 's'}
-ALPHAPB = {'g': 0.3, 'r': 1.}
 WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 MINTIME = -70
 MAXTIME = 80
@@ -95,10 +93,10 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
             pbmask = lc_data['passband'] == pb
             # masktime = (lc_data[pbmask]['time'] > MINTIME) & (lc_data[pbmask]['time'] < MAXTIME)
             ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
-                         yerr=lc_data[pbmask]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
+                         yerr=lc_data[pbmask]['fluxErr'], fmt='.', label=pb, c=COLPB[pb],
                          lw=3, markersize=10, alpha=0.2)
             ax1.plot(timesX_test[idx][:argmax], X_test[idx][:, pbidx][:argmax], c=COLPB[pb],
-                     lw=3)  # , markersize=10, marker=MARKPB[pb])
+                     lw=3)  # , markersize=10, marker='.'
 
         true_class = int(max(y_test_indexes[idx]))
         ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
@@ -212,7 +210,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
             for pbidx, pb in enumerate(passbands):
                 if pb not in used_passbands:
                     continue
-                # ax1.plot(timesX_test[idx][:argmax][:int(i+1)], X_test[idx][:, pbidx][:argmax][:int(i+1)], label=pb, c=COLPB[pb], lw=3)#, markersize=10, marker=MARKPB[pb])
+                # ax1.plot(timesX_test[idx][:argmax][:int(i+1)], X_test[idx][:, pbidx][:argmax][:int(i+1)], label=pb, c=COLPB[pb], lw=3)#, markersize=10, marker='.')
                 if i + 1 >= len(new_t):
                     break
                 # If less than 0.4 day gap in times skip
@@ -222,7 +220,7 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
                 dea = [lc_data[pbmask]['time'] < new_t[int(i + 1)]]
 
                 ax1.errorbar(np.array(lc_data[pbmask]['time'])[dea], np.array(lc_data[pbmask]['flux'])[dea],
-                             yerr=np.array(lc_data[pbmask]['fluxErr'])[dea], fmt=MARKPB[pb], label=pb,
+                             yerr=np.array(lc_data[pbmask]['fluxErr'])[dea], fmt='.', label=pb,
                              c=COLPB[pb], lw=3, markersize=10)
 
             for classnum, classname in enumerate(class_names):
@@ -456,11 +454,11 @@ def plot_metrics(class_names, model, X_test, y_test, fig_dir, timesX_test=None, 
     #         if pb in orig_lc_test[idx].keys():
     #             try:
     #                 ax1.errorbar(lc_data[pbmask]['time'], lc_data[pbmask]['flux'],
-    #                              yerr=orig_lc_test[idx][pb]['fluxErr'], fmt=MARKPB[pb], label=pb, c=COLPB[pb],
+    #                              yerr=orig_lc_test[idx][pb]['fluxErr'], fmt='.', label=pb, c=COLPB[pb],
     #                              lw=3, markersize=10)
     #             except KeyError:
     #                 ax1.errorbar(orig_lc_test[idx][pb]['time'], orig_lc_test[idx][pb][5], yerr=orig_lc_test[idx][pb][6],
-    #                              fmt=MARKPB[pb], label=pb, c=COLPB[pb], lw=3, markersize=10)
+    #                              fmt='., label=pb, c=COLPB[pb], lw=3, markersize=10)
     #     true_class = int(max(y_test_indexes[idx]))
     #     ax1.axvline(x=0, color='k', linestyle='-', linewidth=1)
     #     ax2.axvline(x=0, color='k', linestyle='-', linewidth=1)
