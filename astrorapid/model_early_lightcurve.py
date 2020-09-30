@@ -204,7 +204,7 @@ def emcee_fit_all_pb_lightcurves(times, fluxes, fluxerrs, ndim, x0=None, bounds=
     # bestpars2 = list(map(lambda v: (v[0]), zip(*np.percentile(samples, [50], axis=0))))
     # print('b2', bestpars2)
 
-    print(bestpars)
+    # print(bestpars)
     t0 = bestpars[0]
     bestpars = bestpars[1:]
 
