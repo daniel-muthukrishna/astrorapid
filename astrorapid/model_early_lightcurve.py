@@ -90,7 +90,7 @@ def fit_early_lightcurve(outlc, earlytime=10):
     # best, covariance = curve_fit(fit_func, time, flux, sigma=fluxerr, p0=[max(flux), min(flux)])
 
     # best = fit_all_pb_lightcurves(time, flux, fluxerr)
-    print('best', best)
+    # print('best', best)
 
     return fit_func, best
 
@@ -189,7 +189,7 @@ def emcee_fit_all_pb_lightcurves(times, fluxes, fluxerrs, ndim, x0=None, bounds=
     bestpars = pos[nstep, nwalk]
     posterior = prob
 
-    print("best", bestpars)
+    # print("best", bestpars)
     # import pylab
     # for j in range(nwalkers):
     #     pylab.plot(posterior[:, j])
