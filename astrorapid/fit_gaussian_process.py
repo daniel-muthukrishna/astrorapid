@@ -91,13 +91,16 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
             color = {'g': 'tab:green', 'r': "tab:red", 'i': "tab:purple", 'z': "tab:brown"}
             # plt.plot(time, flux, "k", lw=1.5, alpha=0.3)
             plt.errorbar(time, flux, yerr=fluxerr, fmt=".", capsize=0, color=color[pb])
-            plt.plot(x, pred_mean, color=color[pb])
+            plt.plot(x, pred_mean, color=color[pb], label=pb)
             plt.fill_between(x, pred_mean + pred_std, pred_mean - pred_std, color=color[pb], alpha=0.3,
                              edgecolor="none")
 
     if plot:
-        plt.xlabel("Days since trigger")
-        plt.ylabel("Flux")
+        plt.xlabel("Days since trigger", fontsize=15)
+        plt.ylabel("Flux", fontsize=15)
+        plt.xticks(fontsize=15)
+        plt.yticks(fontsize=15)
+        plt.legend()
         plt.show()
         # if extrapolate:
         #     plt.savefig(f'/Users/danmuth/PycharmProjects/transomaly/plots/gp_fits/extrapolated/gp_{objid}.pdf')
