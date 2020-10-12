@@ -109,7 +109,7 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
 
 
 def save_gps(light_curves, save_dir='data/saved_light_curves/', class_num=None, passbands=('g', 'r'), plot=False,
-             nprocesses=1, redo=False, extrapolate=True):
+             nprocesses=1, redo=False, extrapolate=False):
     """ Save gaussian process fits.
     Don't plot in parallel
     """

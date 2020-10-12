@@ -1,5 +1,5 @@
 import os
-from astrorapid.prepare_arrays import PrepareTrainingSetArrays
+from astrorapid.prepare_training_set import PrepareTrainingSetArrays
 from astrorapid.plot_metrics import plot_metrics
 from astrorapid.neural_network_model import train_model
 import astrorapid.get_custom_data
@@ -11,7 +11,8 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
                              train_batch_size=64, nunits=100, zcut=0.5, bcut=True,
                              ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
                              training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
-                             fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25):
+                             fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25,
+                             augment_data=False, redo_processing=False):
 
     """
     Create a classifier with your own data and own training parameters.
@@ -33,7 +34,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         You may use the same value for a different key if you want the classifier to join these two class_nums under the same label.
         If this is None, it will use the default mapping listed in get_sntypes in helpers.py.
     reread_data : bool
-        If this is True, then it will reread your data and resave the processed files, otherwise
+        If this is True, then it will reread_data your data and resave the processed files, otherwise
         it will check if the data has already been read, processed and saved.
     train_size : float
         Fraction of data to use for training, the remainder will be used for testing/validation.
@@ -93,6 +94,10 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     init_day_since_trigger : int
         Day since trigger from which to start plotting in vs time figures. Input a negative value for a day
         before trigger.
+    augment_data : bool
+        Whether to do Gaussian processing augmenting.
+    redo_processing : bool
+        Whether to redo processing AFTER reading data, saving GP fits and computing t0.
     """
 
     for dirname in [training_set_dir, data_dir, save_dir]:
@@ -109,7 +114,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
                                              reread_data, bcut, zcut, ignore_classes,
                                              class_name_map=class_name_map, nchunks=nchunks,
                                              training_set_dir=training_set_dir, data_dir=data_dir, save_dir=save_dir,
-                                             get_data_func=get_data_func)
+                                             get_data_func=get_data_func, augment_data=augment_data, redo_processing=redo_processing)
     X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, \
     timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = \
         preparearrays.prepare_training_set_arrays(otherchange, class_nums, nprocesses, train_size)

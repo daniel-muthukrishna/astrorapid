@@ -7,7 +7,7 @@ from pkg_resources import resource_filename
 from distutils.spawn import find_executable
 
 from astrorapid.process_light_curves import read_multiple_light_curves
-from astrorapid.prepare_arrays import PrepareInputArrays
+from astrorapid.prepare_input import PrepareInputArrays
 
 try:
     import matplotlib.pyplot as plt

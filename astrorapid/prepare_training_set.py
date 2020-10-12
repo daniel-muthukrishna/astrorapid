@@ -18,11 +18,12 @@ np.random.seed(42)
 
 class PrepareTrainingSetArrays(PrepareArrays):
     def __init__(self, passbands=('g', 'r'), contextual_info=('redshift',), nobs=50, mintime=-70, maxtime=80,
-                 timestep=3.0, reread=False, bcut=True, zcut=None, ignore_classes=(), class_name_map=None,
-                 nchunks=10000,  training_set_dir='data/training_set_files', data_dir='data/ZTF_20190512/',
-                 save_dir='data/saved_light_curves/', get_data_func=None):
+                 timestep=3.0, reread_data=False, bcut=True, zcut=None, ignore_classes=(), class_name_map=None,
+                 nchunks=10000, training_set_dir='data/training_set_files', data_dir='data/ZTF_20190512/',
+                 save_dir='data/saved_light_curves/', get_data_func=None, augment_data=False, redo_processing=False):
         PrepareArrays.__init__(self, passbands, contextual_info, nobs, mintime, maxtime, timestep)
-        self.reread = reread
+        self.reread_data = reread_data
+        self.redo_processing = redo_processing
         self.bcut = bcut
         self.zcut = zcut
         self.ignore_classes = ignore_classes
@@ -32,7 +33,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
         self.save_dir = save_dir
         self.light_curves = {}
         self.get_data_func = get_data_func
-
+        self.augment_data = augment_data
         if 'redshift' in contextual_info:
             self.known_redshift = True
         else:
@@ -50,7 +51,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         for class_num in class_nums:
             lcs = get_data(self.get_data_func, class_num, self.data_dir, self.save_dir, self.passbands,
-                           self.known_redshift, nprocesses, self.reread)
+                           self.known_redshift, nprocesses, self.reread_data)
             light_curves.update(lcs)
 
         return light_curves
@@ -60,20 +61,64 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         for class_num in class_nums:
             gp_lcs = save_gps(light_curves, self.save_dir, class_num, self.passbands, plot=plot,
-                                     nprocesses=nprocesses, redo=self.redo, extrapolate=extrapolate)
+                              nprocesses=nprocesses, redo=self.reread_data, extrapolate=extrapolate)
             saved_gp_fits.update(gp_lcs)
 
         return saved_gp_fits
+
+    def augment_data_with_gp(self, light_curves, gp_fits):
+        augmented_light_curves = {}
+        lenobjids = len(light_curves)
+        for i, (objid, lc) in enumerate(light_curves.items):
+            print(f"Augmenting light curve {objid}, {i} of {lenobjids}")
+
+            # Limit to only -80 to 70 days around trigger
+            masktimes = (lc['time'] >= self.mintime) & (lc['time'] <= self.maxtime)
+            lc = lc[masktimes]
+
+            # Augment data
+            gp_lc = gp_fits[objid]
+
+            new_lc = lc.copy()
+            for s in range(100):
+                for pb in self.passbands:
+                    pbmask = lc['passband'] == pb
+                    pbmaskidx = np.where(pbmask)[0]
+                    sortedidx = np.argsort(lc[pbmask]['time'].data)
+                    time = lc[pbmask]['time'].data[sortedidx]
+                    flux = lc[pbmask]['flux'].data[sortedidx]
+                    fluxerr = lc[pbmask]['flux'].data[sortedidx]
+
+                    # Get new times randomly in range of old times
+                    mintime, maxtime = min(time), max(time)
+
+                    new_times = (maxtime - mintime) * np.random.random(len(time)) + mintime
+                    new_times = sorted(new_times)
+
+                    pred_mean, pred_cov = gp_lc[pb].predict(flux, new_times, return_cov=True)
+                    new_fluxes = np.random.multivariate_normal(pred_mean, pred_cov)
+                    new_fluxerrs = np.sqrt(np.diag(pred_cov))
+
+                    new_lc['time'][pbmaskidx] = new_times
+                    new_lc['flux'][pbmaskidx] = new_fluxes
+                    new_lc['fluxErr'][pbmaskidx] = new_fluxerrs
+                new_lc['photflag'] = 0
+                new_lc['photflag'][new_lc['time'] >= lc.meta['t0']] = 4096
+                augmented_light_curves[f"{objid}_{s}"] = new_lc
+
+        return augmented_light_curves
+
 
     def prepare_training_set_arrays(self, otherchange='', class_nums=(1,), nprocesses=1, train_size=0.6):
         savepath = os.path.join(self.training_set_dir,
                                 "X_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                          self.bcut, self.ignore_classes))
         print(savepath)
-        if self.reread is True or not os.path.isfile(savepath):
+        if self.reread_data or self.redo_processing or not os.path.isfile(savepath):
             self.light_curves = self.get_light_curves(class_nums, nprocesses)
             if self.augment_data:
-                self.light_curves = self.augment_data_with_gp(self.light_curves)
+                gp_fits = self.get_gaussian_process_fits(self.light_curves, class_nums, plot=False, nprocesses=nprocesses, extrapolate=False)
+                self.light_curves = self.augment_data_with_gp(self.light_curves , gp_fits)
 
             objids = list(set(self.light_curves.keys()))
             nobjects = len(objids)
