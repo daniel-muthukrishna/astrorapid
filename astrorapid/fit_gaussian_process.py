@@ -47,7 +47,7 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
             print("Failed object", objid, e)
             return
 
-        print("Initial log likelihood: {0}".format(gp_lc[pb].log_likelihood(fluxes[pb])))
+        # print("Initial log likelihood: {0}".format(gp_lc[pb].log_likelihood(fluxes[pb])))
         initial_params = gp_lc[pb].get_parameter_vector()  # This should be the same across passbands
         bounds = gp_lc[pb].get_parameter_bounds()
 
@@ -66,7 +66,7 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
         flux = fluxes[pb]
         fluxerr = fluxerrs[pb]
 
-        print("Final log likelihood: {0}".format(gp_lc[pb].log_likelihood(flux)))
+        # print("Final log likelihood: {0}".format(gp_lc[pb].log_likelihood(flux)))
 
         # Remove objects with bad fits
         if extrapolate is True:
