@@ -55,7 +55,7 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
     try:
         r = minimize(combined_neg_log_like, initial_params, method="L-BFGS-B", bounds=bounds,
                      args=(fluxes, gp_lc, passbands))
-        print(r)
+        # print(r)
     except Exception as e:
         print("Failed object", objid, e)
         return
@@ -100,7 +100,7 @@ def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_th
         plt.ylabel("Flux", fontsize=15)
         plt.xticks(fontsize=15)
         plt.yticks(fontsize=15)
-        plt.legend()
+        plt.legend(fontsize=15)
         plt.show()
         # if extrapolate:
         #     plt.savefig(f'/Users/danmuth/PycharmProjects/transomaly/plots/gp_fits/extrapolated/gp_{objid}.pdf')
