@@ -69,7 +69,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
     def augment_data_with_gp(self, light_curves, gp_fits):
         augmented_light_curves = {}
         lenobjids = len(light_curves)
-        for i, (objid, lc) in enumerate(light_curves.items):
+        for i, (objid, lc) in enumerate(light_curves.items()):
             print(f"Augmenting light curve {objid}, {i} of {lenobjids}")
 
             # Limit to only -80 to 70 days around trigger
@@ -118,9 +118,11 @@ class PrepareTrainingSetArrays(PrepareArrays):
             self.light_curves = self.get_light_curves(class_nums, nprocesses)
             if self.augment_data:
                 gp_fits = self.get_gaussian_process_fits(self.light_curves, class_nums, plot=False, nprocesses=nprocesses, extrapolate=False)
-                self.light_curves = self.augment_data_with_gp(self.light_curves , gp_fits)
-
-            objids = list(set(self.light_curves.keys()))
+                self.light_curves = self.augment_data_with_gp(self.light_curves, gp_fits)
+                objids = list(set(self.light_curves.keys()) & set(gp_fits.keys()))
+                print(f"{self.light_curves.keys()} LCs and {len(gp_fits.keys())} GP fits")
+            else:
+                objids = list(set(self.light_curves.keys()))
             nobjects = len(objids)
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.

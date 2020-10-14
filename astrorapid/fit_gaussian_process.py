@@ -24,7 +24,7 @@ def fit_gaussian_process_one_argument(args):
     return fit_gaussian_process(lc, objid, passbands, plot, extrapolate)
 
 
-def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_thresh=-380):
+def fit_gaussian_process(lc, objid, passbands, plot, extrapolate, bad_loglike_thresh=-2000):
     print(f"Fitting GP to {objid}")
     gp_lc = {}
     if plot:
