@@ -31,8 +31,8 @@ COLCLASS = {'Pre-explosion': 'grey', 'SNIa-norm': 'tab:green', 'SNIbc': 'tab:ora
             'SLSN-I': 'tab:olive', 'PISN': 'tab:cyan', 'ILOT': '#FF1493', 'CART': 'navy', 'TDE': 'tab:pink',
             'AGN': 'bisque'}
 COLPB = {'u': 'tab:blue', 'g': 'tab:blue', 'r': 'tab:orange', 'i': 'm', 'z': 'k', 'Y': 'y'}
-MARKPB = {'g': 'o', 'r': 's'}
-ALPHAPB = {'g': 0.3, 'r': 1.}
+MARKPB = {'g': 'o', 'r': 's', 'i': 'x'}
+ALPHAPB = {'g': 0.3, 'r': 1., 'i': 0.7}
 WLOGLOSS_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 MINTIME = -70
 MAXTIME = 80
