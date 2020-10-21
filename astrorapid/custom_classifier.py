@@ -1,5 +1,5 @@
 import os
-from astrorapid.prepare_arrays import PrepareTrainingSetArrays
+from astrorapid.prepare_training_set import PrepareTrainingSetArrays
 from astrorapid.plot_metrics import plot_metrics
 from astrorapid.neural_network_model import train_model
 import astrorapid.get_custom_data
@@ -7,10 +7,12 @@ import astrorapid.get_custom_data
 
 def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_name_map=None, reread_data=False, train_size=0.6,
                              contextual_info=('redshift',), passbands=('g', 'r'), nobs=50, mintime=-70, maxtime=80,
-                             timestep=3.0, retrain_network=False, train_epochs=50, zcut=0.5, bcut=True,
+                             timestep=3.0, retrain_network=False, train_epochs=50, dropout_rate=0,
+                             train_batch_size=64, nunits=100, zcut=0.5, bcut=True,
                              ignore_classes=(), nprocesses=1, nchunks=1000, otherchange='',
                              training_set_dir='data/training_set_files', save_dir='data/saved_light_curves',
-                             fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25):
+                             fig_dir='Figures', plot=True, num_ex_vs_time=100, init_day_since_trigger=-25,
+                             augment_data=False, redo_processing=False):
 
     """
     Create a classifier with your own data and own training parameters.
@@ -32,7 +34,7 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         You may use the same value for a different key if you want the classifier to join these two class_nums under the same label.
         If this is None, it will use the default mapping listed in get_sntypes in helpers.py.
     reread_data : bool
-        If this is True, then it will reread your data and resave the processed files, otherwise
+        If this is True, then it will reread_data your data and resave the processed files, otherwise
         it will check if the data has already been read, processed and saved.
     train_size : float
         Fraction of data to use for training, the remainder will be used for testing/validation.
@@ -58,6 +60,12 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
         This is the number of times the nerual network sees each datum in the training set.
         The higher this is the better the classifier will find a local minimum, however, too high, and it might
         overfit and not generalise well to new data
+    dropout_rate : float
+        Value between 0.0 and 1.0 indicating fraction for dropout regularisation.
+    train_batch_size : int
+        Number of objects to use per step in gradient descent.
+    units : int
+        Number of LSTM units.
     zcut : float
         Do not train on objects with redshifts higher than zcut.
     bcut : bool
@@ -86,6 +94,10 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
     init_day_since_trigger : int
         Day since trigger from which to start plotting in vs time figures. Input a negative value for a day
         before trigger.
+    augment_data : bool
+        Whether to do Gaussian processing augmenting.
+    redo_processing : bool
+        Whether to redo processing AFTER reading data, saving GP fits and computing t0.
     """
 
     for dirname in [training_set_dir, data_dir, save_dir]:
@@ -102,14 +114,15 @@ def create_custom_classifier(get_data_func, data_dir, class_nums=(1,2,), class_n
                                              reread_data, bcut, zcut, ignore_classes,
                                              class_name_map=class_name_map, nchunks=nchunks,
                                              training_set_dir=training_set_dir, data_dir=data_dir, save_dir=save_dir,
-                                             get_data_func=get_data_func)
+                                             get_data_func=get_data_func, augment_data=augment_data, redo_processing=redo_processing)
     X_train, X_test, y_train, y_test, labels_train, labels_test, class_names, class_weights, sample_weights, \
     timesX_train, timesX_test, orig_lc_train, orig_lc_test, objids_train, objids_test = \
         preparearrays.prepare_training_set_arrays(otherchange, class_nums, nprocesses, train_size)
 
     # Train the neural network model on saved files
     model = train_model(X_train, X_test, y_train, y_test, sample_weights=sample_weights, fig_dir=fig_dir,
-                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot)
+                        retrain=retrain_network, epochs=train_epochs, plot_loss=plot, dropout_rate=dropout_rate,
+                        batch_size=train_batch_size, nunits=nunits)
 
     # Plot classification metrics such as confusion matrices
     if plot:
