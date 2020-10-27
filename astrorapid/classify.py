@@ -251,7 +251,7 @@ class Classify(object):
         return y_predict, time_steps
 
     def plot_light_curves_and_classifications(self, indexes_to_plot=None, step=True, use_interp_flux=False, figdir='.',
-                                              plot_matrix_input=False, light_curves=None):
+                                              plot_matrix_input=False, light_curves=None, show_plot=False):
         """
         Plot light curve (top panel) and classifications (bottom panel) vs time.
 
@@ -275,6 +275,8 @@ class Classify(object):
             (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv).
             Here, mjd, flux, fluxerr, passband, and photflag are arrays.
             ra, dec, objid, redshift, and mwebv are floats
+        show_plot : bool
+            Run plt.show() after each object plotted.
 
         """
 
@@ -344,6 +346,8 @@ class Classify(object):
             savename = 'classification_vs_time_{}{}{}.pdf'.format(self.objids[idx], '_step' if step else '', '_no_interp' if not use_interp_flux else '')
             plt.savefig(os.path.join(figdir, savename))
             # plt.savefig("{}.png".format(savename))
+            if show_plot:
+                plt.show()
             plt.close()
 
         return self.orig_lc, self.timesX, self.y_predict
