@@ -66,14 +66,7 @@ class PrepareTrainingSetArrays(PrepareArrays):
 
         return saved_gp_fits
 
-    def augment_data_with_gp(self, light_curves, gp_fits, nsamples=100):
-        """
-            If nsamples is dict use dict values instead...
-        """
-        if isinstance(nsamples, dict):
-            nsamples_is_dict = True
-        else:
-            nsamples_is_dict = False
+    def augment_data_with_gp(self, light_curves, gp_fits):
         augmented_light_curves = {}
         lenobjids = len(light_curves)
         for i, (objid, lc) in enumerate(light_curves.items()):
@@ -84,38 +77,24 @@ class PrepareTrainingSetArrays(PrepareArrays):
             lc = lc[masktimes]
 
             # Augment data
-            if objid in gp_fits:
-                gp_lc = gp_fits[objid]
-            else:
-                print(f"{objid} was not fitted by GP.")
-                continue
-
-            if nsamples_is_dict:
-                cname = lc.meta['class_num']
-                ns = int(round(nsamples[cname]))
-            else:
-                ns = nsamples
+            gp_lc = gp_fits[objid]
 
             new_lc = lc.copy()
-            augmented_light_curves[f"{objid}_0"] = new_lc
-            for s in range(1, ns):
+            for s in range(100):
                 for pb in self.passbands:
                     pbmask = lc['passband'] == pb
                     pbmaskidx = np.where(pbmask)[0]
                     sortedidx = np.argsort(lc[pbmask]['time'].data)
                     time = lc[pbmask]['time'].data[sortedidx]
                     flux = lc[pbmask]['flux'].data[sortedidx]
-                    fluxerr = lc[pbmask]['fluxErr'].data[sortedidx]
+                    fluxerr = lc[pbmask]['flux'].data[sortedidx]
 
-                    if len(time) == 0:
-                        continue
                     # Get new times randomly in range of old times
                     mintime, maxtime = min(time), max(time)
 
                     new_times = (maxtime - mintime) * np.random.random(len(time)) + mintime
                     new_times = sorted(new_times)
 
-                    gp_lc[pb].compute(time, fluxerr)
                     pred_mean, pred_cov = gp_lc[pb].predict(flux, new_times, return_cov=True)
                     new_fluxes = np.random.multivariate_normal(pred_mean, pred_cov)
                     new_fluxerrs = np.sqrt(np.diag(pred_cov))
@@ -137,17 +116,13 @@ class PrepareTrainingSetArrays(PrepareArrays):
         print(savepath)
         if self.reread_data or self.redo_processing or not os.path.isfile(savepath):
             self.light_curves = self.get_light_curves(class_nums, nprocesses)
-            objids = list(set(self.light_curves.keys()))
-            objids_train, objids_test = train_test_split(objids, train_size=train_size, shuffle=True, random_state=42)
             if self.augment_data:
                 gp_fits = self.get_gaussian_process_fits(self.light_curves, class_nums, plot=False, nprocesses=nprocesses, extrapolate=False)
-                classnames = []
-                for objid, lc in self.light_curves.items():
-                    classnames.append(lc.meta['class_num'])
-                cnames, counts = np.unique(classnames, return_counts=True)
-                nsamples = dict(zip(cnames, 2*max(counts)/counts))
-                self.light_curves = self.augment_data_with_gp(self.light_curves, gp_fits, nsamples=nsamples)
-            objids = list(set(self.light_curves.keys()))
+                self.light_curves = self.augment_data_with_gp(self.light_curves, gp_fits)
+                objids = list(set(self.light_curves.keys()) & set(gp_fits.keys()))
+                print(f"{self.light_curves.keys()} LCs and {len(gp_fits.keys())} GP fits")
+            else:
+                objids = list(set(self.light_curves.keys()))
             nobjects = len(objids)
 
             # Store data labels (y) and 'r' band data (X). Use memory mapping because input file is very large.
@@ -215,16 +190,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                  "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                          self.bcut, self.ignore_classes)), objids_list,
                     allow_pickle=True)
-            np.save(os.path.join(self.training_set_dir,
-                                 "objids_train_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
-                                                                               self.zcut,
-                                                                               self.bcut, self.ignore_classes)), objids_train,
-                    allow_pickle=True)
-            np.save(os.path.join(self.training_set_dir,
-                                 "objids_test_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info,
-                                                                              self.zcut,
-                                                                              self.bcut, self.ignore_classes)), objids_test,
-                    allow_pickle=True)
             with open(os.path.join(self.training_set_dir,
                                    "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
                                                                            self.bcut, self.ignore_classes)),
@@ -252,20 +217,6 @@ class PrepareTrainingSetArrays(PrepareArrays):
                                                "objids_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange,
                                                                                        self.contextual_info, self.zcut,
                                                                                        self.bcut, self.ignore_classes)),
-                                  allow_pickle=True)
-            objids_train = np.load(os.path.join(self.training_set_dir,
-                                                "objids_train_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange,
-                                                                                              self.contextual_info,
-                                                                                              self.zcut,
-                                                                                              self.bcut,
-                                                                                              self.ignore_classes)),
-                                   allow_pickle=True)
-            objids_test = np.load(os.path.join(self.training_set_dir,
-                                               "objids_test_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange,
-                                                                                            self.contextual_info,
-                                                                                            self.zcut,
-                                                                                            self.bcut,
-                                                                                            self.ignore_classes)),
                                   allow_pickle=True)
             with open(os.path.join(self.training_set_dir,
                                    "origlc_{}ci{}_z{}_b{}_ig{}.npy".format(otherchange, self.contextual_info, self.zcut,
@@ -312,24 +263,9 @@ class PrepareTrainingSetArrays(PrepareArrays):
         X, y, labels, timesX, orig_lc, objids_list = shuffle(X, y, labels, timesX, orig_lc, objids_list)
         print("Done shuffling")
 
-        train_idxes = [i for i, objid in enumerate(objids_list) if objid.split('_')[0] in objids_train]
-        test_idxes = [i for i, objid in enumerate(objids_list) if objid.split('_')[0] in objids_test]
-        X_train = X[train_idxes]
-        y_train = y[train_idxes]
-        labels_train = labels[train_idxes]
-        timesX_train = timesX[train_idxes]
-        orig_lc_train = [orig_lc[i] for i in train_idxes]
-        objids_train = objids_list[train_idxes]
-        X_test = X[test_idxes]
-        y_test = y[test_idxes]
-        labels_test = labels[test_idxes]
-        timesX_test = timesX[test_idxes]
-        orig_lc_test = [orig_lc[i] for i in test_idxes]
-        objids_test = objids_list[test_idxes]
-
-        # X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, \
-        # orig_lc_test, objids_train, objids_test = train_test_split(
-        #     X, y, labels, timesX, orig_lc, objids_list, train_size=train_size, shuffle=False, random_state=42)
+        X_train, X_test, y_train, y_test, labels_train, labels_test, timesX_train, timesX_test, orig_lc_train, \
+        orig_lc_test, objids_train, objids_test = train_test_split(
+            X, y, labels, timesX, orig_lc, objids_list, train_size=train_size, shuffle=False, random_state=42)
 
         def augment_crop_lightcurves(X_local, y_local, labels_local, timesX_local, orig_lc_local, objids_local):
             X_local = copy.copy(X_local)
@@ -429,4 +365,3 @@ class PrepareTrainingSetArrays(PrepareArrays):
         num_objects = X.shape[0]
 
         return labels, y, X, timesX, objids_list, orig_lc, count_deleterows, num_objects
-
