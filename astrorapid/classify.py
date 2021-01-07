@@ -5,6 +5,7 @@ from collections import OrderedDict
 from tensorflow.keras.models import load_model
 from pkg_resources import resource_filename
 from distutils.spawn import find_executable
+from tcn import TCN, tcn_full_summary
 
 from astrorapid.process_light_curves import read_multiple_light_curves
 from astrorapid.prepare_input import PrepareInputArrays
@@ -111,7 +112,7 @@ class Classify(object):
         if graph is not None and model is not None:
             self.model = model
         else:
-            self.model = load_model(self.model_filepath)
+            self.model = load_model(self.model_filepath, custom_objects={'TCN': TCN})
 
     def process_light_curves(self, light_curves):
         processed_lightcurves = read_multiple_light_curves(light_curves, known_redshift=self.known_redshift,

@@ -29,7 +29,7 @@ def train_model(X_train, X_test, y_train, y_test, sample_weights=None, fig_dir='
     # X_test = np.dstack((X_test, colour))
     print("training...")
     if not retrain and os.path.isfile(model_filename):
-        model = load_model(model_filename)
+        model = load_model(model_filename, custom_objects={'TCN': TCN})
     else:
         num_classes = y_test.shape[-1]
 
