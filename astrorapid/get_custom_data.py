@@ -84,7 +84,7 @@ def get_custom_data(class_num, data_dir, save_dir, passbands, known_redshift, np
             inputlightcurve = InputLightCurve(mjds[i], fluxes[i], fluxerrs[i], passbands[i], photflags[i],
                                               ras[i], decs[i], objids[i], redshifts[i], mwebvs[i],
                                               known_redshift=known_redshift,
-                                              training_set_parameters={'class_number': int(class_num),
+                                              training_set_parameters={'class_number': class_num,
                                                                        'peakmjd': peakmjds[i]})
             light_curves[objid] = inputlightcurve.preprocess_light_curve()
 

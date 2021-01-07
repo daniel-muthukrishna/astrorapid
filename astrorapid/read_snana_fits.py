@@ -134,7 +134,7 @@ def read_fits_file(args):
 
             inputlightcurve = InputLightCurve(lc['mjd'], lc['flux'], lc['dflux'], lc['pb'], lc['photflag'], ra,
                                               dec, objid, redshift, mwebv, known_redshift=known_redshift,
-                                              training_set_parameters={'class_number': int(class_num), 'peakmjd': peakmjd},
+                                              training_set_parameters={'class_number': class_num, 'peakmjd': peakmjd},
                                               calculate_t0=calculate_t0)
             light_curves[objid] = inputlightcurve.preprocess_light_curve()
         except IndexError as e:

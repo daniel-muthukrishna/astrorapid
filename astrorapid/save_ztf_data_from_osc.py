@@ -99,15 +99,15 @@ def read_lasair_json(object_name='ZTF18acsovsw'):
             magerr.append(cand['sigmapsf'])
             photflag.append(4096)
 
-            # if cand['magzpsci'] == 0:
-            #     print("NO ZEROPOINT")
-            #      zeropoint.append(26.2)  # TODO: Tell LASAIR their zeropoints are wrong
-            # else:
-            #     zeropoint.append(cand['magzpsci'])  #26.2) #
             if cand['magzpsci'] == 0:
-                print(object_name, zeropoint)
-                raise Exception
-                return
+                print("NO ZEROPOINT")
+                zeropoint.append(26.2)  # LASAIR zeropoints used to be wrong, but no longer using these anyway...
+            else:
+                zeropoint.append(cand['magzpsci'])  #26.2) #
+            # if cand['magzpsci'] == 0:
+            #     print(object_name, zeropoint)
+            #     raise Exception
+            #     return
 
             zeropoint.append(cand['magzpsci'])
             dc_mag.append(cand['dc_mag'])
@@ -173,7 +173,8 @@ def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), savename='', sn
             print(e)
             continue
 
-        flux = 10. ** (-0.4 * (mag - zeropoint))
+        A = 10. ** (0.4 * 24.8)
+        flux = A * 10. ** (-0.4 * (mag))
         fluxerr = np.abs(flux * magerr * (np.log(10.) / 2.5))
 
         passband = np.where((passband == 1) | (passband == '1'), 'g', passband)
@@ -196,7 +197,7 @@ def classify_lasair_light_curves(object_names=('ZTF18acsovsw',), savename='', sn
 
     with open(savename, 'wb') as f:
         pickle.dump([mjds, passbands, mags, magerrs, photflags, zeropoints, dc_mags, dc_magerrs, magnrs, sigmagnrs, isdiffposs, ras, decs, objids, redshifts, mwebvs], f)
-    # np.savez('save_real_ZTF_unprocessed_data_snia_osc_12nov2019.npz', mjds=mjds, passbands=passbands, mags=mags, magerrs=magerrs, photflags=photflags, zeropoints=zeropoints, ras=ras, decs=decs, objids=objids, redshifts=redshifts, mwebvs=mwebvs)# , peakflux_g=peakfluxes_g, peakflux_r=peakfluxes_r)
+    np.savez('save_real_ZTF_unprocessed_data_snia_osc_27Oct2020.npz', mjds=mjds, passbands=passbands, mags=mags, magerrs=magerrs, photflags=photflags, zeropoints=zeropoints, ras=ras, decs=decs, objids=objids, redshifts=redshifts, mwebvs=mwebvs)# , peakflux_g=peakfluxes_g, peakflux_r=peakfluxes_r)
     print("finished")
 
 
@@ -346,7 +347,7 @@ if __name__ == '__main__':
                     print(osc_name, name, redshifts, claimed_types)
 
     for sntype in SN.keys():
-        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-20-Sep-2020_removed_zpt0_objects.pickle'
+        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-27-Oct-2020_keep_zpt0_objects.pickle'
         names_and_redshifts = list(SN[sntype].items())
         classify_lasair_light_curves(object_names=names_and_redshifts, savename=savename, sntype=sntype)
 
@@ -355,7 +356,7 @@ if __name__ == '__main__':
 
     sndata = {}
     for sntype in SN.keys():
-        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-20-Sep-2020_removed_zpt0_objects.pickle'
+        savename = f'data/real_ZTF_data_from_osc/ZTF_data_{sntype}_osc-27-Oct-2020_keep_zpt0_objects.pickle'
         with open(savename, 'rb') as f:
             sndata[sntype] = pickle.load(f)
     print([(sntype, len(data[0])) for sntype, data in sndata.items()])
