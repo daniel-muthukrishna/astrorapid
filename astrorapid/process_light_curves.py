@@ -139,7 +139,8 @@ class InputLightCurve(object):
 
         outlc = laobject.get_lc_as_table()
         outlc.meta = {'redshift': self.redshift, 'b': self.b, 'mwebv': self.mwebv, 'trigger_mjd': self.trigger_mjd}
-        outlc.meta.update(self.other_meta_data)
+        if self.other_meta_data:
+            outlc.meta.update(self.other_meta_data)
 
         if self.training_set_parameters is not None:
             if self.calculate_t0 is not False:
@@ -151,19 +152,25 @@ class InputLightCurve(object):
         return outlc
 
 
-def read_multiple_light_curves(light_curve_list, known_redshift=True, training_set_parameters=None):
+def read_multiple_light_curves(light_curve_list, known_redshift=True, training_set_parameters=None, other_meta_data=None):
     """
     light_curve_list is a list of tuples with each tuple having entries:
     mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv
 
+    other_meta_data is a list of dictionaries
+
     Returns the processed light curves
     """
 
+    if other_meta_data is None:
+        other_meta_data = [None]*len(light_curve_list)
+
     processed_light_curves = {}
-    for light_curve in light_curve_list:
+    for i, light_curve in enumerate(light_curve_list):
         mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
         inputlightcurve = InputLightCurve(*light_curve, known_redshift=known_redshift,
-                                          training_set_parameters=training_set_parameters)
+                                          training_set_parameters=training_set_parameters,
+                                          other_meta_data=other_meta_data)
         processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
     return processed_light_curves

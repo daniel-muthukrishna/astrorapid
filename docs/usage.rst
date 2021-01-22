@@ -14,10 +14,11 @@ Use the following example code:
     # Each light curve should be a tuple in this form. Look at the example code for an example of the input format.
     light_curve_info1 = (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv)
     light_curve_list = [light_curve_info1,]
+    contextual_info_list = [{'hosttype': value},]  # Only use this parameter if you have trained your own classifer with specific meta data. Otherwise set to None.
 
     # Classify Light curves
     classification = Classify(known_redshift=True)
-    predictions = classification.get_predictions(light_curve_list)
+    predictions = classification.get_predictions(light_curve_list, contextual_info_list)
     print(predictions)
 
     # Plot light curve and classification vs time of the light curves at the specified indexes
@@ -41,7 +42,7 @@ An example is shown below.
                              class_nums=(1, 2, 12, 14, 3, 13, 41, 43, 51, 60, 61, 62, 63, 64, 70),
                              class_name_map={1: 'SNIa-norm', 2: 'SNII', 12: 'SNII', 14: 'SNII', 3: 'SNIbc', 13: 'SNIbc', 41: 'SNIa-91bg', 43: 'SNIa-x', 51: 'Kilonova', 60: 'SLSN-I', 61: 'PISN', 62: 'ILOT', 63: 'CART', 64: 'TDE', 70: 'AGN'},
                              reread_data=False,
-                             contextual_info=('redshift',),
+                             contextual_info=('redshift', 'some_contextual_info1'),
                              passbands=('g', 'r'),
                              retrain_network=False,
                              train_epochs=100,
@@ -141,7 +142,8 @@ Use the skeleton function here :func:`astrorapid.get_custom_data.get_custom_data
                                                   ras[i], decs[i], objids[i], redshifts[i], mwebvs[i],
                                                   known_redshift=known_redshift,
                                                   training_set_parameters={'class_number': int(class_num),
-                                                                           'peakmjd': peakmjds[i]})
+                                                                           'peakmjd': peakmjds[i]},
+                                                  other_meta_data={'some_contextual_info1': value})
                 light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
             # If you think that reading the data is too slow, you may want to replace the for loop above with

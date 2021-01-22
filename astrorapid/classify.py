@@ -92,10 +92,10 @@ class Classify(object):
         self.timestep = timestep
 
         if self.known_redshift:
-            self.contextual_info = ('redshift',)
+            self.contextual_info = ['redshift',]
             filename = 'keras_model_with_redshift.hdf5'
         else:
-            self.contextual_info = ()
+            self.contextual_info = []
             filename = 'keras_model_no_redshift.hdf5'
 
         if model_filepath != '' and os.path.exists(model_filepath):
@@ -114,9 +114,27 @@ class Classify(object):
         else:
             self.model = load_model(self.model_filepath, custom_objects={'TCN': TCN})
 
-    def process_light_curves(self, light_curves):
+    def process_light_curves(self, light_curves, other_meta_data=None):
+        """
+
+        Parameters
+        ----------
+        light_curves: list of tuples
+            Each tuple in the list is of the form: (mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv)
+            for each transient.
+        other_meta_data: list of dictionaries or None
+            Each dictionary in the list contains any additional meta data to be used as contextual_info
+            when classifying (if the classifier being used was trained on the specified contextual_info).
+            E.g. other_meta_data = [{'hosttype': 3, 'host_dist': 200}, {'hosttype': 2, 'host_dist': 150},]
+
+
+        Returns
+        -------
+
+        """
         processed_lightcurves = read_multiple_light_curves(light_curves, known_redshift=self.known_redshift,
-                                                           training_set_parameters=None)
+                                                           training_set_parameters=None,
+                                                           other_meta_data=other_meta_data)
         prepareinputarrays = PrepareInputArrays(self.passbands, self.contextual_info, self.bcut, self.zcut,
                                                 self.nobs, self.mintime, self.maxtime, self.timestep)
         X, orig_lc, timesX, objids_list, trigger_mjds = prepareinputarrays.prepare_input_arrays(processed_lightcurves)
@@ -153,7 +171,7 @@ class Classify(object):
                 assert isinstance(redshift, numbers.Number)
                 assert np.isfinite(redshift)
 
-    def get_predictions(self, light_curves, return_predictions_at_obstime=False, return_objids=False):
+    def get_predictions(self, light_curves, other_meta_data=None, return_predictions_at_obstime=False, return_objids=False):
         """ Return the classification accuracies as a function of time for each class
 
         Parameters
@@ -184,6 +202,11 @@ class Classify(object):
 
                 mwebv: Milky way extinction.
 
+        other_meta_data: list of dictionaries or None
+            Each dictionary in the list contains any additional meta data to be used as contextual_info
+            when classifying (if the classifier being used was trained on the specified contextual_info).
+            E.g. other_meta_data = [{'hosttype': 3, 'host_dist': 200}, {'hosttype': 2, 'host_dist': 150},]
+
         return_predictions_at_obstime: bool
             Return the predictions at the observation times instead of at the 50 interpolated timesteps.
         return_objids : bool, optional
@@ -205,7 +228,8 @@ class Classify(object):
 
         self._do_error_checks(light_curves)
 
-        self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves(light_curves)
+        self.X, self.orig_lc, self.timesX, self.objids, self.trigger_mjds = self.process_light_curves(light_curves,
+                                                                                                      other_meta_data=other_meta_data)
         nobjects = len(self.objids)
 
         if nobjects == 0:
