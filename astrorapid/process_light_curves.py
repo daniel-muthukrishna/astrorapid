@@ -10,7 +10,7 @@ from astrorapid.ANTARES_object.LAobject import LAobject
 
 class InputLightCurve(object):
     def __init__(self, mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift=None, mwebv=None,
-                 known_redshift=True, training_set_parameters=None, calculate_t0=None):
+                 known_redshift=True, training_set_parameters=None, calculate_t0=None, other_meta_data={}):
         """
 
         Parameters
@@ -45,6 +45,10 @@ class InputLightCurve(object):
         calculate_t0 : bool or None
             Optional parameter. If this is False, t0 will not be computed
             even if the training_set_parameters argument is set.
+        other_meta_data : dict
+            Optional parameter. Any other meta data that might be used for contextual information in classficiation.
+            E.g. other_meta_data={'hosttype': 3, 'dist_from_center': 400}. These keys are the keys that
+            should be entered into the 'contextual_info' tuple in the create_custom_classifier function if desired.
         """
 
         self.mjd = np.array(mjd)
@@ -60,6 +64,7 @@ class InputLightCurve(object):
         self.known_redshift = known_redshift
         self.training_set_parameters = training_set_parameters
         self.calculate_t0 = calculate_t0
+        self.other_meta_data = other_meta_data
         if training_set_parameters is not None:
             self.class_number = training_set_parameters['class_number']
             self.peakmjd = training_set_parameters['peakmjd']
@@ -134,6 +139,7 @@ class InputLightCurve(object):
 
         outlc = laobject.get_lc_as_table()
         outlc.meta = {'redshift': self.redshift, 'b': self.b, 'mwebv': self.mwebv, 'trigger_mjd': self.trigger_mjd}
+        outlc.meta.update(self.other_meta_data)
 
         if self.training_set_parameters is not None:
             if self.calculate_t0 is not False:
