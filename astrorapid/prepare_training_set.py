@@ -313,8 +313,8 @@ class PrepareTrainingSetArrays(PrepareArrays):
         print("Done shuffling")
         objids_list = np.array(objids_list)
 
-        train_idxes = [i for i, objid in enumerate(objids_list) if objid.split('_')[0] in objids_train]
-        test_idxes = [i for i, objid in enumerate(objids_list) if objid.split('_')[0] in objids_test]
+        train_idxes = [i for i, objid in enumerate(objids_list) if objid in objids_train]
+        test_idxes = [i for i, objid in enumerate(objids_list) if objid in objids_test]
         X_train = X[train_idxes]
         y_train = y[train_idxes]
         labels_train = labels[train_idxes]
