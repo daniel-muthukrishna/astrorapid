@@ -257,8 +257,8 @@ def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.
         fig = plt.figure(figsize=(15, 12))
         plt.imshow(cm, interpolation='nearest', cmap=cmap, vmin=-1, vmax=1)
         # plt.title(title)
-        cb = plt.colorbar()
-        cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=27)
+        # cb = plt.colorbar()
+        # cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=27)
         tick_marks = np.arange(len(classes))
         plt.xticks(tick_marks, classes, rotation=90, fontsize=27)
         if deleterow:
