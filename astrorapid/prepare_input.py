@@ -40,8 +40,9 @@ class PrepareInputArrays(PrepareArrays):
             X = self.update_X(X, i, data, tinterp, len_t, objid, self.contextual_info, data.meta)
 
         deleterows = np.array(deleterows)
-        X = np.delete(X, deleterows, axis=0)
-        timesX = np.delete(timesX, deleterows, axis=0)
+        if len(deleterows) > 0:
+            X = np.delete(X, deleterows, axis=0)
+            timesX = np.delete(timesX, deleterows, axis=0)
 
         # Correct shape for keras is (N_objects, N_timesteps, N_passbands) (where N_timesteps is lookback time)
         X = X.swapaxes(2, 1)
