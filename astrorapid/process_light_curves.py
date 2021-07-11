@@ -170,7 +170,7 @@ def read_multiple_light_curves(light_curve_list, known_redshift=True, training_s
         mjd, flux, fluxerr, passband, photflag, ra, dec, objid, redshift, mwebv = light_curve
         inputlightcurve = InputLightCurve(*light_curve, known_redshift=known_redshift,
                                           training_set_parameters=training_set_parameters,
-                                          other_meta_data=other_meta_data)
+                                          other_meta_data=other_meta_data[i])
         processed_light_curves[objid] = inputlightcurve.preprocess_light_curve()
 
     return processed_light_curves

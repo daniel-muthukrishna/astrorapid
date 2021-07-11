@@ -17,7 +17,7 @@ Use the following example code:
     contextual_info_list = [{'hosttype': value},]  # Only use this parameter if you have trained your own classifer with specific meta data. Otherwise set to None.
 
     # Classify Light curves
-    classification = Classify(known_redshift=True)
+    classification = Classify(model_name='ZTF_known_redshift')
     predictions = classification.get_predictions(light_curve_list, contextual_info_list)
     print(predictions)
 
