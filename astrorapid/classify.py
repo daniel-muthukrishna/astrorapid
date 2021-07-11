@@ -109,7 +109,7 @@ class Classify(object):
                 self.contextual_info = ['redshift',]
                 self.known_redshift = True
                 self.passbands=('g', 'r')
-                self.class_names=('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'TDE')
+                self.class_names = ('Pre-explosion', 'SNIa-norm', 'SNIbc', 'SNII', 'SNIa-91bg', 'SNIa-x', 'Kilonova', 'SLSN-I', 'TDE')
                 self.nobs = 50
                 self.mintime = -70
                 self.maxtime = 80

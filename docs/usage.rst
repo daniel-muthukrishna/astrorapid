@@ -26,6 +26,10 @@ Use the following example code:
     classification.plot_classification_animation(indexes_to_plot=(0,1,4,6))
 
 
+See the description of each of the arguments of the `Classify` class and the `light_curve_info` entries in the
+docstring: https://github.com/daniel-muthukrishna/astrorapid/blob/master/astrorapid/classify.py#L227.
+
+
 Train your own classifier with your own data
 ++++++++++++++++++++++++++++++++++++++++++++
 You'll simply need to run the function :func:`astrorapid.custom_classifier.create_custom_classifier` to get started with training your own classifier.
