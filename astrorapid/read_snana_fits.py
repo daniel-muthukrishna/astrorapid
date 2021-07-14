@@ -1,3 +1,5 @@
+import os, uuid
+
 import numpy as np
 import multiprocessing as mp
 import pandas as pd
@@ -113,8 +115,7 @@ def read_fits_file(args):
 
     for i, head in enumerate(header_data):
         class_num = head['SIM_TYPE_INDEX']
-        snid = head['SNID']
-        objid = '{}_{}'.format(class_num, snid)
+        objid = str(uuid.UUID(bytes=os.urandom(16)))
         ptrobs_min = head['PTROBS_MIN']
         ptrobs_max = head['PTROBS_MAX']
         redshift = head['SIM_REDSHIFT_HOST']
@@ -171,11 +172,8 @@ def read_light_curves_from_snana_fits_files(head_files, phot_files, passbands=('
     """
 
     args_list = []
-    for i, head_file in enumerate(head_files):
-        assert phot_files[i].split('_')[-2].split('-')[1] == head_files[i].split('_')[-2].split('-')[1]
-        head_files_part = head_files[i]
-        phot_files_part = phot_files[i]
-        args_list.append((head_files_part, phot_files_part, passbands, known_redshift, calculate_t0))
+    for head_file, phot_file in zip(head_files, phot_files):
+        args_list.append((head_file, phot_file, passbands, known_redshift, calculate_t0))
 
     light_curves = {}
     if nprocesses == 1:
